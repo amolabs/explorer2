@@ -11,6 +11,9 @@ TODO: vue-specific test launch
 
 NOTE: In react.js, we just type `npm start`.
 
+## Build
+NOTE: In react.js, we just type `npm build`.
+
 ## Install
 For production use
 
