@@ -1,6 +1,12 @@
-# Vuetify - Vuejs - Dashboard Modern
+# AMO Explorer V2 User Interface
 
-## Project setup
+## tech stack and version
+* node : 10.15.3
+* vue : 3.5.5
+* vuetify : 2.2.6
+
+
+### Project setup
 ```
 npm install
 ```
@@ -14,16 +20,9 @@ npm run serve
 ```
 npm run build
 ```
+* build 후 위치 지정 : vue.config.js
+  * default 위치 : /dist
 
-### Run your tests
-```
-npm run test
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### HTTP 모듈
+* axios 사용
+* 모든 요청은 /router/api.js 에서 관리
