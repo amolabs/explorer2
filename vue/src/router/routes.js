@@ -1,34 +1,61 @@
 import Dashboard from '../views/Dashboard.vue';
+import Inspect from '../views/Inspect'
+import Blocks from '../views/Blocks'
+import Transactions from '../views/Transactions'
+import Validators from '../views/Validators'
+import Governance from '../views/Governance'
+import Storages from '../views/Storages'
+import Parcels from '../views/Parcels'
 
-import Cards from '../views/_dev/Cards';
-import Buttons from '../views/_dev/Buttons.vue';
-import Tables from '../views/_dev/Tables.vue';
-import Charts from '../views/_dev/Charts.vue';
-import Progresses from '../views/_dev/Progresses.vue';
 
 const routes = [
-    {
-        path: '/',
-        type: "menu",
-        name: 'Dashboard',
-        icon: 'dashboard',
-        component: Dashboard
-    },
-    // {
-    //     path: '/projects',
-    //     name: 'projects',
-    //     icon: 'dashboard',
-    //     component: Projects
-    //     // route level code-splitting
-    //     // this generates a separate chunk (about.[hash].js) for this route
-    //     // which is lazy-loaded when the route is visited.
-    //     //component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
-    // },
-    // {
-    //     path: '/team',
-    //     name: 'team',
-    //     icon: 'dashboard',
-    //     component: Team
-    // }
+  {
+    path: '/',
+    name: 'Dashboard',
+    icon: 'dashboard',
+    component: Dashboard
+  },
+  {
+    path: '/inspect',
+    name: 'Inspect',
+    icon: 'dashboard',
+    component: Inspect
+  },
+  {
+    path: '/blocks',
+    name: 'Blocks',
+    icon: 'dashboard',
+    component: Blocks
+  },
+  {
+    path: '/Transactions',
+    name: 'Transactions',
+    icon: 'dashboard',
+    component: Transactions
+  },{
+    path: '/validators',
+    name: 'Validators',
+    icon: 'dashboard',
+    component: Validators
+  },
+  {
+    path: '/governance',
+    name: 'Governance',
+    icon: 'dashboard',
+    component: Governance
+  },
+  {
+    path: '/storages',
+    name: 'Storages',
+    icon: 'dashboard',
+    component: Storages
+  },
+  {
+    path: '/parcels',
+    name: 'Parcels',
+    icon: 'dashboard',
+    component: Parcels
+  },
+
 ];
 export default routes;
