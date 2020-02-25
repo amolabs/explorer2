@@ -1,24 +1,20 @@
 <template>
   <v-app>
-    <Navbar/>
+    <c-navbar></c-navbar>
     <v-content class="content-main">
       <div style="padding: 40px 20px 0px 20px">
         <router-view></router-view>
       </div>
     </v-content>
+    <c-footer></c-footer>
   </v-app>
 
 </template>
 
 <script>
 
-import Navbar from '@/components/Navbar'
 export default {
   name: 'App',
-  components: {
-   Navbar
-  },
-
   data: () => ({
     //
   }),

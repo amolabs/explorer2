@@ -1,27 +1,87 @@
 <template>
-    <div id="page-dashboard">
-        <v-row justify="center">
-            <v-col cols="12" class="text-center">
-                <span class="text-center display-3">Dashboard</span>
-            </v-col>
-        </v-row>
-    </div>
+  <div id="page-dashboard">
+    <v-container>
+      <v-row justify="space-between">
+        <v-col class="total-overview">
+          <c-card title="Height" tile>
+            content
+          </c-card>
+        </v-col>
+        <v-col class="total-overview">
+          <c-card title="Time" tile>
+            content
+          </c-card>
+        </v-col>
+        <v-col class="total-overview">
+          <c-card title="Tile" tile>
+            content
+          </c-card>
+        </v-col>
+        <v-col class="total-overview">
+          <c-card title="Tile" tile>
+            content
+          </c-card>
+        </v-col>
+        <v-col class="total-overview">
+          <c-card title="Tile" tile>
+            content
+          </c-card>
+        </v-col>
+      </v-row>
+    </v-container>
+    <v-container>
+      <v-row align-center justify-space-around row fill-height ma-5>
+        <v-col cols="12">
+          <c-card title="Network Overview"></c-card>
+        </v-col>
+      </v-row>
+    </v-container>
+    <v-container>
+      <v-row align-center justify-space-around row fill-height ma-5>
+        <v-col cols="6">
+          <c-card title="Validator Overview"></c-card>
+        </v-col>
+        <v-col cols="6">
+          <c-card title="Asset Overview"></c-card>
+        </v-col>
+      </v-row>
+    </v-container>
+    <v-container>
+      <v-row align-center justify-space-around row fill-height ma-5>
+        <v-col cols="6">
+          <c-card title="Governance Overview"></c-card>
+        </v-col>
+        <v-col cols="6">
+          <c-card title="Data trade Overview"></c-card>
+        </v-col>
+      </v-row>
+    </v-container>
+  </div>
 </template>
 
 <script>
-    // @ is an alias to /src
+  // @ is an alias to /src
 
+  export default {
 
-    export default {
-        name: 'team',
-        components: {},
-        data: () => ({
-            team: [
-                {name: 'Iyad', role: 'web developer', avatar: '/img1.png'},
-                {name: 'Reda', role: 'Graphic designer', avatar: '/img2.png'},
-                {name: 'Zineb', role: 'web developer', avatar: '/img3.png'},
-                {name: 'Hu TechGroup', role: 'Desktop developer', avatar: '/img4.png'},
-            ]
-        }),
-    }
+  }
 </script>
+
+
+<style lang="scss" scoped>
+  .total-overview {
+    //xs 적용 안되서 css 직접 선언
+    @media (min-width: 901px) {
+      -webkit-box-flex: 0;
+      -ms-flex: 0 0 16.6666666667%;
+      flex: 0 0 16.6666666667%;
+      max-width: 16.6666666667%;
+    }
+    @media (max-width: 900px) {
+      -webkit-box-flex: 0;
+      -ms-flex: 0 0 100%;
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
+  }
+</style>
