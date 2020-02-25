@@ -4,12 +4,12 @@
       <v-row justify="space-between">
         <v-col class="total-overview">
           <c-card title="Height" tile>
-            content
+            {{ this.height }}
           </c-card>
         </v-col>
         <v-col class="total-overview">
           <c-card title="Time" tile>
-            content
+            {{ this.intervalValue }}
           </c-card>
         </v-col>
         <v-col class="total-overview">
@@ -60,10 +60,39 @@
 </template>
 
 <script>
-  // @ is an alias to /src
+
+  import api from '../router/api';
 
   export default {
+    data: () => ({
+      height: '',
+      intervalValue : '',
+    }),
+    mounted() {
+      this.getCurTime();
+      this.getTest2();
+    },
+    methods :{
+      async getTest2(){
+        try {
+          const res = await api.getTest_2();
+          this.height = res.data.height;
+          console.log('res',res)
+        } catch (e) {
+          console.log('error',e);
+        }
+      },
 
+      async getCurTime() {
+        await setInterval(() => {
+          api.getCurTime().then(res => {
+            this.intervalValue = res.data.date;
+          }).catch(({response})=> {
+            console.log(response);
+          });
+        }, 5000)
+      }
+    }
   }
 </script>
 
