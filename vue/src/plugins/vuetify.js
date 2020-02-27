@@ -25,6 +25,9 @@ export default new Vuetify({
                 deepGrey: '#485158',
                 lightGrey: '#d9dee4',
                 white: '#ffffff',
+              coinBlack: '#222222',
+              coinTeal: '#009688',
+              coinTealLight: '#1de9b6',
 
             },
             dark: {

@@ -1,52 +1,47 @@
 <template>
     <nav>
-        <v-app-bar id="AppBar" class="app-bar" app height="128">
-	        <v-container>
+        <v-app-bar id="AppBar" class="app-bar coinBlack" app height="110">
+	        <v-container class="pt-0 mt-1">
 		        <v-row>
               <v-col md="8" sm="10">
                 <v-row>
                   <v-img
-                    style=""
-                    :src="require('../assets/amo.png')"
-                    max-height="48"
-                    max-width="48"
+                    :src="require('../assets/amo_white.png')"
+                    max-height="35"
+                    max-width="35"
                     @click="$router.push('/')"></v-img>
-                  <v-toolbar-title @click="$router.push('/')" class="headline font-weight-bold ml-2 mt-2 hidden-sm-and-down"> AMO Blockchain Explorer</v-toolbar-title>
+                  <v-toolbar-title @click="$router.push('/')" class="headline ml-2 hidden-sm-and-down white--text"> AMO Blockchain Explorer</v-toolbar-title>
                   <v-select
-                    class="ml-4 mt-2"
+                    id="test13"
+                    class="ml-3"
+                    item-color="coinTeal"
+                    style="max-width:20%;min-width:17%"
                     label="network"
-                    color="#000305"
-                    single-line
-                    dense
-                    style="max-width:40%"
+                    single-line outlined rounded hide-details dark dense
                     :items="menuItem"
-                    :menu-props="{ top: false, offsetY: true }"
+                    :menu-props="{ top: false, offsetY: true, color : '#ffffff' }"
                   ></v-select>
                 </v-row>
               </v-col>
               <v-col md="4" sm="2" class="d-inline-flex justify-end">
                 <v-spacer></v-spacer>
                 <v-text-field
-                  class="hidden-sm-and-down mt-2"
+                  class="hidden-sm-and-down"
                   label="Search"
-                  color="#000305"
-                  single-line
-                  dense
-                  hide-details
+                  single-line outlined rounded hide-details dense dark
                   prepend-inner-icon="search"
                 ></v-text-field>
                 <!--nav 아이콘은 md사이즈 화면에서부터 보인다-->
                 <v-app-bar-nav-icon color="#555" class="hidden-md-and-up" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
               </v-col>
-			        <v-row class="hidden-sm-and-down" justify="space-between">
-				        <v-tabs background-color="transparent" color="#000350" grow>
-					        <v-tabs-slider color="#000350"></v-tabs-slider>
-					        <v-tab v-for="page in routes" :key="page.name" :to="page.path" @click="currentPage = page">
-						        {{ page.name }}
-					        </v-tab>
-				        </v-tabs>
-			        </v-row>
 		        </v-row>
+            <v-row class="hidden-sm-and-down" justify="space-between">
+              <v-tabs background-color="transparent" grow slider-color="coinTealLight" color="#ffffff">
+                <v-tab v-for="page in routes" :key="page.name" :to="page.path" @click="currentPage = page" class="white--text tabs-item-font">
+                  {{ page.name }}
+                </v-tab>
+              </v-tabs>
+            </v-row>
 	        </v-container>
         </v-app-bar>
 
@@ -77,7 +72,7 @@ export default {
         // Popup
     },
     mounted() {
-    	console.log('hello',this.$route);
+    	console.log('current page',this.$route);
         this.currentPage = this.$route;
     },
   methods: {
@@ -106,26 +101,6 @@ export default {
     border-width: thin;
     border-bottom-color: #e6dbdb;
 }
-.app-menu-logo-img {
-    height: 30px;
-    width: 30px;
-}
-.app-menu-logo-icon {
-    color: #ff9117;
-}
-.app-menu-logo {
-    color: #474250;
-    font-size: 20px;
-    text-align: center;
-    margin:15px 0px;
-}
-.app-menu-separator {
-    border: solid;
-    border-width: thin 0 0 0;
-    border-color: hsla(0, 0%, 71%, .1);
-    background-color: hsla(0, 0%, 71%, .5);
-    margin: 10px 15px;
-}
 .app-menu-item {
     margin: 10px 10px;
     color: #535659;
@@ -133,6 +108,9 @@ export default {
 .app-menu-item-text {
     font-weight: 400;
     font-size: 15px;
+}
+.tabs-item-font {
+  font-weight: normal;
 }
 
 </style>
