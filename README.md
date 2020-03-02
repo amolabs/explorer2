@@ -7,18 +7,13 @@ TBA
 ## Test run
 For development testing
 
-TODO: vue-specific test launch
-
-NOTE: In react.js, we just type `npm start`.
-
 ## Build
-NOTE: In react.js, we just type `npm build`.
 
 ## Install
 For production use
 
 ### Web server setup
-Use static web server for javascript loading
+Use static web server for client web app.
 
 ### Support service setup
 * node.js server
