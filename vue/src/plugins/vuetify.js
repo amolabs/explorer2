@@ -1,7 +1,7 @@
 import 'material-design-icons-iconfont/dist/material-design-icons.css';
 import Vue from 'vue';
-import Vuetify from 'vuetify/lib';
-
+// import Vuetify from 'vuetify/lib';
+import Vuetify from 'vuetify';
 Vue.use(Vuetify);
 
 export default new Vuetify({
@@ -25,9 +25,10 @@ export default new Vuetify({
                 deepGrey: '#485158',
                 lightGrey: '#d9dee4',
                 white: '#ffffff',
-              coinBlack: '#222222',
-              coinTeal: '#009688',
-              coinTealLight: '#1de9b6',
+                coinBlack: '#222222',
+                coinTeal: '#1bbae6',
+                coinTealLight: '#1bbae6',
+                coinYellow: '#f6e66c',
 
             },
             dark: {
@@ -39,6 +40,7 @@ export default new Vuetify({
                 grey: '#8d99a3',
                 deepGrey: '#485158',
                 lightGray: '#d2d8de',
+                coinYellow: '#f6e66c',
             },
         },
     }

@@ -2,7 +2,7 @@
   <v-app>
     <c-navbar></c-navbar>
     <v-content class="content-main">
-      <div style="padding: 40px 20px 0px 20px">
+      <div style="padding: 20px;">
         <router-view></router-view>
       </div>
     </v-content>
@@ -24,5 +24,6 @@ export default {
 @import './styles/index.scss';
 .content-main {
   background-color: #f9f9f9;
+  font-family: 'Montserrat';
 }
 </style>

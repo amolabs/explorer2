@@ -3,7 +3,7 @@
     app
     padless
     absolute
-    class="coinBlack"
+    class="black"
   >
     <v-container class="py-1 my-1">
       <v-row class="align-center">
@@ -14,7 +14,7 @@
           <span>{{ item.name}}</span>
         </v-tooltip>
         <v-spacer></v-spacer>
-        <span class="white--text">&copy; AMO Labs 2020 </span>
+        <span class="white--text body-2">&copy; AMO Labs 2020 </span>
       </v-row>
     </v-container>
   </v-footer>
@@ -49,3 +49,5 @@
     })
   }
 </script>
+<style lang="scss" scoped>
+</style>
