@@ -4,15 +4,10 @@
 #
 version: 2
 jobs:
-  build-ui:
+  build-client:
     docker:
       # specify the version you desire here
       - image: circleci/node:7.10
-
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/mongo:3.4.4
 
     working_directory: ~/repo
 
@@ -39,3 +34,41 @@ jobs:
       - run:
           cd vue
           npm test
+
+  build-server:
+    docker:
+      # specify the version you desire here
+      - image: circleci/node:7.10
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "server/package.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+
+      - run:
+          cd server
+          npm install
+
+      - save_cache:
+          paths:
+            - server/node_modules
+          key: v1-dependencies-{{ checksum "server/package.json" }}
+
+      # run tests!
+      - run:
+          cd server
+          npm test
+
+workflows:
+    version: 2
+    all:
+        jobs:
+            - build-client
+            - build-server
