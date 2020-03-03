@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* vim: set sw=2 ts=2 expandtab : */
 
 /**
  * Module dependencies.

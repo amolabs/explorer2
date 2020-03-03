@@ -1,4 +1,4 @@
-/* vim: set sw=2 ts=2 : */
+/* vim: set sw=2 expandtab : */
 const http = require('http');
 //var fs = require('fs');
 const db = require('mysql');
