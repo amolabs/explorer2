@@ -25,4 +25,4 @@ npm run build
 
 ### HTTP 모듈
 * axios 사용
-* 모든 요청은 /router/api.js 에서 관리
+* 모든 요청은 /api/index.js 에서 관리

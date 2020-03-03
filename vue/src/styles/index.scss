@@ -2,13 +2,19 @@
 
 .v-application {
   .subtitle-1 {
-    font-size: 1rem !important;
+    font-size: 18px !important;
     font-weight: 400 !important;
     letter-spacing: 0.009em !important;
     line-height: 1.75rem !important;
     font-family: 'Montserrat' !important;
   }
-
+  .subtitle-2 {
+    font-size: 16px !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.009em !important;
+    line-height: 1.75rem !important;
+    font-family: 'Montserrat' !important;
+  }
 }
 @media (max-width: 960px) {
   .v-text-field--outlined fieldset{
