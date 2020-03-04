@@ -4,6 +4,7 @@ import router from './router'
 import './components'
 import vuetify from './plugins/vuetify';
 import api from './api';
+import store from './store'
 
 Vue.config.productionTip = false;
 Vue.prototype.$api = api;
@@ -11,5 +12,6 @@ Vue.prototype.$api = api;
 new Vue({
   router,
   vuetify,
+  store,
   render: h => h(App)
 }).$mount('#app')

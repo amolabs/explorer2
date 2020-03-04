@@ -7,8 +7,15 @@
       </div>
     </v-content>
     <c-footer></c-footer>
+    <c-alert-dialog
+      :open="alert.open"
+      :timeout="alert.timeout"
+      :msg="alert.msg"
+      :err="alert.err"
+      :info="alert.info"
+      :persistent="alert.persistent"
+    ></c-alert-dialog>
   </v-app>
-
 </template>
 
 <script>
@@ -18,6 +25,11 @@ export default {
   data: () => ({
     //
   }),
+  computed: {
+    alert() {
+      return this.$store.state.alert;
+    },
+  }
 };
 </script>
 <style lang="scss">

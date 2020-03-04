@@ -9,7 +9,7 @@
       <v-row class="align-center">
         <v-tooltip top v-for="(item, i) in items">
           <template v-slot:activator="{ on }">
-            <c-btn class="mx-1" icon :iconName="item.icon" href="item.link" target="_blank" v-on="on"></c-btn>
+            <c-btn class="mx-1" icon :iconName="item.icon" iconColor="white" href="item.link" target="_blank" v-on="on"></c-btn>
           </template>
           <span>{{ item.name}}</span>
         </v-tooltip>

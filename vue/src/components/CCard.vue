@@ -69,6 +69,8 @@ export default {
     padding: 8px;
     background-color: rgba(255, 255, 255, 0.5);
 }
+</style>
+<style>
 .card-title {
     color: #485158;
     font-size: 20px;
