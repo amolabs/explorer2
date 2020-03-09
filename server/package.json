@@ -2,13 +2,15 @@
   "name": "explorer",
   "version": "1.0.0",
   "description": "AMO blockchain explorer support server",
-  "main": "explorer.js",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node ./bin/server"
   },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "mysql": "^2.18.1"
+    "mysql": "^2.18.1",
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "express": "~4.16.1",
+    "morgan": "~1.9.1"
   }
 }
