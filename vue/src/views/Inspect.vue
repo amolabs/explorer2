@@ -1,17 +1,9 @@
 <template>
-  <v-layout justify-space-around row fill-height mt-12>
-    <v-flex xs12 class="text-center">
-      <span class="text-center display-3">inspect</span>
-    </v-flex>
-  </v-layout>
+  <router-view></router-view>
 </template>
 
 <script>
-  export default {
-    name: "Inspect.vue"
-  }
 </script>
 
 <style scoped>
-
 </style>

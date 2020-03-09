@@ -6,7 +6,14 @@ import Validators from '../views/Validators'
 import Governance from '../views/Governance'
 import Storages from '../views/Storages'
 import Parcels from '../views/Parcels'
-
+import InspectBlank from '../views/InspectBlank'
+import InspectBlock from '../views/InspectBlock'
+import InspectTx from '../views/InspectTx'
+import InspectAoount from '../views/InspectAccount'
+import InspectValidator from '../views/InspectValidator'
+import InspectDraft from '../views/InspectDraft'
+import InspectStorate from '../views/InspectStorage'
+import InspectParcel from '../views/InspectParcel'
 
 const routes = [
   {
@@ -19,7 +26,49 @@ const routes = [
     path: '/inspect',
     name: 'Inspect',
     icon: 'dashboard',
-    component: Inspect
+    component : Inspect,
+    children: [
+      {
+        path:'',
+        props:true,
+        component : InspectBlank
+      },
+      {
+        path: 'block/:block',
+        props : true,
+        component: InspectBlock
+      },
+      {
+        path: 'account/:account',
+        props : true,
+        component: InspectAoount
+      },
+      {
+        path: 'tx/:hash',
+        props : true,
+        component: InspectTx
+      },
+      {
+        path: 'validator/:address',
+        props : true,
+        component: InspectValidator
+      },
+      {
+        path: 'draft/:draftId',
+        props : true,
+        component: InspectDraft
+      },
+      {
+        path: 'storage/:storageId',
+        props : true,
+        component: InspectStorate
+      },
+      {
+        path: 'parcel/:parcelId',
+        props : true,
+        component: InspectParcel
+      },
+    ]
   },
   {
     path: '/blocks',
@@ -28,7 +77,7 @@ const routes = [
     component: Blocks
   },
   {
-    path: '/Transactions',
+    path: '/transactions',
     name: 'Transactions',
     icon: 'dashboard',
     component: Transactions
