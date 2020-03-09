@@ -36,7 +36,7 @@
           icon: 'mdi-alpha-t-box-outline'
         },
         {
-          name:'midium',
+          name:'medium',
           link:'https://medium.com/amo-blockchain',
           icon: 'mdi-alpha-m-box-outline'
         },
