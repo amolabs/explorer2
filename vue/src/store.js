@@ -6,6 +6,8 @@ Vue.use(Vuex);
 export default new Vuex.Store({
 
   state: {
+    tableBreakpoint: 750,
+    args: [100, 1000, 10000],
     alert: {
       open: false,
       timeout: undefined,

@@ -1,14 +1,245 @@
 <template>
-  <v-layout justify-space-around row fill-height mt-12>
-    <v-flex xs12 class="text-center">
-      <span class="text-center display-3">Validators</span>
-    </v-flex>
-  </v-layout>
+  <div id="page-validators">
+    <!--Validator stat-->
+    <v-container>
+      <v-row justify="space-between" align="center">
+        <v-col cols="12">
+          <c-card class="text-center" title="Validator stat">
+            <v-row>
+              <v-col cols="12" md="6">
+                <v-row align="center">
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                    <span> # of validators </span>
+                  </v-col>
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                    <div>
+                      <span>{{ this.value1.toLocaleString() }} </span>
+                    </div>
+                  </v-col>
+                </v-row>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-row align="center">
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                    <span> Average activity </span>
+                  </v-col>
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                    <div>
+                      <span> {{ Number(this.value2.toFixed(2)).toLocaleString() }} %</span>
+                    </div>
+                  </v-col>
+                </v-row>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-row align="start">
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                    <span> Total effective stake </span>
+                  </v-col>
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                    <div>
+                      <span> {{ Number(this.value3.toFixed(2)).toLocaleString() }} AMO </span>
+                    </div>
+                  </v-col>
+                </v-row>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-row align="start">
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                    <span> Average effective stake </span>
+                  </v-col>
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                    <div>
+                      <span> {{ Number(this.value4.toFixed(2)).toLocaleString() }} AMO / validators </span>
+                    </div>
+                  </v-col>
+                </v-row>
+              </v-col>
+            </v-row>
+          </c-card>
+        </v-col>
+      </v-row>
+    </v-container>
+
+    <!--Incentive stat -->
+    <v-container>
+      <v-row justify="space-between" align="center">
+        <v-col cols="12">
+          <c-card class="text-center">
+            <!--title-->
+            <div class="card-title mb-4">Incentive stat <br class="hidden-sm-and-up">  in last
+              <span class="mx-2">
+                <v-select
+                  style="max-width:90px;display:inline-flex"
+                  :items="args"
+                  v-model="arg"
+                  menu-props="offsetY"
+                  dense
+                  class="pa-0"
+                  color="teal lighten-2"
+                  @change="selectEvent"
+                ></v-select>
+              </span>
+              blks
+            </div>
+
+            <!--stat-->
+            <v-row>
+              <v-col cols="12" md="6">
+                <v-row align="center">
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                    <span> Average incentive </span>
+                  </v-col>
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                    <span>{{ Number(this.value5.toFixed(2)).toLocaleString() }} AMO /blk</span>
+                  </v-col>
+                </v-row>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-row align="center" justify="center">
+                  <v-col class="py-0 px-lg-12 text-left">
+                    <span> Average reward </span>
+                  </v-col>
+                  <v-col class="py-0 px-lg-12 text-right subtitle-2">
+                    <span> {{ Number(this.value6.toFixed(2)).toLocaleString() }} AMO /blk </span>
+                  </v-col>
+                </v-row>
+                <v-row align="center">
+                  <v-col class="py-0 px-lg-12 text-center">
+                    <span> +  </span>
+                  </v-col>
+                </v-row>
+                <v-row align="center" justify="center">
+                  <v-col class="py-0 px-lg-12 text-left">
+                    <span> Average tx fee </span>
+                  </v-col>
+                  <v-col class="py-0 px-lg-12 text-right subtitle-2">
+                    <span> {{ Number(this.value7.toFixed(2)).toLocaleString() }} AMO /blk </span>
+                  </v-col>
+                </v-row>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-row align="center" justify="center">
+                  <v-col cols="12" md="6" class="py-0 pl-lg-12 text-left">
+                    <span> Estimated annual interest rate </span>
+                  </v-col>
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2`">
+                    <span> {{ Number(this.value7.toFixed(2)).toLocaleString() }} % </span>
+                  </v-col>
+                </v-row>
+              </v-col>
+            </v-row>
+          </c-card>
+        </v-col>
+      </v-row>
+    </v-container>
+
+    <!--All Validators table-->
+    <v-container>
+      <v-row justify="center" >
+        <v-col cols="12">
+          <c-card class="text-center" title="All validators" outlined>
+            <c-scroll-table
+              :headers="validatorsTable.headers"
+              itemKey="name"
+              :items="validatorsTable.allValidators"
+              height="500"
+              @loadMore="reqData"
+              :mobile-breakpoint="tableBreakpoint"
+            >
+              <template #address="{item}">
+                <router-link class="d-inline-block text-truncate truncate-option"
+                             :to="{ path: '/inspect/validator/' + item.address, params : {address: item.address } }">{{ item.address }}</router-link>
+              </template>
+            </c-scroll-table>
+          </c-card>
+        </v-col>
+      </v-row>
+    </v-container>
+  </div>
+
 </template>
 
 <script>
-</script>
+  export default {
+    data: () => ({
+      value1: 1200345,
+      value2: 22.2222,
+      value3: 555.4544,
+      value4: 444.3333,
+      value5: 124.334,
+      value6: 222.5523,
+      value7: 132.455,
+      value8: 432114.454,
+      arg:100,
+      pageNum: 1,
+      perPage: 50,
+      validatorsTable: {
+        headers: [
+          { text: 'address', align: 'center', value: 'address'},
+          { text: 'eff stake', align: 'center', value: 'effStake'},
+          { text: 'power', align: 'center', value: 'power'},
+          { text: 'activity', align: 'center', value: 'activity'},
+        ],
+        allValidators: [],
 
+      },
+    }),
+    computed:{
+      tableBreakpoint(){
+        return this.$store.state.tableBreakpoint
+      },
+      args(){
+        return this.$store.state.args
+      }
+    },
+    mounted() {
+      this.reqData();
+    },
+    methods: {
+      async reqData() {
+        // call api
+        // try {
+        //     const res = await axios.get('http://192.168.23.50:3000/api/test2', {params: {pagenum: this.pageNum, perpage: this.perPage}});
+        //     console.log(res);
+        //     if(res.data && res.data.result && res.data.result.length > 0) {
+        //         this.validatorsTable.allValidators = this.validatorsTable.allValidators.concat(res.data.result);
+        //         this.pageNum++;
+        //     }
+        // } catch(err) {
+        //     console.log('err: ', err);
+        // }
+
+        // add data
+        const startIdx = (this.pageNum-1) * this.perPage;
+        const endIdx = parseInt(startIdx) + parseInt(this.perPage);
+        let newData = [];
+        for(let i=startIdx; i<endIdx; i++) {
+          newData.push({
+            address: 'a3c338a54bea46c64bdde35e72b6d271c16dedf2',
+            effStake: 234.33,
+            power: 222,
+            activity: 333.23,
+          });
+        }
+        this.validatorsTable.allValidators = this.validatorsTable.allValidators.concat(newData);
+        this.pageNum++;
+      },
+      selectEvent(data){
+        console.log('select arg : ',data);
+      }
+    }
+  }
+</script>
 <style scoped>
 
+  @media(max-width: 600px) {
+    .truncate-option{
+      max-width: 100px !important;
+    }
+  }
+  @media(min-width: 600px) and (max-width: 750px)  {
+    .truncate-option{
+      max-width: 200px !important;
+    }
+  }
 </style>

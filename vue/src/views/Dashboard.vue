@@ -1,92 +1,138 @@
 <template>
     <div id="page-dashboard">
         <v-container>
+
+            <!--Major stats -->
             <v-row justify="space-between" align="center">
                 <v-col cols="12" md="4" lg="2">
-                    <c-card tile>
+                    <c-card tile class="card-option">
                         <div class="overview-card">
                             <v-icon>layers</v-icon>
                             <span class="black--text pl-1">Height</span>
                             <br/>
                             <div class="text-right pt-1 subtitle-1">
-                                <span>{{ Number(majorStats.value1).toLocaleString() }}</span>
+                                <span>{{ this.majorStats.value1.toLocaleString() }}</span>
                             </div>
                         </div>
                     </c-card>
                 </v-col>
-
                 <v-col cols="12" md="4" lg="2">
-                    <c-card tile>
+                    <c-card tile class="card-option">
                         <div class="overview-card">
                             <v-icon>access_time</v-icon>
                             <span class="black--text pl-1">Timestamp</span>
                             <br/>
                             <div class="text-right pt-1 subtitle-1">
-                                <span>{{ majorStats.value2 }}</span>
+                                <span>{{ this.majorStats.value2 }}</span>
                             </div>
                         </div>
                     </c-card>
                 </v-col>
-
                 <v-col cols="12" md="4" lg="2">
-                    <c-card tile>
+                    <c-card tile class="card-option">
                         <div class="overview-card">
                             <v-icon>timer</v-icon>
                             <span class="black--text pl-1">Interval</span>
                             <br/>
                             <div class="text-right pt-1 subtitle-1">
-                                <span>{{majorStats.value3 }}</span>
+                                <span>{{ Number(this.majorStats.value3.toFixed(2)).toLocaleString() }} </span>
                             </div>
                         </div>
                     </c-card>
                 </v-col>
-
                 <v-col cols="12" md="6" lg="2">
-                    <c-card tile>
+                    <c-card tile class="card-option">
                         <div class="overview-card">
                             <v-icon>attach_money</v-icon>
                             <span class="black--text pl-1">AMO Coins</span>
                             <br/>
                             <div class="text-right pt-1 subtitle-1">
-                                <span>{{majorStats.value10 }}</span>
+                                <span>{{this.majorStats.value10 }}</span>
                             </div>
                         </div>
                     </c-card>
                 </v-col>
-
                 <v-col cols="12" md="6" lg="2">
-                    <c-card tile>
+                    <c-card tile class="card-option">
                         <div class="overview-card">
                             <v-icon>layers</v-icon>
                             <span class="black--text pl-1">Stakes Delegates</span>
                             <br/>
                             <div class="text-right pt-1 subtitle-1">
                                 <span>
-                                   {{ Number(assetOverview[1].value).toLocaleString() }} + {{ Number(assetOverview[2].value).toLocaleString() }}
+                                   {{ Number(this.assetOverview.value11).toLocaleString() }} + {{ Number(this.assetOverview.value12).toLocaleString() }}
                                 </span>
                                 <br class="hidden-md-and-down"/>
-                                <span> {{ assetOverview[1].byte }}</span>
-                                <span> {{ assetOverview[1].unit }}</span>
+                                <span> AMO </span>
                             </div>
                         </div>
                     </c-card>
                 </v-col>
+            </v-row>
 
+            <!--Network overview-->
+          <v-row justify="space-between" align="center">
                 <v-col cols="12">
                     <c-card class="text-center" title="Network Overview">
                         <v-row class="">
-                            <v-col cols="12" md="6" v-for="item in networkOverview">
+                            <v-col cols="12" md="6">
                                 <v-row align="center">
                                     <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
-                                        <span> {{ item.label }} </span>
+                                        <span>height of the last block</span>
                                     </v-col>
                                     <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                                        <a href="#">
-                                            <span v-if="item.timestamp"> {{ item.value }} </span>
-                                            <span v-else> {{ Number(item.value).toLocaleString() }} </span>
-                                            <span> {{ item.byte }}</span>
-                                            <span> {{ item.unit }}</span>
-                                        </a>
+                                        <router-link :to="{path: '/blocks'}"> {{ this.networkOverview.value1.toLocaleString()}} </router-link>
+                                    </v-col>
+                                </v-row>
+                            </v-col>
+                            <v-col cols="12" md="6">
+                                <v-row align="center">
+                                    <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                                        <span>timestamp of the last block </span>
+                                    </v-col>
+                                    <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                                        <router-link :to="{path: '/blocks'}"> {{this.networkOverview.value2}} </router-link>
+                                    </v-col>
+                                </v-row>
+                            </v-col>
+                            <v-col cols="12" md="6">
+                                <v-row align="center">
+                                    <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                                        <span>average block interval</span>
+                                    </v-col>
+                                    <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                                        <router-link :to="{path: '/blocks'}"> {{ Number(this.networkOverview.value3.toFixed(2)).toLocaleString()}} sec </router-link>
+                                    </v-col>
+                                </v-row>
+                            </v-col>
+                            <v-col cols="12" md="6">
+                                <v-row align="center">
+                                    <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                                        <span>average # of txs in a block</span>
+                                    </v-col>
+                                    <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                                        <router-link :to="{path: '/transactions'}"> {{ Number(this.networkOverview.value4.toFixed(2)).toLocaleString()}} /blk
+                                        </router-link>
+                                    </v-col>
+                                </v-row>
+                            </v-col>
+                            <v-col cols="12" md="6">
+                                <v-row align="center">
+                                    <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                                        <span>estimated # of pending txs</span>
+                                    </v-col>
+                                    <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                                        <router-link :to="{path: '/transactions'}">{{ Number(this.networkOverview.value5.toFixed(2)).toLocaleString()}} </router-link>
+                                    </v-col>
+                                </v-row>
+                            </v-col>
+                            <v-col cols="12" md="6">
+                                <v-row align="center">
+                                    <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                                        <span>average transaction fee</span>
+                                    </v-col>
+                                    <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                                        <router-link :to="{path: '/transactions'}">{{ Number(this.networkOverview.value6.toFixed(2)).toLocaleString()}} AMO </router-link>
                                     </v-col>
                                 </v-row>
                             </v-col>
@@ -96,56 +142,83 @@
             </v-row>
 
             <v-row class="text-center">
+                <!-- Validator overview-->
                 <v-col cols="12" md="6">
                     <c-card title="Validator Overview">
                         <v-row>
-                            <v-col cols="12" v-for="item in validatorOverview">
-                                <span> {{ item.label}} : </span>
-                                <a href="#"> <span> {{ Number(item.value).toLocaleString() }}  </span> </a>
+                            <v-col cols="12">
+                                <span> # of validators : </span>
+                                <router-link :to="{path:'/validators'}"> {{this.validatorOverview.value7.toLocaleString()}} </router-link>
+                            </v-col>
+                            <v-col cols="12">
+                                <span> # of on-line validators : </span>
+                                <router-link :to="{path:'/validators'}"> {{this.validatorOverview.value8.toLocaleString()}}</router-link>
+                            </v-col>
+                            <v-col cols="12">
+                                <span> # of off-line validators : </span>
+                                <router-link :to="{path:'/validators'}"> {{this.validatorOverview.value9.toLocaleString()}}</router-link>
                             </v-col>
                         </v-row>
                     </c-card>
                 </v-col>
 
+                <!--Asset overview-->
                 <v-col cols="12" md="6">
                     <c-card title="Asset Overview">
                         <v-row>
-                            <v-col cols="12" v-for="item in assetOverview">
-                                <span> {{ item.label}} : </span>
-                                <a href="#">
-                                    <span> {{ Number(item.value).toLocaleString()  }} </span>
-                                    <span> {{ item.byte }}</span>
-                                    <span> {{ item.unit }}</span>
-                                </a>
+                            <v-col cols="12">
+                                <span> total AMO coins : </span>
+                                <span> {{ Number(this.assetOverview.value10.toFixed(2)).toLocaleString() }} AMO </span>
+                            </v-col>
+                            <v-col cols="12">
+                                <span>  total stakes : </span>
+                                <span> {{ Number(this.assetOverview.value11.toFixed(2)).toLocaleString()}} AMO</span>
+                            </v-col>
+                            <v-col cols="12">
+                                <span> total delegated stakes : </span>
+                                <span>{{ Number(this.assetOverview.value12.toFixed(2)).toLocaleString()}} AMO </span>
                             </v-col>
                         </v-row>
                     </c-card>
                 </v-col>
 
+                <!--Goverance overview-->
                 <v-col cols="12" md="6">
                     <c-card title="Governance Overview">
                         <v-row>
-                            <v-col cols="12" v-for="item in governanceOverview">
-                                <span> {{ item.label }} : </span>
-                                <a href="#">
-                                    <span> {{ Number(item.value).toLocaleString() }} </span>
-                                    <span> {{ item.unit }}</span>
-                                </a>
+                            <v-col cols="12">
+                                <span> last draft : </span>
+                                <router-link :to="{path: '/inspect/draft/' + this.governanceOverview.value13_arg1, params: {draftId: this.governanceOverview.value13_arg1}}">
+                                    {{this.governanceOverview.value13_arg1.toLocaleString() }} ( {{this.governanceOverview.value13_arg2}}, {{this.governanceOverview.value13_arg3.toFixed(2).toLocaleString()}} % approval)
+                                </router-link>
+                            </v-col>
+                            <v-col cols="12">
+                                <span> draft stats : </span>
+                                <span> {{this.governanceOverview.value14_arg1.toLocaleString()}} / {{this.governanceOverview.value14_arg2.toLocaleString()}} drafts passed </span>
+                            </v-col>
+                            <v-col cols="12">
+                                <span> current waiting / voting / grace period : </span>
+                                <span> {{this.governanceOverview.value15_arg1.toLocaleString()}} / {{this.governanceOverview.value15_arg2.toLocaleString()}} / {{this.governanceOverview.value15_arg3.toLocaleString()}} blks </span>
                             </v-col>
                         </v-row>
                     </c-card>
                 </v-col>
 
+                <!--Data trade overview-->
                 <v-col cols="12" md="6">
                     <c-card title="Data trade Overview">
                         <v-row>
-                            <v-col cols="12" v-for="item in tradeOverview">
-                                <span> {{ item.label }} : </span>
-                                <a href="#">
-                                    <span> {{ Number(item.value).toLocaleString() }} </span>
-                                    <span> {{ item.byte }}</span>
-                                    <span> {{ item.unit }}</span>
-                                </a>
+                            <v-col cols="12">
+                                <span> # of registered storage services : </span>
+                                <router-link :to="{path: '/storages'}"> {{this.dataTradeOverview.value16.toLocaleString()}} </router-link>
+                            </v-col>
+                            <v-col cols="12">
+                                <span> # of all parcels : </span>
+                                <router-link :to="{path: '/parcels'}"> {{this.dataTradeOverview.value17.toLocaleString()}} </router-link>
+                            </v-col>
+                            <v-col cols="12">
+                                <span> average trade values in 1 month : </span>
+                                <span :to="{}"> {{ Number(this.dataTradeOverview.value18.toFixed(2)).toLocaleString()}} AMO </span>
                             </v-col>
                         </v-row>
                     </c-card>
@@ -160,35 +233,45 @@
 export default {
     data: () => ({
         majorStats: {
-            value1: '123456',
+            value1: 123456,
             value2: '2020-03-31 11:11:11',
-            value3: '123456.11',
-            value10: '123.11',
-            value1112: '123.11',
+            value3: 123456.11,
+            value10: 123.11,
+            value1112: 123.11,
         },
-        networkOverview: [
-            {label: 'Height of the last block', value: 111222},
-            {label: 'Timestamp of the last block', value: '2020-03-31 11:11:11', timestamp: true},
-            {label: 'Average block interval', value: 111222.33, unit: 'sec'},
-            {label: 'Average # of txs in a block', value: 111222.33, unit: '/ blk'},
-            {label: 'Estimated # of pending txs', value: 111222.33},
-            {label: 'Average transaction fee', value: 111.33, byte: 'G', unit: 'AMO'},
-        ],
-        validatorOverview: [
-            {label: '# of validators', value: 555555},
-            {label: '# of on-line validators', value: 234233},
-            {label: '# of off-line validators', value: 111222},
-        ],
-        assetOverview: [
-            {label: 'Total AMO coins', value: 555555, byte: 'G', unit: 'AMO'},
-            {label: 'Total stakes', value: 234233, byte: 'G', unit: 'AMO'},
-            {label: 'Total delegated stakes', value: 111222, byte: 'G', unit: 'AMO'},
-        ],
-        governanceOverview: [
-            {label: 'Last draft', value: 555555},
-            {label: 'Draft stats', value: 233},
-            {label: 'current waiting / voting / grace period', value: 111222, unit: 'blks'},
-        ],
+        networkOverview: {
+            value1: 111324,
+            value2:'2020-03-31 11:11:11',
+            value3:111222.333,
+            value4:117622.333,
+            value5:997622.333,
+            value6:117.332323,
+        },
+        validatorOverview: {
+            value7: 555555,
+            value8: 234233,
+            value9: 111222,
+        },
+        assetOverview: {
+            value10: 555.555,
+            value11: 234.233,
+            value12: 111.22322,
+        },
+        governanceOverview: {
+          value13_arg1: 223,
+          value13_arg2: 'rejected',
+          value13_arg3: 223.234,
+          value14_arg1: 223,
+          value14_arg2: 234,
+          value15_arg1: 777234,
+          value15_arg2: 554234,
+          value15_arg3: 123234,
+        },
+        dataTradeOverview:{
+            value16: 123356,
+            value17: 333225,
+            value18: 241.33354
+        },
         tradeOverview: [
             {label: '#of registered storage services', value: 555555},
             {label: '#of all parcels', value: 234233},
@@ -200,25 +283,25 @@ export default {
         // this.getTest2();
     },
     methods: {
-        // async getTest2(){
-        //   try {
-        //     const res = await this.$api.getTest_2();
-        //     this.height = res.data.height;
-        //     console.log('res',res)
-        //   } catch (e) {
-        //     console.log('error',e);
-        //   }
-        // },
-        //
-        // async getCurTime() {
-        //   await setInterval(() => {
-        //     this.$api.getCurTime().then(res => {
-        //       this.intervalValue = res.data.date;
-        //     }).catch(({response})=> {
-        //       console.log(response);
-        //     });
-        //   }, 5000)
-        // }
+        async getTest2(){
+          try {
+            const res = await this.$api.getTest_2();
+            this.height = res.data.height;
+            console.log('res',res)
+          } catch (e) {
+            console.log('error',e);
+          }
+        },
+
+        async getCurTime() {
+          await setInterval(() => {
+            this.$api.getCurTime().then(res => {
+              this.intervalValue = res.data.date;
+            }).catch(({response})=> {
+              console.log(response);
+            });
+          }, 5000)
+        }
     }
 }
 </script>
@@ -228,4 +311,7 @@ export default {
 .overview-card {
     margin: -10px !important;
 }
+  .card-option {
+    height:100px
+  }
 </style>
