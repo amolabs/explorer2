@@ -11,9 +11,9 @@
                     <span> # of drafts</span>
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <a href="#">
-                      <span> {{ this.governanceStat.value1.toLocaleString() }} </span>
-                    </a>
+                    <span>
+                      {{ this.governanceStat.value1.toLocaleString() }}
+                    </span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -23,9 +23,7 @@
                     <span> Pass rate for far </span>
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <a href="#">
-                      <span> {{ this.governanceStat.value2 }} %</span>
-                    </a>
+                    <span> {{ Number(this.governanceStat.value2.toFixed(2)).toLocaleString() }} %</span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -67,9 +65,9 @@
                     <span> Draft ID </span>
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <a href="#">
-                      <span> {{ Number(this.currentActiveDraft.value1).toLocaleString() }} </span>
-                    </a>
+                    <router-link :to="{path: '/inspect/draft/'+ this.currentActiveDraft.value1, params: {draftId: this.currentActiveDraft.value1}}">
+                      {{ this.currentActiveDraft.value1.toLocaleString() }}
+                    </router-link>
                   </v-col>
                 </v-row>
               </v-col>
@@ -79,9 +77,10 @@
                     <span> Proposer </span>
                   </v-col>
                   <v-col cols="12" md="8" class="py-0 px-lg-10 text-right subtitle-3">
-                    <a href="#">
-                      <span> {{ this.currentActiveDraft.value2 }} </span>
-                    </a>
+                    <router-link :to="{path:'/inspect/account'+ this.currentActiveDraft.value2, params:{account: this.currentActiveDraft.value2}}"
+                                 class="truncate-option">
+                      {{this.currentActiveDraft.value2}}
+                    </router-link>
                   </v-col>
                 </v-row>
               </v-col>
@@ -91,9 +90,7 @@
                     <span> Stage </span>
                   </v-col>
                   <v-col cols="12" md="9" class="py-0 px-lg-12 text-right subtitle-2">
-                    <a href="#">
-                      <span> {{ this.arg1 }} ( {{ this.arg2.toLocaleString() }} blks remaining) </span>
-                    </a>
+                    <span> {{ this.arg1 }} ( {{ this.arg2.toLocaleString() }} blks remaining) </span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -146,8 +143,11 @@
               @loadMore="reqData"
               :mobile-breakpoint="tableBreakpoint"
             >
+              <template #id="{item}">
+                <router-link :to="{path: '/inspect/draft/'+ item.id, params: {draftId: item.id}}" class="truncate-option" >{{item.id}}</router-link>
+              </template>
               <template #proposer="{item}">
-                <a href="#" class="d-inline-block text-truncate truncate-option"> {{ item.proposer }} </a>
+                <router-link :to="{path: '/inspect/account/' + item.proposer, params: {account: item.proposer}}" class="truncate-option"> {{item.proposer}} </router-link>
               </template>
             </c-scroll-table>
           </c-card>
@@ -240,11 +240,19 @@
 
   @media(max-width: 600px) {
     .truncate-option{
+      white-space: nowrap!important;
+      overflow: hidden!important;
+      text-overflow: ellipsis!important;
+      display: inline-block!important;
       max-width: 100px !important;
     }
   }
   @media(min-width: 600px) and (max-width: 750px)  {
     .truncate-option{
+      white-space: nowrap!important;
+      overflow: hidden!important;
+      text-overflow: ellipsis!important;
+      display: inline-block!important;
       max-width: 200px !important;
     }
   }

@@ -85,45 +85,64 @@
             <!--stat-->
             <v-row>
               <v-col cols="12" md="6">
-                <v-row align="center">
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                <v-row >
+                  <v-col cols="12" md="5" class="py-0 px-lg-12 text-left">
                     <span> Average incentive </span>
                   </v-col>
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span>{{ Number(this.value5.toFixed(2)).toLocaleString() }} AMO /blk</span>
+                  <v-col cols="12" md="5" class="py-0 px-lg-12 text-right subtitle-2">
+                  <span>{{ Number(this.value5.toFixed(2)).toLocaleString() }} AMO /blk</span>
+                  </v-col>
+                  <v-col cols="12" md="2">
+                    <span class="hidden-md-and-down"> = </span>
                   </v-col>
                 </v-row>
               </v-col>
               <v-col cols="12" md="6">
-                <v-row align="center" justify="center">
-                  <v-col class="py-0 px-lg-12 text-left">
-                    <span> Average reward </span>
-                  </v-col>
-                  <v-col class="py-0 px-lg-12 text-right subtitle-2">
+                <v-row>
+                  <v-col cols="12" class="py-0 px-lg-12 text-left text-lg-right subtitle-2">
+                    <span class="hidden-lg-and-up">=</span>
+                    <span> Average reward : </span>
+                    <br class="hidden-sm-and-up">
                     <span> {{ Number(this.value6.toFixed(2)).toLocaleString() }} AMO /blk </span>
                   </v-col>
-                </v-row>
-                <v-row align="center">
-                  <v-col class="py-0 px-lg-12 text-center">
-                    <span> +  </span>
-                  </v-col>
-                </v-row>
-                <v-row align="center" justify="center">
-                  <v-col class="py-0 px-lg-12 text-left">
-                    <span> Average tx fee </span>
-                  </v-col>
-                  <v-col class="py-0 px-lg-12 text-right subtitle-2">
+                  <v-col cols="12" class="py-0 px-lg-12 text-left text-lg-right subtitle-2"> + </v-col>
+                  <v-col cols="12" class="py-0 px-lg-12  text-left text-lg-right subtitle-2">
+                    <span> Average tx fee :</span>
+                    <br class="hidden-sm-and-up">
                     <span> {{ Number(this.value7.toFixed(2)).toLocaleString() }} AMO /blk </span>
                   </v-col>
                 </v-row>
+
+                <!--<v-row>-->
+                  <!--<v-col class="py-0 px-lg-12 text-left">-->
+                    <!--<span> Average reward </span>-->
+                  <!--</v-col>-->
+                  <!--<v-col class="py-0 px-lg-12 text-right subtitle-2">-->
+                    <!--<span> {{ Number(this.value6.toFixed(2)).toLocaleString() }} AMO /blk </span>-->
+                  <!--</v-col>-->
+                <!--</v-row>-->
+
+
+                <!--<v-row>-->
+                  <!--<v-col class="py-0 px-lg-12 text-left">-->
+                    <!--<span> Average tx fee </span>-->
+                  <!--</v-col>-->
+                  <!--<v-col class="py-0 px-lg-12 text-right subtitle-2">-->
+                    <!--<span> {{ Number(this.value7.toFixed(2)).toLocaleString() }} AMO /blk </span>-->
+                  <!--</v-col>-->
+                <!--</v-row>-->
+
+
               </v-col>
               <v-col cols="12" md="6">
-                <v-row align="center" justify="center">
-                  <v-col cols="12" md="6" class="py-0 pl-lg-12 text-left">
+                <v-row align="center">
+                  <v-col cols="12" md="6" class="py-0 pl-lg-12 pr-lg-0 text-left">
                     <span> Estimated annual interest rate </span>
                   </v-col>
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2`">
-                    <span> {{ Number(this.value7.toFixed(2)).toLocaleString() }} % </span>
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                    <div>
+                      <span>{{ Number(this.value7.toFixed(2)).toLocaleString() }} %  </span>
+                    </div>
                   </v-col>
                 </v-row>
               </v-col>
@@ -147,8 +166,17 @@
               :mobile-breakpoint="tableBreakpoint"
             >
               <template #address="{item}">
-                <router-link class="d-inline-block text-truncate truncate-option"
+                <router-link class="truncate-option"
                              :to="{ path: '/inspect/validator/' + item.address, params : {address: item.address } }">{{ item.address }}</router-link>
+              </template>
+              <template #effStake="{item}">
+                <span> {{Number(item.effStake.toFixed(2).toLocaleString())}} AMO</span>
+              </template>
+              <!--<template #power="{item}">-->
+                <!--<span> </span>-->
+              <!--</template>-->
+              <template #activity="{item}">
+                <span>{{ Number(item.activity.toFixed(2).toLocaleString())}} %  </span>
               </template>
             </c-scroll-table>
           </c-card>
@@ -214,10 +242,12 @@
         const endIdx = parseInt(startIdx) + parseInt(this.perPage);
         let newData = [];
         for(let i=startIdx; i<endIdx; i++) {
+          let col3_arg1 = 1233;
+          let col3_arg2 = 1233.329;
           newData.push({
             address: 'a3c338a54bea46c64bdde35e72b6d271c16dedf2',
             effStake: 234.33,
-            power: 222,
+            power: col3_arg1.toLocaleString() + '(' + Number(col3_arg2.toFixed(2)).toLocaleString()+ '%)',
             activity: 333.23,
           });
         }
@@ -234,11 +264,19 @@
 
   @media(max-width: 600px) {
     .truncate-option{
+      white-space: nowrap!important;
+      overflow: hidden!important;
+      text-overflow: ellipsis!important;
+      display: inline-block!important;
       max-width: 100px !important;
     }
   }
   @media(min-width: 600px) and (max-width: 750px)  {
     .truncate-option{
+      white-space: nowrap!important;
+      overflow: hidden!important;
+      text-overflow: ellipsis!important;
+      display: inline-block!important;
       max-width: 200px !important;
     }
   }

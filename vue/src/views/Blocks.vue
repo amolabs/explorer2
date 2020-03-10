@@ -1,5 +1,6 @@
 <template>
   <div id="page-block">
+    <!-- Block stat -->
     <v-container>
        <v-row justify="space-between" align="center">
         <v-col cols="12">
@@ -39,7 +40,7 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <span> {{ Number(this.value2.toFixed(2)).toLocaleString() }} M AMO /blk </span>
+                      <span> {{ Number(this.value2.toFixed(2)).toLocaleString() }} AMO /blk </span>
                     </div>
                   </v-col>
                 </v-row>
@@ -63,7 +64,7 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <span> {{ Number(this.value4.toFixed(2)).toLocaleString() }} B /blk </span>
+                      <span> {{ Number(this.value4.toFixed(2)).toLocaleString() }} /blk </span>
                     </div>
                   </v-col>
                 </v-row>
@@ -73,10 +74,12 @@
         </v-col>
       </v-row>
     </v-container>
+
+    <!--Table-->
     <v-container>
       <v-row justify="center" >
         <v-col cols="12">
-          <c-card class="text-center" title="Recent blockTable" outlined>
+          <c-card class="text-center" title="Recent blocks" outlined>
             <c-scroll-table
               :headers="blockTable.headers"
               itemKey="name"
@@ -92,8 +95,7 @@
                   {{item.timestamp.split(' ')[1]}} </span>
               </template>
               <template #height="{item}">
-                <router-link class="d-inline-block text-truncate truncate-option"
-                             :to="{ path: '/inspect/block/' + item.height, params : {block: item.height } }">{{ item.height }}</router-link>
+                <router-link :to="{ path: '/inspect/block/' + item.height, params : {block: item.height } }">{{ item.height }}</router-link>
                 <!--#D1C4E9-->
                 <!--<a href="#" style="text-decoration: none;color: #4CAF50"> {{ item.height }} </a>-->
                 <!--<v-chip style="cursor: pointer" color="#DCEDC8" target="#">{{ item.height }}</v-chip>-->

@@ -60,10 +60,10 @@
               <v-col cols="12" md="6">
                 <v-row align="center">
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
-                    <span>Hosting fee</span>
+                    <span>Status</span>
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span> {{Number(this.value5.toFixed(2)).toLocaleString()}} AMO</span>
+                    <span> {{this.value6}}</span>
                   </v-col>
                 </v-row>
               </v-col>

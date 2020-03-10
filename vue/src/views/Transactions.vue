@@ -50,19 +50,19 @@
                 </v-row>
               </v-col>
               <v-col cols="12" md="6">
-                <v-row align="center">
+                <v-row align="start">
                   <v-col cols="12" md="4" class="py-0 pl-lg-12 text-left">
                     <span> Average binding lag </span>
                   </v-col>
                   <v-col cols="12" md="8" class="py-0 pr-lg-12 text-right subtitle-2">
                     <div>
-                      <span>  {{ Number(this.value3_arg1.toFixed(2)).toLocaleString() }} blks / <br class="hidden-sm-and-upf">max {{ this.value3_arg2.toLocaleString() }} blks</span>
+                      <span>{{ Number(this.value3_arg1.toFixed(2)).toLocaleString() }} blks / <br class="hidden-sm-and-up">max {{ this.value3_arg2.toLocaleString() }} blks</span>
                     </div>
                   </v-col>
                 </v-row>
               </v-col>
               <v-col cols="12" md="6">
-                <v-row align="center">
+                <v-row align="start">
                   <v-col cols="12" md="4" class="py-0 px-lg-12 text-left">
                     <span> Invalid ratio </span>
                   </v-col>
@@ -93,18 +93,14 @@
               :mobile-breakpoint="tableBreakpoint"
             >
               <template #height="{item}">
-                <router-link class="d-inline-block text-truncate truncate-option"
-                             :to="{ path: '/inspect/block/' + item.height, params : {block: item.height } }">{{ item.height }}</router-link>
+                <router-link :to="{ path: '/inspect/block/' + item.height, params : {block: item.height } }">{{ item.height }}</router-link>
               </template>
               <template #hash="{item}">
-                <a href="#" class="d-inline-block text-truncate truncate-option"> {{ item.hash }} </a>
-              </template>
-              <template #hash="{item}">
-                <router-link class="d-inline-block text-truncate truncate-option"
+                <router-link class="truncate-option"
                              :to="{ path: '/inspect/tx/' + item.hash, params: {hash : item.hash }}">{{ item.hash }}</router-link>
               </template>
               <template #sender="{item}">
-                <router-link class="d-inline-block text-truncate truncate-option"
+                <router-link class="truncate-option"
                              :to="{ path: '/inspect/account/' + item.sender, params: {account : item.sender }}">{{ item.sender }}</router-link>
               </template>
             </c-scroll-table>
@@ -194,6 +190,10 @@
   /* 모바일 */
   @media(max-width: 600px) {
     .truncate-option{
+      white-space: nowrap!important;
+      overflow: hidden!important;
+      text-overflow: ellipsis!important;
+      display: inline-block!important;
       max-width: 120px !important;
     }
   }
@@ -201,28 +201,40 @@
   /* 작은화면 */
   @media(min-width: 600px) and (max-width: 750px)  {
     .truncate-option{
-      max-width: 200px !important;
+      white-space: nowrap!important;
+      overflow: hidden!important;
+      text-overflow: ellipsis!important;
+      display: inline-block!important;
+      max-width: 250px !important;
     }
   }
 
   /* 아이패드 */
   @media(min-width: 750px) and (max-width: 940px)  {
     .truncate-option{
-      max-width: 150px !important;
+      white-space: nowrap!important;
+      overflow: hidden!important;
+      text-overflow: ellipsis!important;
+      display: inline-block!important;
+      max-width: 140px !important;
     }
   }
 
   /*  아이패드 프로, 중간화면 */
   @media(min-width: 940px)  and (max-width: 1300px) {
     .truncate-option{
+      white-space: nowrap!important;
+      overflow: hidden!important;
+      text-overflow: ellipsis!important;
+      display: inline-block!important;
       max-width: 200px !important;
     }
   }
 
   /* 아주 큰 화면 */
-  @media(min-width: 1300px) {
-    .truncate-option{
-      max-width: 500px !important;
-    }
-  }
+  /*@media(min-width: 1300px) {*/
+    /*.truncate-option{*/
+      /*max-width: 500px !important;*/
+    /*}*/
+  /*}*/
 </style>
