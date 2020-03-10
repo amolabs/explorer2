@@ -3,7 +3,7 @@
         <v-app-bar id="AppBar" class="app-bar" app height="110">
             <v-container class="pt-0 mt-1">
                 <!-- Desktop version -->
-                <v-row align="center" class="hidden-sm-and-down">
+                <v-row align="center" class="hidden-sm-and-down" style="cursor: pointer;">
                     <v-col cols="6">
                         <v-row>
                             <v-img
@@ -28,7 +28,7 @@
                     </v-col>
                     <v-col cols="4">
                         <v-text-field
-                            label="block, account, tx, validator, draft ID"
+                            label="block, account, tx, validator, draftId"
                             single-line outlined rounded hide-details dense dark clearable
                             prepend-inner-icon="search"
                             v-model="search"
@@ -40,14 +40,14 @@
                 <v-row class="hidden-md-and-up">
                     <v-col cols="12">
                         <v-row class="pt-5" align="center">
-                            <v-col cols="7">
+                            <v-col cols="7" style="cursor: pointer">
                                 <v-row align="center">
                                     <v-img
                                         class="logo-img"
                                         :src="require('../assets/amo_white.png')"
                                         @click.stop="drawer = !drawer"
                                     />
-                                    <div>
+                                    <div @click="$router.push('/')">
                                         <div class="logo-title white--text ml-2">AMO</div>
                                         <div class="logo-sub-title white--text ml-2">Blockchain Explorer</div>
                                     </div>
@@ -69,7 +69,7 @@
                         </v-row>
                         <v-text-field
                             single-line outlined rounded hide-details search dark
-                            label="block, account, tx, validator, draft ID"
+                            label="block, account, tx, validator, draftId"
                             prepend-inner-icon="search"
                         ></v-text-field>
                     </v-col>
@@ -116,11 +116,13 @@
             // Popup
         },
         mounted() {
+            // this.$byteCalc('good');
             console.log('current page', this.$route);
             this.currentPage = this.$route;
 
             window.addEventListener('keyup', evt => {
                 // 자동완성
+                console.log(evt.keyCode);
                 if(this.search.length === 1){
                     if(evt.keyCode === 65) {
                         this.search = 'account/'
@@ -131,7 +133,7 @@
                     if(evt.keyCode === 68) {
                         this.search = 'draftId/'
                     }
-                    if(evt.keyCode === 86) {
+                    if(evt.keyCode === 84) {
                         this.search = 'tx/'
                     }
                     if(evt.keyCode === 86) {
@@ -235,9 +237,10 @@
         }
     }
 
-    @media (min-width: 1040px) and (max-width: 1400px){
+    @media (min-width: 840px) and (max-width: 1400px){
         .tab-option {
-
+            width: 110% !important;
+            margin-left: -24px;
         }
 
     }
