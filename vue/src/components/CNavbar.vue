@@ -71,6 +71,7 @@
                             single-line outlined rounded hide-details search dark
                             label="block, account, tx, validator, draftId"
                             prepend-inner-icon="search"
+                            v-model="search"
                         ></v-text-field>
                     </v-col>
                 </v-row>
