@@ -42,7 +42,7 @@
                     <span> Effective stake </span>
                   </v-col>
                   <v-col cols="12" md="8" sm="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span> {{ this.value4.toFixed(2) }} AMO </span>
+                    <span> {{ this.$byteCalc(this.value4) }} AMO </span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -82,12 +82,12 @@
         param: this.$route.params,
         value2: '66d6f6b107e14a335fd416e76749256fa81c146b4cff118049a177f0fe4161e1',
         value3: '1169e6753ae9d6aa9f1f57bc4e0f1de5a3db436a',
-        value4: 123.3455,
+        value4: 1222223.3455,
         value5_arg1 : 111,
         value5_arg2: 232.113,
         value6:645.3455
       }
-    }
+    },
   }
 </script>
 

@@ -70,9 +70,9 @@
                 <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                   <span v-if="value5_arg1 === 'waiting' || value5_arg1 ==='voting'"> vote not closed yet</span>
                   <span v-else>
-                    {{Number(this.value6_arg1.toFixed(2)).toLocaleString()}} AMO approved, <br>
-                    {{Number(this.value6_arg2.toFixed(2)).toLocaleString()}} AMO rejected, <br>
-                    {{Number(this.value6_arg3.toFixed(2)).toLocaleString()}} AMO absent
+                    {{this.$byteCalc(this.value6_arg1)}} AMO approved, <br>
+                    {{this.$byteCalc(this.value6_arg2)}} AMO rejected, <br>
+                    {{this.$byteCalc(this.value6_arg3)}} AMO absent
                   </span>
                 </v-col>
               </v-row>
@@ -98,9 +98,8 @@
         value6_arg1 : 123.345,
         value6_arg2: 2314.23,
         value6_arg3:  123.41234,
-
       }
-    }
+    },
   }
 </script>
 

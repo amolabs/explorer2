@@ -21,7 +21,7 @@
                     <span> AMO balance </span>
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span> {{ this.value2.toFixed(2)}} AMO</span>
+                    <span> {{this.$byteCalc(this.value2)}} AMO</span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -32,7 +32,7 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <span v-if="this.value3_arg1 === ''"> none </span>
-                    <span v-else> {{ this.value3_arg1.toFixed(2) }} AMO for validator <br>{{ this.value3_arg2 }}</span>
+                    <span v-else> {{ this.$byteCalc(this.value3_arg1)}} AMO for validator <br>{{ this.value3_arg2 }}</span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -43,7 +43,7 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <span v-if="this.value4_arg1 === ''"> none</span>
-                    <span v-else> {{this.value4_arg1.toFixed(2)}} AMO for account <br> {{this.value4_arg2}}</span>
+                    <span v-else> {{this.$byteCalc(this.value4_arg1)}}AMO for account <br> {{this.value4_arg2}}</span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -88,7 +88,7 @@
     data() {
       return {
         param : this.$route.params,
-        value2: 234.435,
+        value2: 22234.435,
         value3_arg1: 234.234,
         value3_arg2:'d1b1af47c016e7b6a4b92b99ca4df24261b8d22b',
         value4_arg1:342.3455,

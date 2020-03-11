@@ -77,7 +77,7 @@
                     <span> Proposer </span>
                   </v-col>
                   <v-col cols="12" md="8" class="py-0 px-lg-10 text-right subtitle-3">
-                    <router-link :to="{path:'/inspect/account'+ this.currentActiveDraft.value2, params:{account: this.currentActiveDraft.value2}}"
+                    <router-link :to="{path:'/inspect/account/'+ this.currentActiveDraft.value2, params:{account: this.currentActiveDraft.value2}}"
                                  class="truncate-option">
                       {{this.currentActiveDraft.value2}}
                     </router-link>
@@ -101,7 +101,7 @@
                   </v-col>
                   <v-spacer></v-spacer>
                   <v-col cols="12" md="7" sm="6" class="py-0 px-lg-4 text-left subtitle-3">
-                      <span> {{ this.currentActiveDraft.value4 }} AMO </span>
+                      <span> {{ this.$byteCalc(this.currentActiveDraft.value4) }} AMO </span>
                   </v-col>
                 </v-row>
                 <v-row>
@@ -110,7 +110,7 @@
                   </v-col>
                   <v-spacer></v-spacer>
                   <v-col cols="12" md="7" sm="6" class="py-0 px-lg-4 text-left subtitle-3">
-                    <span> {{ this.currentActiveDraft.value5 }} AMO </span>
+                    <span> {{ this.$byteCalc(this.currentActiveDraft.value5) }} AMO </span>
                   </v-col>
                 </v-row>
                 <v-row>
@@ -119,7 +119,7 @@
                   </v-col>
                   <v-spacer></v-spacer>
                   <v-col cols="12" md="7" sm="6" class="py-0 px-lg-4 text-left subtitle-3">
-                    <span> {{ this.currentActiveDraft.value6 }} AMO </span>
+                    <span> {{ this.$byteCalc(this.currentActiveDraft.value6) }} AMO </span>
                     <span> (would be counted as BAY when closing vote)</span>
                   </v-col>
                 </v-row>
@@ -175,9 +175,9 @@
       currentActiveDraft:{
         value1: 123,
         value2: '73bae62d33bb942c914d85f9ed612ec8f5a0fa62',
-        value4: 123.45,
-        value5: 455.45,
-        value6: 999.45,
+        value4: 1223231231233.45,
+        value5: 4522223235.45,
+        value6: 991231231231231239.45,
       },
       pageNum: 1,
       perPage: 50,

@@ -43,7 +43,7 @@
                     <span>Registration fee</span>
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span> {{Number(this.value4.toFixed(2)).toLocaleString()}} AMO</span>
+                    <span> {{this.$byteCalc(this.value4)}} AMO</span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -53,7 +53,7 @@
                     <span>Hosting fee</span>
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span> {{Number(this.value5.toFixed(2)).toLocaleString()}} AMO</span>
+                    <span> {{this.$byteCalc(this.value5)}} AMO</span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -82,14 +82,11 @@
         param : this.$route.params,
         value2: 'ad16f4c1bbcaa40fdba158a486210de350474c14',
         value3: 'http://naver.com',
-        value4: 123.234,
+        value4: 121113.234,
         value5: 123.234,
         value6: 'active'
       }
     },
-    mounted() {
-      console.log(this.param)
-    }
   }
 </script>
 

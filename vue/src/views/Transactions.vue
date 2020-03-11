@@ -32,7 +32,7 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <span> {{ Number(this.value1.toFixed(2)).toLocaleString() }} / tx</span>
+                      <span> {{ this.$byteCalc(this.value1) }} tx</span>
                     </div>
                   </v-col>
                 </v-row>
@@ -44,7 +44,7 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <span> {{ Number(this.value2.toFixed(2)).toLocaleString() }} / tx </span>
+                      <span> {{ this.$byteCalc(this.value2) }} AMO /tx </span>
                     </div>
                   </v-col>
                 </v-row>
@@ -231,10 +231,15 @@
     }
   }
 
-  /* 아주 큰 화면 */
-  /*@media(min-width: 1300px) {*/
-    /*.truncate-option{*/
+   /*큰 화면*/
+  @media(min-width: 1300px) and (max-width: 1900px){
+    .truncate-option{
+      white-space: nowrap!important;
+      overflow: hidden!important;
+      text-overflow: ellipsis!important;
+      display: inline-block!important;
+      max-width: 500px !important;
       /*max-width: 500px !important;*/
-    /*}*/
-  /*}*/
+    }
+  }
 </style>

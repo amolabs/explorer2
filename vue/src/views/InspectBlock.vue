@@ -42,7 +42,7 @@
                     <span> Tx bytes </span>
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span> {{ this.value4 }} </span>
+                    <span> {{this.$byteCalc(this.value4)}} </span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -62,7 +62,7 @@
                     <span> # of txs </span>
                   </v-col>
                   <v-col cols="12" md="8" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span> {{ this.arg1.toLocaleString() }} (valid {{this.arg2.toLocaleString()}} + invalid {{this.arg3.toLocaleString()}} )</span>
+                    <span>{{ this.arg1.toLocaleString() }} (valid {{this.arg2.toLocaleString()}}+invalid {{this.arg3.toLocaleString()}})</span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -106,11 +106,11 @@
       value1: 342,
       value2: '2020-03-04 11:22:33',
       value3: '9917c981107a5c7a05e171d61bfaed6046fcf1792da7fabf3fe1dbbd2eed7452',
-      value4: 344.235,
+      value4: 3433334.235,
       value5: '73bae62d33bb942c914d85f9ed612ec8f5a0fa62',
-      arg1: '123456',
-      arg2: '234567',
-      arg3: '987654',
+      arg1: 123456,
+      arg2: 234567,
+      arg3: 987654,
       pageNum: 1,
       perPage: 50,
       blockTable: {

@@ -40,7 +40,7 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <span> {{ Number(this.value2.toFixed(2)).toLocaleString() }} AMO /blk </span>
+                      <span> {{ this.$byteCalc(this.value2)  }} AMO /blk</span>
                     </div>
                   </v-col>
                 </v-row>
@@ -64,7 +64,7 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <span> {{ Number(this.value4.toFixed(2)).toLocaleString() }} /blk </span>
+                      <span> {{ this.$byteCalc(this.value4) }} /blk</span>
                     </div>
                   </v-col>
                 </v-row>
@@ -117,9 +117,9 @@
     data: () => ({
       // responseData: {},
       value1: 123456.1234,
-      value2: 123.2432,
+      value2: 2222222.12345,
       value3: 234222.35432,
-      value4: 234.33,
+      value4: 222234.33,
       arg:100,
       pageNum: 1,
       perPage: 50,
