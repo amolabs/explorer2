@@ -15,14 +15,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-app.param('chainid', function(req, res, next, val) {
-  console.log('chainid');
-  res.locals.chainid = val;
+app.param('chain_id', function(req, res, next, val) {
+  console.log('chain_id');
+  res.locals.chain_id = val;
   next();
 });
 
 app.use('/', indexRouter);
 //app.use('/networks', networksRouter);
-app.use('/chain/:chainid([a-zA-Z0-9-]+)', chainRouter);
+app.use('/chain/:chain_id([a-zA-Z0-9-]+)', chainRouter);
 
 module.exports = app;

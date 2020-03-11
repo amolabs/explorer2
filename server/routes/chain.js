@@ -4,20 +4,20 @@ var router = express.Router();
 const block = require('../models/block');
 
 router.get('/', function(req, res) {
-  const chainid = res.locals.chainid;
+  const chain_id = res.locals.chain_id;
   var chain_summary = {
     desc: 'chain summary',
-    chainid: chainid,
+    chain_id: chain_id,
   };
   res.send(JSON.stringify(chain_summary));
 });
 
 router.get('/blocks', function(req, res) {
-  const chainid = res.locals.chainid;
+  const chain_id = res.locals.chain_id;
   if (req.query.stat) {
     var blocks_stat = {
       desc: 'blocks stat',
-      chainid: chainid,
+      chain_id: chain_id,
       num_blocks: req.query.num_blocks,
     };
     res.send(JSON.stringify(blocks_stat));
@@ -32,9 +32,9 @@ router.get('/blocks', function(req, res) {
 });
 
 router.get('/blocks/:height([0-9]+)', function(req, res) {
-  const chainid = res.locals.chainid;
+  const chain_id = res.locals.chain_id;
   const height = req.params.height;
-  block(chainid, height)
+  block(chain_id, height)
     .then((rows) => {
       if (rows.length > 0) {
         res.send(rows[0]);
