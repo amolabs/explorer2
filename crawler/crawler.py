@@ -53,61 +53,58 @@ row = cur.fetchone()
 if row:
     #print(row)
     chain_summary = dict(zip(cur.column_names, row))
-    my_last_height = int(chain_summary['height'])
+    last_height = int(chain_summary['height'])
 else:
-    my_last_height = 0
+    last_height = 0
 print('fetched currnet explorer status')
 
 # get node status
 r = requests.get(f'{node}/status')
 dat = json.loads(r.text)
-target_last_height = int(dat['result']['sync_info']['latest_block_height'])
+target_height = int(dat['result']['sync_info']['latest_block_height'])
 #print(dat['result']['node_info']['network'])
 print('fetched target node status')
 
 # figure out
-print(f'currnet explorer status: {my_last_height}')
-print(f'target node status: {target_last_height}')
+print(f'currnet explorer status: {last_height}')
+print(f'target node status: {target_height}')
 limit = args.limit
-if limit > 0:
-    run = min(target_last_height - my_last_height, limit)
-else:
-    run = target_last_height - my_last_height
+if limit == 0:
+    limit = 20
+run = min(target_height - last_height, limit)
 
-# collect
-db.autocommit = False
+batch_base = last_height
+while run > 0:
+    # XXX: This limit is due to the limit of tendermint rpc.
+    batch_run = min(run,20)
+    # one batch
+    print(f'batch height from {batch_base+1} to {batch_base+batch_run}')
+    db.autocommit = False
+    r = requests.get(f'{node}/blockchain?minHeight={batch_base+1}&maxHeight={batch_base+batch_run}')
+    metas = json.loads(r.text)['result']['block_metas']
+    for meta in metas:
+        # format
+        block = {}
+        block['chain_id'] = meta['header']['chain_id']
+        block['height'] = meta['header']['height']
+        block['time'] = meta['header']['time']
+        block['hash'] = meta['block_id']['hash']
+        block['num_txs'] = meta['header']['num_txs']
 
-#r = requests.get(f'{node}/blockchain?minHeight={my_last_height+1}&maxHeight={my_last_height+run}')
-#metas = json.loads(r.text)['result']['block_metas']
-#print(json.dumps(dat, indent=2))
-#exit(0)
-for h in range(my_last_height+1, my_last_height+1+run):
-    # retrieve block
-    r = requests.get(f'{node}/block?height={h}')
-    dat = json.loads(r.text)
-    meta = dat['result']['block_meta']
-    #print(json.dumps(meta))
-    block = {}
-    block['chain_id'] = meta['header']['chain_id']
-    block['height'] = meta['header']['height']
-    block['time'] = meta['header']['time']
-    block['hash'] = meta['block_id']['hash']
-    block['num_txs'] = meta['header']['num_txs']
-
-    #print(block['chain_id'], block['height'], block['time'])
-    #print(json.dumps(block))
-
-    block['time'] = parse(block['time'])
-    # store
-    cur.execute("""
-        insert into blocks (chain_id, height, time, hash, num_txs)
-        values
-        (%(chain_id)s, %(height)s, %(time)s, %(hash)s, %(num_txs)s)""",
-        (block))
-db.commit()
-cur.close()
+        # store
+        #print(json.dumps(block))
+        block['time'] = parse(block['time'])
+        cur.execute("""
+            insert into blocks (chain_id, height, time, hash, num_txs)
+            values
+            (%(chain_id)s, %(height)s, %(time)s, %(hash)s, %(num_txs)s)""",
+            (block))
+    db.commit()
+    run -= len(metas)
+    batch_base += len(metas)
 
 # update stat
 
 # closing
+cur.close()
 db.close()
