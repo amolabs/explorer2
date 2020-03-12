@@ -7,7 +7,7 @@ import argparse
 import requests
 import mysql.connector
 from mysql.connector import Error
-from dateutil.parser import parse
+from dateutil.parser import parse as dateparse
 
 # local config
 dbconfigfile = '../db/config.json'
@@ -20,6 +20,60 @@ p.add_argument("-l", "--limit", help="limit number of blocks to collect",
         type=int, default=100)
 args = p.parse_args()
 node = args.node
+
+def collect_block_headers(node, base, num):
+    print(f'batch height from {base+1} to {base+num}')
+    r = requests.get(
+            f'{node}/blockchain?minHeight={base+1}&maxHeight={base+num}')
+    metas = json.loads(r.text)['result']['block_metas']
+    list.sort(metas, key=lambda val: int(val['header']['height']))
+    return metas
+
+def format_block(dat):
+    # format
+    block = {}
+    block['chain_id'] = dat['header']['chain_id']
+    block['height'] = dat['header']['height']
+    block['time'] = dat['header']['time']
+    block['hash'] = dat['block_id']['hash']
+    block['num_txs'] = dat['header']['num_txs']
+    return block
+
+def save_block(block):
+    #print(json.dumps(block))
+    block['time'] = dateparse(block['time'])
+    cur.execute("""
+        INSERT INTO `blocks`
+            (`chain_id`, `height`, `time`, `hash`, `num_txs`)
+        VALUES
+            (%(chain_id)s, %(height)s, %(time)s, %(hash)s, %(num_txs)s)""",
+        (block))
+
+def collect_block_txs(node, height):
+    # collect txs
+    r = requests.get(f'{node}/tx_search?query="tx.height={height}"')
+    items = json.loads(r.text)['result']['txs']
+    print(f'non-empty block height {height}: num_txs = {len(items)}')
+    return items
+
+def format_tx(dat):
+    tx = {}
+    tx['hash'] = item['hash']
+    tx['height'] = item['height']
+    tx['index'] = item['index']
+    tx['code'] = item['tx_result']['code']
+    tx['info'] = item['tx_result']['info']
+    return tx
+
+def save_tx(chain_id, tx):
+    tx['chain_id'] = chain_id
+    cur.execute("""
+        INSERT INTO `txs`
+            (`chain_id`, `hash`, `height`, `index`, `code`, `info`)
+        VALUES
+            (%(chain_id)s, %(hash)s,
+            %(height)s, %(index)s, %(code)s, %(info)s)""",
+        (tx))
 
 # read config
 try:
@@ -48,7 +102,7 @@ else:
 
 # get current explorer state
 cur = db.cursor()
-cur.execute("""select * from chain_summary""")
+cur.execute("""SELECT * FROM `chain_summary`""")
 row = cur.fetchone()
 if row:
     #print(row)
@@ -69,36 +123,30 @@ print('fetched target node status')
 print(f'currnet explorer status: {last_height}')
 print(f'target node status: {target_height}')
 limit = args.limit
-if limit == 0:
-    limit = 20
-run = min(target_height - last_height, limit)
+if limit > 0:
+    run = min(target_height - last_height, limit)
+else:
+    run = target_height - last_height
 
 batch_base = last_height
 while run > 0:
     # XXX: This limit is due to the limit of tendermint rpc.
     batch_run = min(run,20)
     # one batch
-    print(f'batch height from {batch_base+1} to {batch_base+batch_run}')
     db.autocommit = False
-    r = requests.get(f'{node}/blockchain?minHeight={batch_base+1}&maxHeight={batch_base+batch_run}')
-    metas = json.loads(r.text)['result']['block_metas']
+    print(f'==========================================================')
+    metas = collect_block_headers(node, batch_base, batch_run)
     for meta in metas:
-        # format
-        block = {}
-        block['chain_id'] = meta['header']['chain_id']
-        block['height'] = meta['header']['height']
-        block['time'] = meta['header']['time']
-        block['hash'] = meta['block_id']['hash']
-        block['num_txs'] = meta['header']['num_txs']
+        block = format_block(meta)
+        save_block(block)
 
-        # store
-        #print(json.dumps(block))
-        block['time'] = parse(block['time'])
-        cur.execute("""
-            insert into blocks (chain_id, height, time, hash, num_txs)
-            values
-            (%(chain_id)s, %(height)s, %(time)s, %(hash)s, %(num_txs)s)""",
-            (block))
+        if int(block['num_txs']) > 0:
+            items = collect_block_txs(node, block['height'])
+            for item in items:
+                tx = format_tx(item)
+                save_tx(block['chain_id'], tx)
+        else:
+            print(f'empty block height {block["height"]}')
     db.commit()
     run -= len(metas)
     batch_base += len(metas)
