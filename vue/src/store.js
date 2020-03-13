@@ -15,7 +15,8 @@ export default new Vuex.Store({
       err: false,
       info: true,
       persistent: false
-    }
+    },
+    network: 'testnet',
   },
 
   mutations: {
@@ -23,6 +24,10 @@ export default new Vuex.Store({
       state.alert = payload;
       state.open = !state.open;
     },
+
+    network(state, payload) {
+      state.network = payload;
+    }
   },
 
   actions: {
