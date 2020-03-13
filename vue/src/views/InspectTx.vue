@@ -47,15 +47,227 @@
               </v-col>
             </v-row>
 
-            <div style="border-width:3px;border-color:black; border-style: dashed;height: 100px"> Type-Specific tx Body </div>
+            <!--Type-Specific tx Body-->
+            <v-row v-if="this.value4 === 'transfer'">
+              <v-col cols="12" md="6">
+                <v-row align="start">
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                    <span> TO </span>
+                  </v-col>
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                    <span class="truncate-option"> </span>
+                  </v-col>
+                </v-row>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-row align="start">
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                    <span> Amount</span>
+                  </v-col>
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                    <span> AMO </span>
+                  </v-col>
+                </v-row>
+              </v-col>
+            </v-row>
+            <v-row v-else-if="this.value4 === 'stake'">
+              <v-col cols="12" md="6">
+                <v-row align="start">
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                    <span> Validator </span>
+                  </v-col>
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                    <span class="truncate-option"> </span>
+                  </v-col>
+                </v-row>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-row align="start">
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                    <span> Amount</span>
+                  </v-col>
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                    <span> AMO </span>
+                  </v-col>
+                </v-row>
+              </v-col>
+            </v-row>
+            <v-row v-else-if="this.value4 === 'withdraw'">
+              <v-col cols="12" md="6">
+                <v-row align="start">
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                    <span> Amount </span>
+                  </v-col>
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                    <span> AMO</span>
+                  </v-col>
+                </v-row>
+              </v-col>
+            </v-row>
+            <v-row v-else-if="this.value4 === 'delegate'">
+              <v-col cols="12" md="6">
+                <v-row align="start">
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                    <span> TO </span>
+                  </v-col>
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                    <span class="truncate-option"> AMO</span>
+                  </v-col>
+                </v-row>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-row align="start">
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                    <span> Amount </span>
+                  </v-col>
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                    <span class="truncate-option"> AMO</span>
+                  </v-col>
+                </v-row>
+              </v-col>
+            </v-row>
+            <v-row v-else-if="this.value4 === 'retract'">
+              <v-col cols="12" md="6">
+                <v-row align="start">
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                    <span> Amount </span>
+                  </v-col>
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                    <span class="truncate-option"> AMO</span>
+                  </v-col>
+                </v-row>
+              </v-col>
+            </v-row>
+            <v-row v-else-if="this.value4 === 'register'">
+              <v-col cols="12" md="6">
+                <v-row align="start">
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                    <span> Parcel </span>
+                  </v-col>
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                    <span class="truncate-option"> </span>
+                  </v-col>
+                </v-row>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-row align="start">
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                    <span> Owner key custody </span>
+                  </v-col>
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                    <span class="truncate-option"> AMO</span>
+                  </v-col>
+                </v-row>
+              </v-col>
+            </v-row>
+            <v-row v-else-if="this.value4 === 'discard'">
+              <v-col cols="12" md="6">
+                <v-row align="start">
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                    <span> Parcel </span>
+                  </v-col>
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                    <span class="truncate-option"> </span>
+                  </v-col>
+                </v-row>
+              </v-col>
+            </v-row>
+            <v-row v-else-if="this.value4 === 'request'">
+              <v-col cols="12" md="6">
+                <v-row align="start">
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                    <span> Parcel </span>
+                  </v-col>
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                    <span class="truncate-option"> </span>
+                  </v-col>
+                </v-row>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-row align="start">
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                    <span> Payment </span>
+                  </v-col>
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                    <span class="truncate-option"> AMO</span>
+                  </v-col>
+                </v-row>
+              </v-col>
+            </v-row>
+            <v-row v-else-if="this.value4 === 'cancel'">
+              <v-col cols="12" md="6">
+                <v-row align="start">
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                    <span> Parcel </span>
+                  </v-col>
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                    <span class="truncate-option"> </span>
+                  </v-col>
+                </v-row>
+              </v-col>
+            </v-row>
+            <v-row v-else-if="this.value4 === 'grant'">
+              <v-col cols="12" md="6">
+                <v-row align="start">
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                    <span> Parcel </span>
+                  </v-col>
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                    <span class="truncate-option"> </span>
+                  </v-col>
+                </v-row>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-row align="start">
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                    <span> Grantee </span>
+                  </v-col>
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                    <span class="truncate-option"></span>
+                  </v-col>
+                </v-row>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-row align="start">
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                    <span> Buyer key custody </span>
+                  </v-col>
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                    <span class="truncate-option"> </span>
+                  </v-col>
+                </v-row>
+              </v-col>
+            </v-row>
+            <v-row v-else-if="this.value4 === 'revoke'">
+              <v-col cols="12" md="6">
+                <v-row align="start">
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                    <span> Parcel </span>
+                  </v-col>
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                    <span class="truncate-option"> </span>
+                  </v-col>
+                </v-row>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-row align="start">
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                    <span> Grantee </span>
+                  </v-col>
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                    <span class="truncate-option"> AMO</span>
+                  </v-col>
+                </v-row>
+              </v-col>
+            </v-row>
 
             <v-row>
-              <v-col cols="12">
+              <v-col cols="12" md="6">
                 <v-row align="center">
-                  <v-col cols="12" md="2" class="py-0 px-lg-12 text-left">
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
                     <span> result </span>
                   </v-col>
-                  <v-col cols="12" md="10" class="py-0 px-lg-12 text-left subtitle-2">
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <span class=""> {{ this.value5_arg1 }} ( code = {{ this.value5_arg2 }} ) </span>
                   </v-col>
                 </v-row>
@@ -101,7 +313,7 @@
         param : this.$route.params,
         value2 : 123,
         value3 : '3e1ca2bc03050d6e2b5868a968b551c68ee14854',
-        value4: 'SEND',
+        value4: 'transfer',
         value5_arg1: 'ABCD',
         value5_arg2: 344,
         value6: '98ee0c782742cf6099d2854338562d24e24335de13cdad7012079b4f082988cdc9a25a88bf5333ec898e6f0c1efc1c6f4a70abf6e0f33fc20dfb1a9b6930bd90df',
