@@ -19,6 +19,10 @@ CREATE TABLE `txs` (
   `index` int(11) NOT NULL,
   `code` int(11) NOT NULL,
   `info` varchar(128) DEFAULT NULL,
+  `type` char(32) NOT NULL,
+  `sender` char(40) NOT NULL,
+  `fee` bigint(20) NOT NULL,
+  `payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`payload`)),
   PRIMARY KEY (`chain_id`,`hash`),
   KEY `block_FK` (`chain_id`,`height`),
   CONSTRAINT `block_FK` FOREIGN KEY (`chain_id`, `height`) REFERENCES `blocks` (`chain_id`, `height`)
@@ -32,11 +36,12 @@ ALGORITHM = UNDEFINED VIEW `explorer`.`chain_summary` AS
 select
     `b`.`chain_id` AS `chain_id`,
     max(`b`.`height`) AS `height`,
-    count(`b`.`height`) AS `num_blocks`,
-    count(`t`.`hash`) AS `num_txs`
+    count(distinct `b`.`hash`) AS `num_blocks`,
+    count(distinct `t`.`hash`) AS `num_txs`
 from
     (`explorer`.`blocks` `b`
 left join `explorer`.`txs` `t` on
-    (`b`.`chain_id` = `t`.`chain_id`))
+    (`b`.`chain_id` = `t`.`chain_id`
+    and `b`.`height` = `t`.`height`))
 group by
     `b`.`chain_id`;

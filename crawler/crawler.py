@@ -9,6 +9,8 @@ import mysql.connector
 from mysql.connector import Error
 from dateutil.parser import parse as dateparse
 
+import amo
+
 # local config
 dbconfigfile = '../db/config.json'
 
@@ -29,16 +31,6 @@ def collect_block_headers(node, base, num):
     list.sort(metas, key=lambda val: int(val['header']['height']))
     return metas
 
-def format_block(dat):
-    # format
-    block = {}
-    block['chain_id'] = dat['header']['chain_id']
-    block['height'] = dat['header']['height']
-    block['time'] = dat['header']['time']
-    block['hash'] = dat['block_id']['hash']
-    block['num_txs'] = dat['header']['num_txs']
-    return block
-
 def save_block(block):
     #print(json.dumps(block))
     block['time'] = dateparse(block['time'])
@@ -53,26 +45,20 @@ def collect_block_txs(node, height):
     # collect txs
     r = requests.get(f'{node}/tx_search?query="tx.height={height}"')
     items = json.loads(r.text)['result']['txs']
-    print(f'non-empty block height {height}: num_txs = {len(items)}')
+    print(f'block height {height}: num_txs = {len(items)}')
     return items
-
-def format_tx(dat):
-    tx = {}
-    tx['hash'] = item['hash']
-    tx['height'] = item['height']
-    tx['index'] = item['index']
-    tx['code'] = item['tx_result']['code']
-    tx['info'] = item['tx_result']['info']
-    return tx
 
 def save_tx(chain_id, tx):
     tx['chain_id'] = chain_id
     cur.execute("""
         INSERT INTO `txs`
-            (`chain_id`, `hash`, `height`, `index`, `code`, `info`)
+            (`chain_id`, `hash`, `height`, `index`, `code`, `info`,
+            `type`, `sender`, `fee`, `payload`)
         VALUES
             (%(chain_id)s, %(hash)s,
-            %(height)s, %(index)s, %(code)s, %(info)s)""",
+            %(height)s, %(index)s, %(code)s, %(info)s,
+            %(type)s, %(sender)s, %(fee)s, %(payload)s
+            )""",
         (tx))
 
 # read config
@@ -137,16 +123,16 @@ while run > 0:
     print(f'==========================================================')
     metas = collect_block_headers(node, batch_base, batch_run)
     for meta in metas:
-        block = format_block(meta)
+        block = amo.format_block(meta)
         save_block(block)
 
         if int(block['num_txs']) > 0:
             items = collect_block_txs(node, block['height'])
             for item in items:
-                tx = format_tx(item)
+                tx = amo.format_tx(item)
                 save_tx(block['chain_id'], tx)
         else:
-            print(f'empty block height {block["height"]}')
+            print(f'block height {block["height"]}: empty')
     db.commit()
     run -= len(metas)
     batch_base += len(metas)
