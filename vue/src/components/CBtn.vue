@@ -17,6 +17,9 @@
         :large="large"
         :block="block"
 
+        :href="href"
+        target="target"
+
         v-on="$listeners"
     >
         <v-icon v-if="iconName&&!(this.$slots.default)" :color="iconColor">{{iconName}}</v-icon>

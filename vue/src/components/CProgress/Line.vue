@@ -3,10 +3,10 @@
          :style="{ width: this.width }"
     >
         <v-container v-if="type === '1'" class="top-text">
-            <v-layout row fill-height>
-                <span>title</span>
+            <v-layout row fill-height >
+                <span :style="{fontSize: this.fontSize}"> {{title}}</span>
                 <v-spacer></v-spacer>
-                <span>{{ value }}%</span>
+                <!--<span :style="{fontSize: this.fontSize}">{{ value }}</span>-->
             </v-layout>
             <v-layout row fill-height>
                 <svg
@@ -94,7 +94,7 @@ export default {
         },
         width: { // progress width
             type: String,
-            default: "100%"
+            default: "300px"
         },
         strokeWidth: { // progress stroke width
             type: String,
@@ -114,7 +114,7 @@ export default {
         },
         fontSize: { // progress value font size
             type: String,
-            default: "14"
+            default: "14px"
         },
         fontDynamicPosition: { // progress value position
             type: Boolean,
