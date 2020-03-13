@@ -27,13 +27,13 @@
                   </v-col>
                 </v-row>
               </v-col>
-              <v-col cols="12">
+              <v-col cols="12" md="8">
                 <v-row>
-                  <v-col cols="12" md="3" sm="6" class="py-0 px-lg-12 text-left">
+                  <v-col cols="12" md="6" sm="6" class="py-0 px-lg-12 text-left">
                     <span> Current voting configuration </span>
                   </v-col>
                   <v-spacer></v-spacer>
-                  <v-col cols="12" md="8" sm="6" class="py-0 px-lg-12 text-left subtitle-3">
+                  <v-col cols="12" md="6" sm="6" class="py-0 px-lg-12 text-right subtitle-3">
                     <div>
                       <span> waiting period (open_count) : </span>
                       <span>  {{ this.governanceStat.value3.toLocaleString() }} blks </span>
@@ -94,33 +94,33 @@
                   </v-col>
                 </v-row>
               </v-col>
-              <v-col cols="12">
+              <v-col cols="12" md="6">
                 <v-row>
-                  <v-col cols="12" md="2" sm="6" class="py-0 px-lg-12 text-left">
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
                     <span> Projected YEA : </span>
                   </v-col>
                   <v-spacer></v-spacer>
-                  <v-col cols="12" md="7" sm="6" class="py-0 px-lg-4 text-left subtitle-3">
+                  <v-col cols="12" md="6" class="py-0 px-lg-4 text-right subtitle-3">
                       <span> {{ this.$byteCalc(this.currentActiveDraft.value4) }} AMO </span>
                   </v-col>
                 </v-row>
                 <v-row>
-                  <v-col cols="12" md="2" sm="6" class="py-0 px-lg-12 text-left">
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
                     <span> Projected NAY : </span>
                   </v-col>
                   <v-spacer></v-spacer>
-                  <v-col cols="12" md="7" sm="6" class="py-0 px-lg-4 text-left subtitle-3">
+                  <v-col cols="12" md="6" class="py-0 px-lg-4 text-right subtitle-3">
                     <span> {{ this.$byteCalc(this.currentActiveDraft.value5) }} AMO </span>
                   </v-col>
                 </v-row>
                 <v-row>
-                  <v-col cols="12" md="2" sm="6" class="py-0 px-lg-12 text-left">
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
                     <span> Projected ABSENT : </span>
                   </v-col>
                   <v-spacer></v-spacer>
-                  <v-col cols="12" md="7" sm="6" class="py-0 px-lg-4 text-left subtitle-3">
+                  <v-col cols="12" md="6"class="py-0 px-lg-4 text-right subtitle-3">
                     <span> {{ this.$byteCalc(this.currentActiveDraft.value6) }} AMO </span>
-                    <span> (would be counted as BAY when closing vote)</span>
+                    <span>  <br class="hidden-md-and-up"> (would be counted as BAY when closing vote)</span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -191,18 +191,32 @@
 
       },
     }),
+    watch: {
+      '$store.state.network'() {
+        console.log('[Governance Page] 변경 된 network value', this.$store.state.network);
+        this.getPageData()
+      },
+    },
     computed:{
       tableBreakpoint(){
         return this.$store.state.tableBreakpoint
       },
       args(){
         return this.$store.state.args
+      },
+      network() {
+        return this.$store.state.network
       }
     },
     mounted() {
       this.reqData();
+      this.getPageData();
     },
     methods: {
+      async getPageData(){
+        // 데이터 바인딩
+        console.log('network val',this.network);
+      },
       async reqData() {
         // call api
         // try {
@@ -232,6 +246,7 @@
       },
       selectEvent(data){
         console.log('select arg : ',data);
+        this.getPageData();
       }
     }
   }

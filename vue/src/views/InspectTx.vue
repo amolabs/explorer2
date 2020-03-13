@@ -320,6 +320,27 @@
         value7: '9f2633241418630e7fe210a7fff0df891cbf2f53d833153b89c0a68017e1e40acfccb65c412c4fff39531234240fb825980a0b5d5db84f63977f020aebdaebff',
         value8: '??',
       }
+    },
+    watch: {
+      '$store.state.network'() {
+        console.log('[InspectTx Page] 변경 된 network value', this.$store.state.network);
+        this.getPageData()
+      },
+    },
+    computed: {
+      network() {
+        return this.$store.state.network
+      }
+    },
+    mounted() {
+      this.getPageData();
+    },
+    methods: {
+      async getPageData(){
+        // 데이터 바인딩
+        console.log(this.param.hash);
+        console.log('network val',this.network);
+      },
     }
   }
 </script>

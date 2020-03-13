@@ -96,13 +96,14 @@
               </template>
               <template #height="{item}">
                 <router-link :to="{ path: '/inspect/block/' + item.height, params : {block: item.height } }">{{ item.height }}</router-link>
-                <!--#D1C4E9-->
-                <!--<a href="#" style="text-decoration: none;color: #4CAF50"> {{ item.height }} </a>-->
-                <!--<v-chip style="cursor: pointer" color="#DCEDC8" target="#">{{ item.height }}</v-chip>-->
+                <!--<v-chip style="cursor: pointer" color="#DCEDC8" :to="{ path: '/inspect/block/' + item.height, params : {block: item.height } }">{{ item.height }}</v-chip>-->
               </template>
               <template #proposer="{item}">
                 <router-link class="d-inline-block text-truncate truncate-option"
                              :to="{ path: '/inspect/account/' + item.proposer, params: {account : item.proposer }}">{{ item.proposer }}</router-link>
+              </template>
+              <template #ofTxs="{item}">
+                <span> {{item.ofTxs.toLocaleString()}}</span>
               </template>
             </c-scroll-table>
           </c-card>
@@ -137,18 +138,35 @@
         recentBlocks: [],
       },
     }),
+    watch: {
+      '$store.state.network'() {
+        console.log('[Blocks Page] 변경 된 network value', this.$store.state.network);
+        this.getPageData()
+      },
+    },
     computed:{
+      // tableBreakpoint, args -> vuex에서 선언된 데이터 사용하기 위함.
       tableBreakpoint(){
         return this.$store.state.tableBreakpoint
       },
       args(){
         return this.$store.state.args
+      },
+      network() {
+        return this.$store.state.network
       }
     },
     mounted() {
       this.reqData();
+      this.getPageData();
     },
     methods: {
+      async getPageData(){
+        // 데이터 바인딩
+        console.log('network val',this.network);
+        console.log('arg ',this.arg);
+        // let res = this.$api.getTest_3(this.arg)
+      },
       async reqData() {
         // call api
         // try {
@@ -167,13 +185,15 @@
         const endIdx = parseInt(startIdx) + parseInt(this.perPage);
         let newData = [];
         for(let i=startIdx; i<endIdx; i++) {
-          newData.push({height: 123+i, timestamp: '2020-03-04 11:22:33', proposer: '73bae62d33bb942c914d85f9ed612ec8f5a0fa62', ofTxs: Number(123456).toLocaleString()});
+          newData.push({height: 123+i, timestamp: '2020-03-04 11:22:33', proposer: '73bae62d33bb942c914d85f9ed612ec8f5a0fa62', ofTxs:123453+i});
         }
         this.blockTable.recentBlocks = this.blockTable.recentBlocks.concat(newData);
         this.pageNum++;
       },
-      selectEvent(data){
-        console.log('select arg : ',data);
+      selectEvent(){
+        console.log('select arg : ', this.arg);
+        // 변경된 select 값으로 api 호출
+        this.getPageData()
       }
     }
   }

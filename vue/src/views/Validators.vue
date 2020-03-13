@@ -102,13 +102,13 @@
                   <v-col cols="12" class="py-0 px-lg-12 text-left text-lg-right subtitle-2">
                     <span class="hidden-lg-and-up">=</span>
                     <span> Average reward : </span>
-                    <br class="hidden-sm-and-up">
+                    <!--<br class="hidden-sm-and-up">-->
                     <span> {{ this.$byteCalc(this.value6) }} AMO /blk </span>
                   </v-col>
                   <v-col cols="12" class="py-0 px-lg-12 text-left text-lg-right subtitle-2"> + </v-col>
                   <v-col cols="12" class="py-0 px-lg-12  text-left text-lg-right subtitle-2">
                     <span> Average tx fee :</span>
-                    <br class="hidden-sm-and-up">
+                    <!--<br class="hidden-sm-and-up">-->
                     <span>  {{ this.$byteCalc(this.value7) }} AMO /blk </span>
                   </v-col>
                 </v-row>
@@ -210,18 +210,33 @@
 
       },
     }),
+    watch: {
+      '$store.state.network'() {
+        console.log('[Validators Page] 변경 된 network value', this.$store.state.network);
+        this.getPageData()
+      },
+    },
     computed:{
       tableBreakpoint(){
         return this.$store.state.tableBreakpoint
       },
       args(){
         return this.$store.state.args
+      },
+      network() {
+        return this.$store.state.network
       }
     },
     mounted() {
       this.reqData();
+      this.getPageData()
     },
     methods: {
+      async getPageData(){
+        // 데이터 바인딩
+        console.log('network val',this.network);
+        console.log('arg ',this.arg);
+      },
       async reqData() {
         // call api
         // try {
@@ -254,7 +269,9 @@
         this.pageNum++;
       },
       selectEvent(data){
+        console.log('network val',this.network);
         console.log('select arg : ',data);
+        this.getPageData();
       }
     }
   }

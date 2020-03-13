@@ -88,6 +88,27 @@
         value6:645.3455
       }
     },
+    watch: {
+      '$store.state.network'() {
+        console.log('[InspectValidator Page] 변경 된 network value', this.$store.state.network);
+        this.getPageData()
+      },
+    },
+    computed: {
+      network() {
+        return this.$store.state.network
+      }
+    },
+    mounted() {
+      this.getPageData();
+    },
+    methods: {
+      async getPageData(){
+        // 데이터 바인딩
+        console.log(this.param.address);
+        console.log('network val',this.network);
+      },
+    }
   }
 </script>
 

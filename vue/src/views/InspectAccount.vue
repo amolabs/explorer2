@@ -109,18 +109,30 @@
     watch: {
       '$route' (to, from) {
         this.param = this.$route.params;
-      }
+      },
+      '$store.state.network'() {
+        console.log('[InspectAccount Page] 변경 된 network value', this.$store.state.network);
+        this.getPageData()
+      },
     },
     computed: {
       tableBreakpoint(){
         return this.$store.state.tableBreakpoint
       },
+      network() {
+        return this.$store.state.network
+      }
     },
     mounted() {
       console.log('params', this.param);
       this.reqData();
+      this.getPageData();
     },
     methods: {
+      async getPageData(){
+        // 데이터 바인딩
+        console.log('network val',this.network);
+      },
       async reqData() {
         // call api
         // try {

@@ -87,6 +87,27 @@
         value6: 'active'
       }
     },
+    watch: {
+      '$store.state.network'() {
+        console.log('[InspectStorage Page] 변경 된 network value', this.$store.state.network);
+        this.getPageData()
+      },
+    },
+    computed: {
+      network() {
+        return this.$store.state.network
+      }
+    },
+    mounted() {
+      this.getPageData();
+    },
+    methods: {
+      async getPageData(){
+        // 데이터 바인딩
+        console.log(this.param.draftId);
+        console.log('network val',this.network);
+      },
+    }
   }
 </script>
 

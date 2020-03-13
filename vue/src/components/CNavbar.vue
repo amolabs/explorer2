@@ -17,12 +17,15 @@
                     </v-col>
                     <v-col cols="2">
                         <v-select
+                          @change="selectEvent"
                             class="ml-3"
-                            item-color="coinTeal"
+                            item-color="teal"
                             label="network"
                             single-line outlined hide-details dark dense
                             :items="menuItem"
                             :menu-props="{ top: false, offsetY: true, color : '#ffffff' }"
+                            v-model="network"
+
                         ></v-select>
 
                     </v-col>
@@ -40,6 +43,9 @@
                 <v-row class="hidden-md-and-up">
                     <v-col cols="12">
                         <v-row class="pt-5" align="center">
+                            <!--<v-col cols="1">-->
+                                <!--<v-app-bar-nav-icon style="color: white;padding-right: 20px" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>-->
+                            <!--</v-col>-->
                             <v-col cols="7" style="cursor: pointer">
                                 <v-row align="center">
                                     <v-img
@@ -58,9 +64,11 @@
                             <v-col cols="5">
                                 <v-row class="select-wrapper"  justify="end">
                                     <v-select
+                                      @change="selectEvent"
+                                      v-model="network"
                                         item-color="coinTeal"
                                         label="network"
-                                        single-line outlined hide-details dark dense clearable
+                                        single-line outlined hide-details dark dense
                                         :items="menuItem"
                                         :menu-props="{ top: false, offsetY: true, color : '#ffffff' }"
                                     ></v-select>
@@ -77,7 +85,7 @@
                 </v-row>
 
                 <v-row class="hidden-sm-and-down">
-                    <v-tabs background-color="transparent" grow slider-color="coinYellow" class="tab-option">
+                    <v-tabs background-color="transparent" grow slider-color="coinYellow" class="tab-option" slider-size="3">
                         <v-tab v-for="page in routes" :key="page.name" :to="page.path" @click="currentPage = page"
                                class="white--text tabs-item-font">
                             {{ page.name }}
@@ -86,7 +94,6 @@
                 </v-row>
             </v-container>
         </v-app-bar>
-
         <v-navigation-drawer v-model="drawer" app class="app-navibar" temporary>
             <v-list flat>
                 <v-list-item class="app-menu-item" v-for="page in routes" :key="page.name" :to="page.path"
@@ -112,33 +119,38 @@
             currentPage: {},
             menuItem: ['mainnet', 'testnet'],
             search: '',
+            network: 'testnet',
         }),
         components: {
             // Popup
         },
+        // computed: {
+        //     network() {
+        //         return this.$store.state.network
+        //     }
+        // },
         mounted() {
-            // this.$byteCalc('good');
             console.log('current page', this.$route);
             this.currentPage = this.$route;
 
             window.addEventListener('keyup', evt => {
                 // 자동완성
-                console.log(evt.keyCode);
+                // console.log(evt.keyCode);
                 if(this.search.length === 1){
                     if(evt.keyCode === 65) {
-                        this.search = 'account/'
+                        this.search = 'account:'
                     }
                     if(evt.keyCode === 66) {
-                        this.search = 'block/'
+                        this.search = 'block:'
                     }
                     if(evt.keyCode === 68) {
-                        this.search = 'draftId/'
+                        this.search = 'draftId:'
                     }
                     if(evt.keyCode === 84) {
-                        this.search = 'tx/'
+                        this.search = 'tx:'
                     }
                     if(evt.keyCode === 86) {
-                        this.search = 'validator/'
+                        this.search = 'validator/:'
                     }
                 }
 
@@ -151,6 +163,14 @@
         methods: {
             searchByKeyword() {
                 console.log(this.search);
+            //  TODO: api call
+            },
+            selectEvent() {
+                console.log('network item',this.network);
+
+                // network값 변경 후 vuex에 반영
+                this.$store.commit('network', this.network);
+
             }
         }
     }

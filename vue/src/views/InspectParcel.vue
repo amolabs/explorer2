@@ -71,6 +71,27 @@
         value3: '1c288b4619abd39538ad0e5bd683016863b7468b',
         value4: {'firstName':'John','lastName':'Smith','createdDate':'2016-12-18@07:53:34.740+0000'},
       }
+    },
+    watch: {
+      '$store.state.network'() {
+        console.log('[InspectParcel Page] 변경 된 network value', this.$store.state.network);
+        this.getPageData()
+      },
+    },
+    computed: {
+      network() {
+        return this.$store.state.network
+      }
+    },
+    mounted() {
+      this.getPageData();
+    },
+    methods: {
+      async getPageData() {
+        // 데이터 바인딩
+        console.log(this.param.parcelId);
+        console.log('network val', this.network);
+      },
     }
   }
 </script>

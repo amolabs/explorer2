@@ -137,18 +137,33 @@
         recentTxs: [],
       },
     }),
+    watch: {
+      '$store.state.network'() {
+        console.log('[Transaction Page] 변경 된 network value', this.$store.state.network);
+        this.getPageData()
+      },
+    },
     computed:{
       tableBreakpoint(){
         return this.$store.state.tableBreakpoint
       },
       args() {
         return this.$store.state.args
+      },
+      network() {
+        return this.$store.state.network
       }
     },
     mounted() {
       this.reqData();
+      this.getPageData()
     },
     methods: {
+      async getPageData(){
+        // 데이터 바인딩
+        console.log('network val',this.network);
+        console.log('arg ',this.arg);
+      },
       async reqData() {
         // call api
         // try {
@@ -181,6 +196,7 @@
       },
       selectEvent(data){
         console.log('select arg : ',data);
+        this.getPageData();
       }
     }
   }

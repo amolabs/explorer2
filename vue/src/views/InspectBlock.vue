@@ -124,10 +124,19 @@
 
       },
     }),
+    watch: {
+      '$store.state.network'() {
+        console.log('[InspectBlock Page] 변경 된 network value', this.$store.state.network);
+        this.reqBlockInfo()
+      },
+    },
     computed:{
       tableBreakpoint(){
         return this.$store.state.tableBreakpoint
       },
+      network() {
+        return this.$store.state.network
+      }
     },
     mounted() {
       this.reqBlockInfo();
@@ -136,8 +145,10 @@
     methods: {
       async reqBlockInfo() {
         console.log(this.$route.params);
+        console.log('network val',this.network);
         // axios
-        // method : get && params : this.$route.params
+        // method : get
+        // params : this.$route.params
         // response : bind to blockInfo
 
       },
