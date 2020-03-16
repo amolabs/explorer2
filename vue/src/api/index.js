@@ -8,6 +8,10 @@ const options = { headers: {
 } };
 
 export default {
+  getBlock(height) {
+    return axios.get(`${server}/chain/amo-testnet-200306/blocks/${height}`,
+      options)
+  },
 
   getTest_2() {
     return axios.get(`/api/test2`)

@@ -7,41 +7,41 @@
           <c-card class="text-center" title="Network Overview">
             <v-row>
               <v-col cols="12" md="6" class="py-2">
-                <v-row align="center">
-                  <v-col class="py-0 px-md-12 px-sm-5 text-right mobile-title" cols="12" sm="4" md="6">
+                <v-row align="start">
+                  <v-col class="py-0 px-md-5 px-sm-5 text-right mobile-title" cols="12" sm="4" md="6">
                     <span>Genesis Block</span>
                   </v-col>
-                  <v-col class="py-0 px-md-12 px-sm-5 text-left subtitle-2 mobile-content" cols="12" sm="8" md="6">
+                  <v-col class="py-0 px-md-5 px-sm-5 text-left subtitle-2 mobile-content" cols="12" sm="8" md="6">
                     <div>
-                      <router-link :to="{path: '/inspect/block/' + this.networkOverview.value1, param : {block : this.networkOverview.value1}}"> {{ this.networkOverview.value1.toLocaleString()}} </router-link>
+                      height <router-link :to="{path: '/inspect/block/' + this.networkOverview.genesisHeight, param : {block : this.networkOverview.genesisHeight}}"> {{this.networkOverview.genesisHeight.toLocaleString()}} </router-link>
                     </div>
                     <div>
-                      <span> (height {{this.networkOverview.value2}})</span>
+                      <span> ({{this.networkOverview.genesisTime}})</span>
                     </div>
                   </v-col>
                 </v-row>
               </v-col>
               <v-col cols="12" md="6" class="py-2">
-                <v-row align="center">
-                  <v-col class="py-0 px-md-12 px-sm-5 text-right mobile-title" cols="12" sm="4" md="6">
+                <v-row align="start">
+                  <v-col class="py-0 px-md-5 px-sm-5 text-right mobile-title" cols="12" sm="4" md="6">
                     <span class="">Last Block</span>
                   </v-col>
-                  <v-col class="py-0 px-md-12 px-sm-5 text-left subtitle-2  mobile-content" cols="12" sm="8" md="6">
+                  <v-col class="py-0 px-md-5 px-sm-5 text-left subtitle-2  mobile-content" cols="12" sm="8" md="6">
                     <div>
-                      <router-link :to="{path: '/blocks'}"> {{this.networkOverview.value3.toLocaleString()}}</router-link>
+                      height <router-link :to="{path: '/inspect/block/' + this.networkOverview.lastHeight, param : {block : this.networkOverview.lastHeight}}"> {{this.networkOverview.lastHeight.toLocaleString()}}</router-link>
                     </div>
                     <div>
-                      <span> (height {{this.networkOverview.value4}})</span>
+                      <span> ({{this.networkOverview.lastTime}})</span>
                     </div>
                   </v-col>
                 </v-row>
               </v-col>
               <v-col cols="12" md="12" class="py-2">
-                <v-row align="center">
-                  <v-col class="py-0 px-md-12 px-sm-5 text-right mobile-title" cols="12" sm="4" md="3">
+                <v-row align="start">
+                  <v-col class="py-0 px-md-5 px-sm-5 text-right mobile-title" cols="12" sm="4" md="3">
                     <span>Average Stat</span>
                   </v-col>
-                  <v-col class="py-0 px-md-12 px-sm-5 text-left subtitle-2 mobile-content " cols="12" sm="8" md="9" lg="6">
+                  <v-col class="py-0 px-md-5 px-sm-5 text-left subtitle-2 mobile-content " cols="12" sm="8" md="9" lg="6">
                     <div>
                       <span> block interval : </span>
                       <span class="ml-3"> {{Number(this.networkOverview.value5.toFixed(2)).toLocaleString()}} sec </span>
@@ -262,10 +262,10 @@
   export default {
     data: () => ({
       networkOverview: {
-        value1: 111324,
-        value2: '2020-03-31 11:11:11',
-        value3: 111222,
-        value4: '2020-03-31 11:11:11',
+        genesisHeight: 0,
+        genesisTime: 'not yet',
+        lastHeight: 0,
+        lastTime: 'not yet',
         value5: 997622.333,
         value6: 117.332323,
         value7: 12312312313212.123123
@@ -311,7 +311,7 @@
     watch: {
       // network 값이 변경되면 호출되는 함수
       '$store.state.network'() {
-        console.log('변경 된 network value', this.$store.state.network);
+        console.log('network changed:', this.$store.state.network);
         // 데이터 불러오기 위한 함수 호출
         this.getPageData()
       },
@@ -362,9 +362,15 @@
       async getPageData() {
         try {
           // 2. data에 있는 value 에 rendering 진행
-          console.log('network val',this.network);
-          const res = await this.$api.getTest_2();
-          console.log('res', res)
+          //console.log('network val',this.network);
+          var res;
+          res = await this.$api.getBlock(1);
+          this.networkOverview.genesisHeight = res.data.height;
+          this.networkOverview.genesisTime = res.data.time;
+          res = await this.$api.getBlock(0);
+          this.networkOverview.lastHeight = res.data.height;
+          this.networkOverview.lastTime = res.data.time;
+          //console.log('res', res)
         } catch (e) {
           console.log('error', e);
         }
