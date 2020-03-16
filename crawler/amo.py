@@ -10,10 +10,11 @@ def format_block(dat):
     # format
     block = {}
     block['chain_id'] = dat['header']['chain_id']
-    block['height'] = dat['header']['height']
+    block['height'] = int(dat['header']['height'])
     block['time'] = dateparse(dat['header']['time']).astimezone(tz=timezone.utc)
     block['hash'] = dat['block_id']['hash']
-    block['num_txs'] = dat['header']['num_txs']
+    block['num_txs'] = int(dat['header']['num_txs'])
+    block['proposer'] = dat['header']['proposer_address']
     return block
 
 def format_tx(dat):

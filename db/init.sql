@@ -6,6 +6,8 @@ CREATE TABLE `blocks` (
   `time` datetime(6) NOT NULL DEFAULT current_timestamp(6),
   `hash` char(64) DEFAULT NULL,
   `num_txs` int(11) NOT NULL,
+  `interval` float NOT NULL DEFAULT 0,
+  `proposer` char(40) NOT NULL,
   PRIMARY KEY (`chain_id`,`height`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -37,11 +39,9 @@ select
     `b`.`chain_id` AS `chain_id`,
     max(`b`.`height`) AS `height`,
     count(distinct `b`.`hash`) AS `num_blocks`,
-    count(distinct `t`.`hash`) AS `num_txs`
+    sum(`b`.`num_txs`) AS `num_txs`,
+    avg(`b`.`interval`) AS `avg_interval`
 from
-    (`explorer`.`blocks` `b`
-left join `explorer`.`txs` `t` on
-    (`b`.`chain_id` = `t`.`chain_id`
-    and `b`.`height` = `t`.`height`))
+    `explorer`.`blocks` `b`
 group by
     `b`.`chain_id`;

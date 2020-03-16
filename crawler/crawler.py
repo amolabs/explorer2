@@ -35,18 +35,32 @@ def save_block(block):
     #print(json.dumps(block))
     dt = block['time'].astimezone(tz=timezone.utc)
     block['time'] = dt.replace(tzinfo=None).isoformat()
+
+    block['interval'] = 0
+    if block['height'] == 1:
+        block['interval'] = 0
+    else:
+        cur.execute(f"""SELECT `time` FROM `blocks`
+            WHERE `height` = {block["height"] - 1}""")
+        row = cur.fetchone()
+        # TODO exception handling
+        prev = row[0].replace(tzinfo=timezone.utc)
+        block['interval'] = (dt - prev).total_seconds()
+
     cur.execute("""
         INSERT INTO `blocks`
-            (`chain_id`, `height`, `time`, `hash`, `num_txs`)
+            (`chain_id`, `height`, `time`, `hash`, `num_txs`,
+                `interval`, `proposer`)
         VALUES
-            (%(chain_id)s, %(height)s, %(time)s, %(hash)s, %(num_txs)s)""",
+            (%(chain_id)s, %(height)s, %(time)s, %(hash)s, %(num_txs)s,
+            %(interval)s, %(proposer)s)""",
         (block))
 
 def collect_block_txs(node, height):
     # collect txs
     r = requests.get(f'{node}/tx_search?query="tx.height={height}"')
     items = json.loads(r.text)['result']['txs']
-    print(f'block height {height}: num_txs = {len(items)}')
+    print(f'- block height {height}: num_txs = {len(items)}')
     return items
 
 def save_tx(chain_id, tx):
@@ -115,13 +129,15 @@ if limit > 0:
 else:
     run = target_height - last_height
 
+print(f'==========================================================')
 batch_base = last_height
 while run > 0:
     # XXX: This limit is due to the limit of tendermint rpc.
     batch_run = min(run,20)
-    # one batch
+    # batch start
     db.autocommit = False
-    print(f'==========================================================')
+
+    # collect raw data
     metas = collect_block_headers(node, batch_base, batch_run)
     for meta in metas:
         block = amo.format_block(meta)
@@ -132,13 +148,15 @@ while run > 0:
             for item in items:
                 tx = amo.format_tx(item)
                 save_tx(block['chain_id'], tx)
-        else:
-            print(f'block height {block["height"]}: empty')
+
+    # update stat
+    # done
+
     db.commit()
+    # batch end
+
     run -= len(metas)
     batch_base += len(metas)
-
-# update stat
 
 # closing
 cur.close()
