@@ -18,7 +18,7 @@ app.use(cookieParser());
 app.use(cors({origin: 'http://localhost:8080', optionsSuccessStatus: 200}));
 
 app.param('chain_id', function(req, res, next, val) {
-  console.log('chain_id');
+  //console.log('chain_id');
   res.locals.chain_id = val;
   next();
 });

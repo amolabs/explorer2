@@ -1,9 +1,5 @@
 <template>
   <div id="page-dashboard">
-    <!-- 증감표시 확인위해 사용한 버튼 -> test 필요하지 않을경우 삭제-->
-    <v-btn @click="watchTest">aaa</v-btn>
-    <v-btn @click="watchTest1">bbb</v-btn>
-
     <v-container>
       <!--Network overview-->
       <v-row align="center" justify="space-between">
