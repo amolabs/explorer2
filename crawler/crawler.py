@@ -7,7 +7,7 @@ import argparse
 import requests
 import mysql.connector
 from mysql.connector import Error
-from dateutil.parser import parse as dateparse
+from datetime import timezone
 
 import amo
 
@@ -33,7 +33,8 @@ def collect_block_headers(node, base, num):
 
 def save_block(block):
     #print(json.dumps(block))
-    block['time'] = dateparse(block['time'])
+    dt = block['time'].astimezone(tz=timezone.utc)
+    block['time'] = dt.replace(tzinfo=None).isoformat()
     cur.execute("""
         INSERT INTO `blocks`
             (`chain_id`, `height`, `time`, `hash`, `num_txs`)

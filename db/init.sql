@@ -3,7 +3,7 @@
 CREATE TABLE `blocks` (
   `chain_id` char(32) NOT NULL,
   `height` int(11) NOT NULL,
-  `time` datetime DEFAULT NULL,
+  `time` datetime(6) NOT NULL DEFAULT current_timestamp(6),
   `hash` char(64) DEFAULT NULL,
   `num_txs` int(11) NOT NULL,
   PRIMARY KEY (`chain_id`,`height`)

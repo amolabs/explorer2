@@ -3,13 +3,15 @@
 
 import json
 import base64
+from datetime import timezone
+from dateutil.parser import parse as dateparse
 
 def format_block(dat):
     # format
     block = {}
     block['chain_id'] = dat['header']['chain_id']
     block['height'] = dat['header']['height']
-    block['time'] = dat['header']['time']
+    block['time'] = dateparse(dat['header']['time']).astimezone(tz=timezone.utc)
     block['hash'] = dat['block_id']['hash']
     block['num_txs'] = dat['header']['num_txs']
     return block
