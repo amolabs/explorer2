@@ -12,17 +12,17 @@
                     <span> Height </span>
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span> {{ this.value1.toLocaleString() }} </span>
+                    <span> {{ block.height.toLocaleString() }} </span>
                   </v-col>
                 </v-row>
               </v-col>
               <v-col cols="12" md="6">
                 <v-row align="center">
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
-                    <span> Timestamp </span>
+                    <span> Time </span>
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span> {{ this.value2 }} </span>
+                    <span> {{ block.time }} </span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -32,7 +32,7 @@
                     <span> Block hash </span>
                   </v-col>
                   <v-col cols="12" md="8" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span class="truncate-option-box"> {{ this.value3 }}</span>
+                    <span class="truncate-option-box"> {{ block.hash }}</span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -42,7 +42,7 @@
                     <span> Tx bytes </span>
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span> {{this.$byteCalc(this.value4)}} </span>
+                    <span> {{$byteCalc(block.txBytes) + 'B'}} </span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -52,7 +52,7 @@
                     <span> Proposer </span>
                   </v-col>
                   <v-col cols="12" md="8" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span class="truncate-option-box"> {{ this.value5 }}</span>
+                    <span class="truncate-option-box"> {{ block.proposer }}</span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -62,7 +62,7 @@
                     <span> # of txs </span>
                   </v-col>
                   <v-col cols="12" md="8" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span>{{ this.arg1.toLocaleString() }} (valid {{this.arg2.toLocaleString()}}+invalid {{this.arg3.toLocaleString()}})</span>
+                    <span>{{ block.numTxs.toLocaleString() }} ({{block.numTxsValid.toLocaleString()}} valid + {{block.numTxsInvalid.toLocaleString()}} invalid)</span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -77,11 +77,11 @@
         <v-col cols="12">
           <c-card class="text-center" title="Included txs" outlined>
             <c-scroll-table
-              :headers="blockTable.headers"
+              :headers="txTable.headers"
               itemKey="name"
-              :items="blockTable.recentBlocks"
+              :items="txTable.txList"
               height="500"
-              @loadMore="reqData"
+              @loadMore="reqTxTableData"
               :mobile-breakpoint="tableBreakpoint"
             >
               <template #hash="{item}">
@@ -103,31 +103,34 @@
 <script>
   export default {
     data: () => ({
-      value1: 342,
-      value2: '2020-03-04 11:22:33',
-      value3: '9917c981107a5c7a05e171d61bfaed6046fcf1792da7fabf3fe1dbbd2eed7452',
-      value4: 3433334.235,
-      value5: '73bae62d33bb942c914d85f9ed612ec8f5a0fa62',
-      arg1: 123456,
-      arg2: 234567,
-      arg3: 987654,
-      pageNum: 1,
-      perPage: 50,
-      blockTable: {
+      // NOTE: don't use 'this' in here.
+      block: {
+        height: 0,
+        time: '-',
+        hash: '-',
+        txBytes: 0,
+        proposer: '-',
+        numTxs: 0,
+        numTxsValid: 0,
+        numTxsInvalid: 0,
+      },
+      txTable: {
         headers: [
           { text: 'hash',align: 'center',  value: 'hash' },
           { text: 'sender',align: 'center',  value: 'sender' },
           { text: 'type', align: 'center',  value: 'type' },
           { text: 'result', align: 'center', value: 'result' },
         ],
-        recentBlocks: [],
-
+        txList: [],
+        pageNum: 1,
+        perPage: 50,
       },
     }),
     watch: {
       '$store.state.network'() {
-        console.log('[InspectBlock Page] 변경 된 network value', this.$store.state.network);
-        this.reqBlockInfo()
+        console.debug('network changed:', this.$store.state.network);
+        this.reqBlockData()
+        this.reqTxTableData();
       },
     },
     computed:{
@@ -139,26 +142,24 @@
       }
     },
     mounted() {
-      this.reqBlockInfo();
-      this.reqTableData();
+      this.reqBlockData();
+      this.reqTxTableData();
     },
     methods: {
-      async reqBlockInfo() {
-        console.log(this.$route.params);
-        console.log('network val',this.network);
-        // axios
-        // method : get
-        // params : this.$route.params
-        // response : bind to blockInfo
-
+      async reqBlockData() {
+        try {
+          this.block = await this.$api.getBlock(this.$route.params.height);
+        } catch (e) {
+          console.log(e);
+        }
       },
-      async reqTableData() {
-        // call api
-        // try {
-        //     const res = await axios.get('http://192.168.23.50:3000/api/test2', {params: {pagenum: this.pageNum, perpage: this.perPage}});
+      async reqTxTableData() {
+        this.txTable.txList = [];
+        //console.log('get tx table data', this.txTable);
+        //axios.get('http://192.168.23.50:3000/api/test2', {params: {pagenum: this.pageNum, perpage: this.perPage}});
         //     console.log(res);
         //     if(res.data && res.data.result && res.data.result.length > 0) {
-        //         this.blockTable.recentBlocks = this.blockTable.recentBlocks.concat(res.data.result);
+        //         this.txTable.txList = this.txTable.txList.concat(res.data.result);
         //         this.pageNum++;
         //     }
         // } catch(err) {
@@ -166,19 +167,18 @@
         // }
 
         // res.data.result format
-        const axoisResponse = [
-          {'hash':123, 'sender': '2020-03-04 11:22:33', 'type':123123,'result': 123456},
-        ];
-
+        // const axoisResponse = [
+        //   {'hash':123, 'sender': '2020-03-04 11:22:33', 'type':123123,'result': 123456},
+        // ];
         // add data
-        const startIdx = (this.pageNum-1) * this.perPage;
-        const endIdx = parseInt(startIdx) + parseInt(this.perPage);
-        let newData = [];
-        for(let i=startIdx; i<endIdx; i++) {
-          newData.push({hash: '9917c981107a5c7a05e171d61bfaed6046fcf1792da7fabf3fe1dbbd2eed1111', sender: '73bae62d33bb942c914d85f9ed612ec8f5a0fa62', type: 'reject', result : 'OK'});
-        }
-        this.blockTable.recentBlocks = this.blockTable.recentBlocks.concat(newData);
-        this.pageNum++;
+        // const startIdx = (this.pageNum-1) * this.perPage;
+        // const endIdx = parseInt(startIdx) + parseInt(this.perPage);
+        // let newData = [];
+        // for(let i=startIdx; i<endIdx; i++) {
+        //   newData.push({hash: '9917c981107a5c7a05e171d61bfaed6046fcf1792da7fabf3fe1dbbd2eed1111', sender: '73bae62d33bb942c914d85f9ed612ec8f5a0fa62', type: 'reject', result : 'OK'});
+        // }
+        // this.txTable.txList = this.txTable.txList.concat(newData);
+        // this.pageNum++;
       },
     }
   }

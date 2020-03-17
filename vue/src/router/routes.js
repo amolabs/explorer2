@@ -34,7 +34,7 @@ const routes = [
         component : InspectBlank
       },
       {
-        path: 'block/:block',
+        path: 'block/:height',
         props : true,
         component: InspectBlock
       },

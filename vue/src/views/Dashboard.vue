@@ -13,7 +13,7 @@
                   </v-col>
                   <v-col class="py-0 px-md-5 px-sm-5 text-left subtitle-2 mobile-content" cols="12" sm="8" md="6">
                     <div>
-                      height <router-link :to="{path: '/inspect/block/' + this.networkOverview.genesisHeight, param : {block : this.networkOverview.genesisHeight}}"> {{this.networkOverview.genesisHeight.toLocaleString()}} </router-link>
+                      height <router-link :to="{path: '/inspect/block/' + this.networkOverview.genesisHeight, param : {height : this.networkOverview.genesisHeight}}"> {{this.networkOverview.genesisHeight.toLocaleString()}} </router-link>
                     </div>
                     <div>
                       <span> ({{this.networkOverview.genesisTime}})</span>
@@ -28,7 +28,7 @@
                   </v-col>
                   <v-col class="py-0 px-md-5 px-sm-5 text-left subtitle-2  mobile-content" cols="12" sm="8" md="6">
                     <div>
-                      height <router-link :to="{path: '/inspect/block/' + this.networkOverview.lastHeight, param : {block : this.networkOverview.lastHeight}}"> {{this.networkOverview.lastHeight.toLocaleString()}}</router-link>
+                      height <router-link :to="{path: '/inspect/block/' + this.networkOverview.lastHeight, param : {height : this.networkOverview.lastHeight}}"> {{this.networkOverview.lastHeight.toLocaleString()}}</router-link>
                     </div>
                     <div>
                       <span> ({{this.networkOverview.lastTime}})</span>
@@ -365,11 +365,11 @@
           //console.log('network val',this.network);
           var res;
           res = await this.$api.getBlock(1);
-          this.networkOverview.genesisHeight = res.data.height;
-          this.networkOverview.genesisTime = res.data.time;
+          this.networkOverview.genesisHeight = res.height;
+          this.networkOverview.genesisTime = res.time;
           res = await this.$api.getBlock(0);
-          this.networkOverview.lastHeight = res.data.height;
-          this.networkOverview.lastTime = res.data.time;
+          this.networkOverview.lastHeight = res.height;
+          this.networkOverview.lastTime = res.time;
           //console.log('res', res)
         } catch (e) {
           console.log('error', e);
