@@ -9,7 +9,7 @@ async function getBlock(chain_id, height) {
       query_str = "select * from blocks where (chain_id = ?) order by height desc limit 1";
       query_var = [chain_id];
     } else {
-      query_str = "select * from blocks where (chain_id = ?) and (height = ?)";
+      query_str = "select * from blocks where (chain_id = ?) and (height = ?) limit 1";
       query_var = [chain_id, height];
     }
     db.query(query_str, query_var, function (err, rows, fields) {

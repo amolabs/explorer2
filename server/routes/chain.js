@@ -39,7 +39,7 @@ router.get('/blocks/:height([0-9]+)', function(req, res) {
       if (rows.length > 0) {
         res.send(rows[0]);
       } else {
-        // TODO: 404
+        res.status(404);
         res.send('not found');
       }
     })
