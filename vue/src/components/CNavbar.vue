@@ -130,7 +130,7 @@
     //     }
     // },
     mounted() {
-      console.log('current page', this.$route);
+      console.debug('current page', this.$route);
       this.currentPage = this.$route;
 
       window.addEventListener('keyup', evt => {
@@ -162,11 +162,11 @@
     },
     methods: {
       searchByKeyword() {
-        console.log(this.search);
+        console.debug(this.search);
         //  TODO: api call
       },
       selectEvent() {
-        console.log('network item',this.network);
+        console.debug('network item',this.network);
 
         // network값 변경 후 vuex에 반영
         this.$store.commit('network', this.network);

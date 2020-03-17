@@ -343,26 +343,8 @@
       this.coinsAndStakes.value13_percentage = this.coinsAndStakes.value13 / this.coinsAndStakes.value11 * 100;
     },
     methods: {
-      async watchTest() {
-        try{
-          const res = await this.$api.watchTest();
-          this.validators.value8 = res.data.val;
-        } catch (e) {
-          console.log(e)
-        }
-      },
-      async watchTest1() {
-        try{
-          const res = await this.$api.watchTest();
-          this.validators.value8 = 234234;
-        } catch (e) {
-          console.log(e)
-        }
-      },
       async getPageData() {
         try {
-          // 2. data에 있는 value 에 rendering 진행
-          //console.log('network val',this.network);
           var res;
           res = await this.$api.getBlock(1);
           this.networkOverview.genesisHeight = res.height;
