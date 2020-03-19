@@ -1,15 +1,23 @@
 /* vim: set sw=2 ts=2 expandtab : */
 var express = require('express');
 var router = express.Router();
+const chain = require('../models/chain');
 const block = require('../models/block');
 
 router.get('/', function(req, res) {
   const chain_id = res.locals.chain_id;
-  var chain_summary = {
-    desc: 'chain summary',
-    chain_id: chain_id,
-  };
-  res.send(JSON.stringify(chain_summary));
+  chain(chain_id)
+    .then((rows) => {
+      if (rows.length > 0) {
+        res.send(rows[0]);
+      } else {
+        res.status(404);
+        res.send('not found');
+      }
+    })
+    .catch((err) => {
+      res.send(err);
+    });
 });
 
 router.get('/blocks', function(req, res) {
