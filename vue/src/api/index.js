@@ -27,6 +27,10 @@ export default {
       options)
       .then(res => {
         var chain = camelcaseKeys(res.data); 
+        if (!chain.avgInterval) chain.Interval = 0;
+        if (!chain.avgIncentive) chain.avgIncentive = 0;
+        if (!chain.avgNumTxs) chain.avgNumTxs = 0;
+        if (!chain.avgTxBytes) chain.avgTxBytes = 0;
         if (!chain.avgTxFee) chain.avgTxFee = 0;
         return Promise.resolve(chain);
       });

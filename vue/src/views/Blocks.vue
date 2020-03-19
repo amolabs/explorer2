@@ -10,7 +10,7 @@
                 <v-select
                   style="max-width:90px;display:inline-flex"
                   :items="args"
-                  v-model="arg"
+                  v-model="statRange"
                   menu-props="offsetY"
                   dense
                   class="pa-0"
@@ -18,7 +18,7 @@
                   @change="selectEvent"
                 ></v-select>
               </span>
-              blockTable
+              blocks
             </div>
             <v-row>
               <v-col cols="12" md="6">
@@ -28,7 +28,7 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <span> {{ Number(this.value1.toFixed(2)).toLocaleString() }} sec /blk</span>
+                      <span> {{ Number(this.chainSummary.avgInterval.toFixed(2)).toLocaleString() }} sec / blk</span>
                     </div>
                   </v-col>
                 </v-row>
@@ -40,7 +40,7 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <span> {{ this.$byteCalc(this.value2)  }} AMO /blk</span>
+                      <span> {{ this.$byteCalc(this.chainSummary.avgIncentive)  }} AMO / blk</span>
                     </div>
                   </v-col>
                 </v-row>
@@ -52,7 +52,7 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <span> {{ Number(this.value3.toFixed(2)).toLocaleString() }} txs /blk </span>
+                      <span> {{ Number(this.chainSummary.avgNumTxs.toFixed(2)).toLocaleString() }} txs / blk </span>
                     </div>
                   </v-col>
                 </v-row>
@@ -64,7 +64,7 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <span> {{ this.$byteCalc(this.value4) }} /blk</span>
+                      <span> {{ this.$byteCalc(this.chainSummary.avgTxBytes) + 'B' }} / blk</span>
                     </div>
                   </v-col>
                 </v-row>
@@ -83,9 +83,9 @@
             <c-scroll-table
               :headers="blockTable.headers"
               itemKey="name"
-              :items="blockTable.recentBlocks"
+              :items="blockTable.blockList"
               height="500"
-              @loadMore="reqData"
+              @loadMore="reqBlockTableData"
               :mobile-breakpoint="tableBreakpoint"
             >
               <template #timestamp="{item}">
@@ -116,12 +116,13 @@
 <script>
   export default {
     data: () => ({
-      // responseData: {},
-      value1: 123456.1234,
-      value2: 2222222.12345,
-      value3: 234222.35432,
-      value4: 222234.33,
-      arg:100,
+      chainSummary: {
+        avgInterval: 0,
+        avgIncentive: 0,
+        avgNumTxs: 0,
+        avgTxBytes: 222234.33,
+      },
+      statRange:100,
       pageNum: 1,
       perPage: 50,
       blockTable: {
@@ -135,7 +136,7 @@
           { text: 'proposer', align: 'center',  value: 'proposer' },
           { text: '# of txs', align: 'center', value: 'ofTxs' },
         ],
-        recentBlocks: [],
+        blockList: [],
       },
     }),
     watch: {
@@ -157,23 +158,25 @@
       }
     },
     mounted() {
-      this.reqData();
       this.getPageData();
+      this.reqBlockTableData();
     },
     methods: {
       async getPageData(){
-        // 데이터 바인딩
-        console.log('network val',this.network);
-        console.log('arg ',this.arg);
-        // let res = this.$api.getTest_3(this.arg)
+        try {
+          this.chainSummary = await this.$api.getChain();
+        } catch (e) {
+          console.log(e);
+        }
       },
-      async reqData() {
+      async reqBlockTableData() {
+        this.blockTable.blockList = [];
         // call api
         // try {
         //     const res = await axios.get('http://192.168.23.50:3000/api/test2', {params: {pagenum: this.pageNum, perpage: this.perPage}});
         //     console.log(res);
         //     if(res.data && res.data.result && res.data.result.length > 0) {
-        //         this.blockTable.recentBlocks = this.blockTable.recentBlocks.concat(res.data.result);
+        //         this.blockTable.blockList = this.blockTable.blockList.concat(res.data.result);
         //         this.pageNum++;
         //     }
         // } catch(err) {
@@ -181,17 +184,17 @@
         // }
 
         // add data
-        const startIdx = (this.pageNum-1) * this.perPage;
-        const endIdx = parseInt(startIdx) + parseInt(this.perPage);
-        let newData = [];
-        for(let i=startIdx; i<endIdx; i++) {
-          newData.push({height: 123+i, timestamp: '2020-03-04 11:22:33', proposer: '73bae62d33bb942c914d85f9ed612ec8f5a0fa62', ofTxs:123453+i});
-        }
-        this.blockTable.recentBlocks = this.blockTable.recentBlocks.concat(newData);
-        this.pageNum++;
+        // const startIdx = (this.pageNum-1) * this.perPage;
+        // const endIdx = parseInt(startIdx) + parseInt(this.perPage);
+        // let newData = [];
+        // for(let i=startIdx; i<endIdx; i++) {
+        //   newData.push({height: 123+i, timestamp: '2020-03-04 11:22:33', proposer: '73bae62d33bb942c914d85f9ed612ec8f5a0fa62', ofTxs:123453+i});
+        // }
+        // this.blockTable.blockList = this.blockTable.blockList.concat(newData);
+        // this.pageNum++;
       },
       selectEvent(){
-        console.log('select arg : ', this.arg);
+        console.log('select statRange : ', this.statRange);
         // 변경된 select 값으로 api 호출
         this.getPageData()
       }
