@@ -44,15 +44,15 @@
                   <v-col class="py-0 px-md-5 px-sm-5 text-left subtitle-2 mobile-content " cols="12" sm="8" md="9" lg="6">
                     <div>
                       <span> block interval : </span>
-                      <span class="ml-3"> {{Number(this.networkOverview.value5.toFixed(2)).toLocaleString()}} sec </span>
+                      <span class="ml-3"> {{Number(this.networkOverview.avgInterval.toFixed(2)).toLocaleString()}} sec </span>
                     </div>
                     <div>
                       <span> no. of txs per block : </span>
-                      <span class="ml-3"> {{Number(this.networkOverview.value6.toFixed(2)).toLocaleString()}} /blk </span>
+                      <span class="ml-3"> {{Number(this.networkOverview.numTxsPerBlock.toFixed(2)).toLocaleString()}} /blk </span>
                     </div>
                     <div >
                       <span> transaction fee : </span>
-                      <span class="ml-3">  {{ this.$byteCalc(this.networkOverview.value7) }} AMO</span>
+                      <span class="ml-3">  {{ this.$byteCalc(this.networkOverview.avgTxFee) }} AMO</span>
                     </div>
                   </v-col>
                 </v-row>
@@ -266,9 +266,9 @@
         genesisTime: 'not yet',
         lastHeight: 0,
         lastTime: 'not yet',
-        value5: 997622.333,
-        value6: 117.332323,
-        value7: 12312312313212.123123
+        avgInterval: 0,
+        numTxsPerBlock: 117.332323,
+        avgTxFee: 12312312313212.123123
       },
       validators: {
         value8 : 323423423200.456456,
@@ -346,11 +346,16 @@
       async getPageData() {
         try {
           var res;
+          res = await this.$api.getChain();
+          var height = res.height;
+          this.networkOverview.avgInterval = res.avgInterval;
+          this.networkOverview.numTxsPerBlock = res.numTxs / height;
+          this.networkOverview.avgTxFee = res.avgTxFee;
           res = await this.$api.getBlock(1);
           this.networkOverview.genesisHeight = res.height;
           this.networkOverview.genesisTime = res.time;
-          res = await this.$api.getBlock(0);
-          this.networkOverview.lastHeight = res.height;
+          res = await this.$api.getBlock(height);
+          this.networkOverview.lastHeight = res.height; // = getChain().height
           this.networkOverview.lastTime = res.time;
           //console.log('res', res)
         } catch (e) {

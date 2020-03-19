@@ -21,4 +21,14 @@ export default {
         return Promise.resolve(block);
       });
   },
+
+  getChain() {
+    return axios.get(`${server}/chain/amo-testnet-200306`,
+      options)
+      .then(res => {
+        var chain = camelcaseKeys(res.data); 
+        if (!chain.avgTxFee) chain.avgTxFee = 0;
+        return Promise.resolve(chain);
+      });
+  },
 }
