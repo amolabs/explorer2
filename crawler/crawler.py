@@ -23,6 +23,16 @@ p.add_argument("-l", "--limit", help="limit number of blocks to collect",
 args = p.parse_args()
 node = args.node
 
+def collect_block(node, height):
+    r = requests.get(f'{node}/block?height={height}')
+    block = json.loads(r.text)['result']
+    if int(block['block_meta']['header']['num_txs']) > 0:
+        r = requests.get(f'{node}/block_results?height={height}')
+        block_results = json.loads(r.text)['result']['results']['deliver_tx']
+    else:
+        block_results = []
+    return block['block_meta'], block['block']['data']['txs'], block_results
+
 def collect_block_headers(node, base, num):
     print(f'batch height from {base+1} to {base+num}')
     r = requests.get(
@@ -31,50 +41,12 @@ def collect_block_headers(node, base, num):
     list.sort(metas, key=lambda val: int(val['header']['height']))
     return metas
 
-def save_block(block):
-    #print(json.dumps(block))
-    dt = block['time'].astimezone(tz=timezone.utc)
-    block['time'] = dt.replace(tzinfo=None).isoformat()
-
-    block['interval'] = 0
-    if block['height'] == 1:
-        block['interval'] = 0
-    else:
-        cur.execute(f"""SELECT `time` FROM `blocks`
-            WHERE `height` = {block["height"] - 1}""")
-        row = cur.fetchone()
-        # TODO exception handling
-        prev = row[0].replace(tzinfo=timezone.utc)
-        block['interval'] = (dt - prev).total_seconds()
-
-    cur.execute("""
-        INSERT INTO `blocks`
-            (`chain_id`, `height`, `time`, `hash`, `num_txs`,
-                `interval`, `proposer`)
-        VALUES
-            (%(chain_id)s, %(height)s, %(time)s, %(hash)s, %(num_txs)s,
-            %(interval)s, %(proposer)s)""",
-        (block))
-
 def collect_block_txs(node, height):
     # collect txs
     r = requests.get(f'{node}/tx_search?query="tx.height={height}"')
     items = json.loads(r.text)['result']['txs']
     print(f'- block height {height}: num_txs = {len(items)}')
     return items
-
-def save_tx(chain_id, tx):
-    tx['chain_id'] = chain_id
-    cur.execute("""
-        INSERT INTO `txs`
-            (`chain_id`, `hash`, `height`, `index`, `code`, `info`,
-            `type`, `sender`, `fee`, `payload`)
-        VALUES
-            (%(chain_id)s, %(hash)s,
-            %(height)s, %(index)s, %(code)s, %(info)s,
-            %(type)s, %(sender)s, %(fee)s, %(payload)s
-            )""",
-        (tx))
 
 # read config
 try:
@@ -131,33 +103,76 @@ else:
 
 print(f'==========================================================')
 batch_base = last_height
-while run > 0:
-    # XXX: This limit is due to the limit of tendermint rpc.
-    batch_run = min(run,20)
+#while run > 0:
+for h in range(last_height + 1, last_height + run + 1):
     # batch start
     db.autocommit = False
 
+    ### NOTE: the following strategy is effective when tx density is high.
+    if h % 50 == 0:
+        print('.', flush=True)
+    else:
+        print('.', end='', flush=True)
+    if h % 100 == 0:
+        print(f'block height {h}', flush=True)
+    block_meta, tx_bodies, block_results = collect_block(node, h)
+    block = amo.Block(block_meta['header']['chain_id'], h)
+    block.set_meta(block_meta)
+    #if tx_bodies == None:
+    #    tx_bodies = []
+    #if block_results == None:
+    #    block_results = []
+    #if len(tx_bodies) != len(block_results):
+    #    print(f'tx bodies and block results mismatches')
+    #    exit(-1)
+    block.save(cur)
+    num = 0
+    num_valid = 0
+    num_invalid = 0
+    for i in range(len(tx_bodies) if tx_bodies else 0):
+        body = tx_bodies[i]
+        result = block_results[i]
+        tx = amo.Tx(block.chain_id, block.height, i)
+        tx.set_body(body)
+        tx.set_result(result)
+        if result['code'] == 0:
+            num_valid += 1
+        else:
+            num_invalid += 1
+        num += 1
+        #pprint(vars(tx))
+        tx.save(cur)
+
+    assert(block.num_txs == num)
+    if num_valid > 0 or num_invalid > 0:
+        block.num_txs_valid = num_valid
+        block.num_txs_invalid = num_invalid
+        block.update(cur)
+
+    ### NOTE: the following strategy is effective when tx density is low.
+
+    # XXX: This limit is due to the limit of tendermint rpc.
+    #batch_run = min(run,20)
     # collect raw data
-    metas = collect_block_headers(node, batch_base, batch_run)
-    for meta in metas:
-        block = amo.format_block(meta)
-        save_block(block)
-
-        if int(block['num_txs']) > 0:
-            items = collect_block_txs(node, block['height'])
-            for item in items:
-                tx = amo.format_tx(item)
-                save_tx(block['chain_id'], tx)
-
+    #metas = collect_block_headers(node, batch_base, batch_run)
+    #for meta in metas:
+    #    block = amo.format_block(meta)
+    #    save_block(block)
+    #    if int(block['num_txs']) > 0:
+    #        items = collect_block_txs(node, block['height'])
+    #        for item in items:
+    #            tx = amo.format_tx(item)
+    #            save_tx(block['chain_id'], tx)
     # update stat
     # done
+
+    #run -= len(metas)
+    #batch_base += len(metas)
 
     db.commit()
     # batch end
 
-    run -= len(metas)
-    batch_base += len(metas)
-
+print()
 # closing
 cur.close()
 db.close()
