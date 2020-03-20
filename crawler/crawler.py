@@ -10,6 +10,7 @@ from mysql.connector import Error
 from datetime import timezone
 
 import amo
+import collect
 
 # local config
 dbconfigfile = '../db/config.json'
@@ -22,31 +23,6 @@ p.add_argument("-l", "--limit", help="limit number of blocks to collect",
         type=int, default=100)
 args = p.parse_args()
 node = args.node
-
-def collect_block(node, height):
-    r = requests.get(f'{node}/block?height={height}')
-    block = json.loads(r.text)['result']
-    if int(block['block_meta']['header']['num_txs']) > 0:
-        r = requests.get(f'{node}/block_results?height={height}')
-        block_results = json.loads(r.text)['result']['results']['deliver_tx']
-    else:
-        block_results = []
-    return block['block_meta'], block['block']['data']['txs'], block_results
-
-def collect_block_headers(node, base, num):
-    print(f'batch height from {base+1} to {base+num}')
-    r = requests.get(
-            f'{node}/blockchain?minHeight={base+1}&maxHeight={base+num}')
-    metas = json.loads(r.text)['result']['block_metas']
-    list.sort(metas, key=lambda val: int(val['header']['height']))
-    return metas
-
-def collect_block_txs(node, height):
-    # collect txs
-    r = requests.get(f'{node}/tx_search?query="tx.height={height}"')
-    items = json.loads(r.text)['result']['txs']
-    print(f'- block height {height}: num_txs = {len(items)}')
-    return items
 
 # read config
 try:
@@ -115,7 +91,7 @@ for h in range(last_height + 1, last_height + run + 1):
         print('.', end='', flush=True)
     if h % 100 == 0:
         print(f'block height {h}', flush=True)
-    block_meta, tx_bodies, block_results = collect_block(node, h)
+    block_meta, tx_bodies, block_results = collect.block(node, h)
     block = amo.Block(block_meta['header']['chain_id'], h)
     block.set_meta(block_meta)
     #if tx_bodies == None:

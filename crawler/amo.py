@@ -75,7 +75,10 @@ class Tx:
         self.code = result['code']
         self.info = result['info']
 
-    """cursor: db cursor"""
+    """Save to DB
+
+    :param cursor: db cursor opened with conn.cursor()
+    """
     def save(self, cursor):
         cursor.execute("""
             INSERT INTO `txs`
