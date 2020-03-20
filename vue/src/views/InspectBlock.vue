@@ -129,7 +129,7 @@
     watch: {
       '$store.state.network'() {
         console.debug('network changed:', this.$store.state.network);
-        this.reqBlockData()
+        this.getPageData()
         this.reqTxTableData();
       },
     },
@@ -142,11 +142,11 @@
       }
     },
     mounted() {
-      this.reqBlockData();
+      this.getPageData();
       this.reqTxTableData();
     },
     methods: {
-      async reqBlockData() {
+      async getPageData() {
         try {
           this.block = await this.$api.getBlock(this.$route.params.height);
         } catch (e) {

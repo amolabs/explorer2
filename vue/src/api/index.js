@@ -14,10 +14,10 @@ export default {
       options)
       .then(res => {
         var block = camelcaseKeys(res.data);
-        //block.txBytes = 0;
-        //block.numTxs = 0;
-        //block.numTxsValid = 0;
-        //block.numTxsInvalid = 0;
+        if (!block.txBytes) block.txBytes = 0;
+        if (!block.numTxs) block.numTxs = 0;
+        if (!block.numTxsValid) block.numTxsValid = 0;
+        if (!block.numTxsInvalid) block.numTxsInvalid = 0;
         return Promise.resolve(block);
       });
   },
