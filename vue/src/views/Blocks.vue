@@ -123,8 +123,6 @@
         avgTxBytes: 222234.33,
       },
       statRange:100,
-      pageNum: 1,
-      perPage: 50,
       blockTable: {
         headers: [
           {
@@ -132,11 +130,13 @@
             value: 'height',
             align: 'center', // 'start' | 'center' | 'end'
           },
-          { text: 'timestamp',align: 'center',  value: 'timestamp' },
+          { text: 'time',align: 'center',  value: 'time' },
           { text: 'proposer', align: 'center',  value: 'proposer' },
-          { text: '# of txs', align: 'center', value: 'ofTxs' },
+          { text: '# of txs', align: 'center', value: 'num_txs' },
         ],
         blockList: [],
+        anchor: 0,
+        bulkSize: 20,
       },
     }),
     watch: {
@@ -170,28 +170,16 @@
         }
       },
       async reqBlockTableData() {
-        this.blockTable.blockList = [];
-        // call api
-        // try {
-        //     const res = await axios.get('http://192.168.23.50:3000/api/test2', {params: {pagenum: this.pageNum, perpage: this.perPage}});
-        //     console.log(res);
-        //     if(res.data && res.data.result && res.data.result.length > 0) {
-        //         this.blockTable.blockList = this.blockTable.blockList.concat(res.data.result);
-        //         this.pageNum++;
-        //     }
-        // } catch(err) {
-        //     console.log('err: ', err);
-        // }
-
-        // add data
-        // const startIdx = (this.pageNum-1) * this.perPage;
-        // const endIdx = parseInt(startIdx) + parseInt(this.perPage);
-        // let newData = [];
-        // for(let i=startIdx; i<endIdx; i++) {
-        //   newData.push({height: 123+i, timestamp: '2020-03-04 11:22:33', proposer: '73bae62d33bb942c914d85f9ed612ec8f5a0fa62', ofTxs:123453+i});
-        // }
-        // this.blockTable.blockList = this.blockTable.blockList.concat(newData);
-        // this.pageNum++;
+        var l = this.blockTable.blockList;
+        try {
+          const res = await this.$api.getBlocks(
+            this.blockTable.anchor, this.blockTable.bulkSize, 'desc');
+          l = l.concat(res);
+          this.blockTable.blockList = l;
+          this.blockTable.anchor = l[l.length-1].height - 1;
+        } catch (e) {
+          console.log(e);
+        }
       },
       selectEvent(){
         console.log('select statRange : ', this.statRange);

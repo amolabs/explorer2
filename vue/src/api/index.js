@@ -22,6 +22,14 @@ export default {
       });
   },
 
+  getBlocks(from, num, order) {
+    return axios.get(`${server}/chain/amo-testnet-200306/blocks?from=${from}&num=${num}&order=${order}`,
+      options)
+      .then(res => {
+        return Promise.resolve(res.data);
+      });
+  },
+
   getChain() {
     return axios.get(`${server}/chain/amo-testnet-200306`,
       options)
