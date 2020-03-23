@@ -5,9 +5,12 @@ CREATE TABLE `blocks` (
   `height` int(11) NOT NULL,
   `time` datetime(6) NOT NULL DEFAULT current_timestamp(6),
   `hash` char(64) DEFAULT NULL,
-  `num_txs` int(11) NOT NULL,
+  `num_txs` int(11) NOT NULL DEFAULT 0,
   `interval` float NOT NULL DEFAULT 0,
   `proposer` char(40) NOT NULL,
+  `tx_bytes` int(11) NOT NULL DEFAULT 0,
+  `num_txs_valid` int(11) NOT NULL DEFAULT 0,
+  `num_txs_invalid` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`chain_id`,`height`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
