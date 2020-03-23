@@ -1,7 +1,7 @@
 /* vim: set sw=2 ts=2 expandtab : */
 const db = require('../db/db');
 
-async function getBlock(chain_id, height) {
+async function getOne(chain_id, height) {
   return new Promise(function(resolve, reject) {
     var query_str;
     var query_var;
@@ -23,4 +23,47 @@ async function getBlock(chain_id, height) {
   });
 }
 
-module.exports = getBlock;
+async function getList(chain_id, from, num, order) {
+  return new Promise(function(resolve, reject) {
+    from = Number(from);
+    num = Number(num);
+    var query_str;
+    var query_var;
+    if (order == 'asc') {
+      if (from == 0) {
+        query_str = "select * from blocks where (chain_id = ?) \
+          order by height asc limit ?";
+        query_var = [chain_id, num];
+      } else {
+        query_str = "select * from blocks where (chain_id = ?) \
+          and (height >= ?) \
+          order by height asc limit ?";
+        query_var = [chain_id, from, num];
+      }
+    } else {
+      if (from == 0) {
+        query_str = "select * from blocks where (chain_id = ?) \
+          order by height desc limit ?";
+        query_var = [chain_id, num];
+      } else {
+        query_str = "select * from blocks where (chain_id = ?) \
+          and (height <= ?) \
+          order by height desc limit ?";
+        query_var = [chain_id, from, num];
+      }
+    }
+    db.query(query_str, query_var, function (err, rows, fields) {
+      // Call reject on error states,
+      // call resolve with results
+      if (err) {
+        return reject(err);
+      }
+      resolve(rows);
+    });
+  });
+}
+
+module.exports = {
+  getOne: getOne,
+  getList: getList,
+}

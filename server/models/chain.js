@@ -1,7 +1,7 @@
 /* vim: set sw=2 ts=2 expandtab : */
 const db = require('../db/db');
 
-async function getChain(chain_id) {
+async function getSummary(chain_id) {
   return new Promise(function(resolve, reject) {
     var query_str = "select * from chain_summary where (chain_id = ?)";
     var query_var = [chain_id];
@@ -16,4 +16,6 @@ async function getChain(chain_id) {
   });
 }
 
-module.exports = getChain;
+module.exports = {
+  getSummary: getSummary,
+}
