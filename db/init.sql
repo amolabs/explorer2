@@ -19,17 +19,17 @@ CREATE TABLE `blocks` (
 
 CREATE TABLE `txs` (
   `chain_id` char(32) NOT NULL,
-  `hash` char(64) NOT NULL,
   `height` int(11) NOT NULL,
   `index` int(11) NOT NULL,
+  `hash` char(64) NOT NULL,
   `code` int(11) NOT NULL,
   `info` varchar(128) DEFAULT NULL,
   `type` char(32) NOT NULL,
   `sender` char(40) NOT NULL,
   `fee` bigint(20) NOT NULL,
   `payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`payload`)),
-  PRIMARY KEY (`chain_id`,`hash`),
-  KEY `block_FK` (`chain_id`,`height`),
+  PRIMARY KEY (`chain_id`,`height`,`index`),
+  KEY `txs_hash` (`chain_id`,`hash`) USING BTREE,
   CONSTRAINT `block_FK` FOREIGN KEY (`chain_id`, `height`) REFERENCES `blocks` (`chain_id`, `height`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
