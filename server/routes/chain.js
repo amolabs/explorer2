@@ -1,57 +1,28 @@
 /* vim: set sw=2 ts=2 expandtab : */
 var express = require('express');
 var router = express.Router();
+
 const chain = require('../models/chain');
-const block = require('../models/block');
+var blocks = require('./blocks');
+var txs = require('./txs');
+
+router.use('/blocks', blocks);
+router.use('/txs', txs);
 
 router.get('/', function(req, res) {
   const chain_id = res.locals.chain_id;
   chain.getSummary(chain_id)
-    .then((rows) => {
-      if (rows.length > 0) {
-        res.send(rows[0]);
+    .then((val) => {
+      //console.log('then', val);
+      res.send(val);
+    })
+    .catch((err) => {
+      if (err == 'not found') {
+        res.status(404).send('not found');
       } else {
-        res.status(404);
-        res.send('not found');
+        console.log(err);
+        res.status(500).send(err);
       }
-    })
-    .catch((err) => {
-      res.send(err);
-    });
-});
-
-router.get('/blocks', function(req, res) {
-  const chain_id = res.locals.chain_id;
-  var from = req.query.from || 0;
-  var num = req.query.num || 20;
-  var order = req.query.order || 'desc';
-  block.getList(chain_id, from, num, order)
-    .then((rows) => {
-      res.status(200);
-      res.send(rows);
-    })
-    .catch((err) => {
-      res.status(500);
-      res.send(err);
-    });
-});
-
-router.get('/blocks/:height([0-9]+)', function(req, res) {
-  const chain_id = res.locals.chain_id;
-  const height = req.params.height;
-  block.getOne(chain_id, height)
-    .then((rows) => {
-      if (rows.length > 0) {
-        res.status(200);
-        res.send(rows[0]);
-      } else {
-        res.status(404);
-        res.send('not found');
-      }
-    })
-    .catch((err) => {
-      res.status(500);
-      res.send(err);
     });
 });
 

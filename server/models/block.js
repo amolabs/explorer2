@@ -6,10 +6,12 @@ async function getOne(chain_id, height) {
     var query_str;
     var query_var;
     if (height == 0) {
-      query_str = "select * from blocks where (chain_id = ?) order by height desc limit 1";
+      query_str = "select * from blocks where (chain_id = ?) \
+        order by height desc limit 1";
       query_var = [chain_id];
     } else {
-      query_str = "select * from blocks where (chain_id = ?) and (height = ?) limit 1";
+      query_str = "select * from blocks where (chain_id = ?) \
+        and (height = ?)";
       query_var = [chain_id, height];
     }
     db.query(query_str, query_var, function (err, rows, fields) {
@@ -30,27 +32,15 @@ async function getList(chain_id, from, num, order) {
     var query_str;
     var query_var;
     if (order == 'asc') {
-      if (from == 0) {
-        query_str = "select * from blocks where (chain_id = ?) \
-          order by height asc limit ?";
-        query_var = [chain_id, num];
-      } else {
-        query_str = "select * from blocks where (chain_id = ?) \
-          and (height >= ?) \
-          order by height asc limit ?";
-        query_var = [chain_id, from, num];
-      }
+      query_str = "select * from blocks where (chain_id = ?) \
+        and (height >= ?) \
+        order by height asc limit ?";
+      query_var = [chain_id, from, num];
     } else {
-      if (from == 0) {
-        query_str = "select * from blocks where (chain_id = ?) \
-          order by height desc limit ?";
-        query_var = [chain_id, num];
-      } else {
-        query_str = "select * from blocks where (chain_id = ?) \
-          and (height <= ?) \
-          order by height desc limit ?";
-        query_var = [chain_id, from, num];
-      }
+      query_str = "select * from blocks where (chain_id = ?) \
+        and (height <= ?) \
+        order by height desc limit ?";
+      query_var = [chain_id, from, num];
     }
     db.query(query_str, query_var, function (err, rows, fields) {
       // Call reject on error states,
