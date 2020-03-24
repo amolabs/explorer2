@@ -12,7 +12,7 @@
                 <v-select
                   style="max-width:90px;display:inline-flex"
                   :items="args"
-                  v-model="arg"
+                  v-model="statRange"
                   menu-props="offsetY"
                   dense
                   class="pa-0"
@@ -20,7 +20,7 @@
                   @change="selectEvent"
                 ></v-select>
               </span>
-              txs
+              blocks
             </div>
 
             <!-- stat -->
@@ -32,7 +32,7 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <span> {{ this.$byteCalc(this.value1) }} tx</span>
+                      <span> {{ this.$byteCalc(this.txStat.avgTxBytes) }}B</span>
                     </div>
                   </v-col>
                 </v-row>
@@ -44,7 +44,7 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <span> {{ this.$byteCalc(this.value2) }} AMO /tx </span>
+                      <span> {{ this.$byteCalc(this.txStat.avgTxFee) }} AMO / tx </span>
                     </div>
                   </v-col>
                 </v-row>
@@ -56,7 +56,7 @@
                   </v-col>
                   <v-col cols="12" md="8" class="py-0 pr-lg-12 text-right subtitle-2">
                     <div>
-                      <span>{{ Number(this.value3_arg1.toFixed(2)).toLocaleString() }} blks / <br class="hidden-sm-and-up">max {{ this.value3_arg2.toLocaleString() }} blks</span>
+                      <span>{{ Number(this.txStat.avgBindingLag.toFixed(2)).toLocaleString() }} blks / <br class="hidden-sm-and-up">max {{ this.txStat.maxBindingLag.toLocaleString() }} blks</span>
                     </div>
                   </v-col>
                 </v-row>
@@ -64,11 +64,11 @@
               <v-col cols="12" md="6">
                 <v-row align="start">
                   <v-col cols="12" md="4" class="py-0 px-lg-12 text-left">
-                    <span> Invalid ratio </span>
+                    <span> Invalid tx ratio </span>
                   </v-col>
                   <v-col cols="12" md="8" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <span> {{ this.value4_arg1.toLocaleString()}} / {{ this.value4_arg2.toLocaleString() }} ( {{ Number(this.value4_arg3.toFixed(2)).toLocaleString() }} % ) </span>
+                      <span> {{ this.txStat.numTxsInvalid.toLocaleString()}} / {{ this.txStat.numTxs.toLocaleString() }} ( {{ Number(this.txStat.ratioInvalid.toFixed(2)).toLocaleString() }} % ) </span>
                     </div>
                   </v-col>
                 </v-row>
@@ -85,11 +85,11 @@
         <v-col cols="12">
           <c-card class="text-center" title="Recent txs" outlined>
             <c-scroll-table
-              :headers="transactionTable.headers"
+              :headers="txTable.headers"
               itemKey="name"
-              :items="transactionTable.recentTxs"
+              :items="txTable.txList"
               height="500"
-              @loadMore="reqData"
+              @loadMore="reqTxTableData"
               :mobile-breakpoint="tableBreakpoint"
             >
               <template #height="{item}">
@@ -115,32 +115,41 @@
 <script>
   export default {
     data: () => ({
-      value1 : 111.55,
-      value2 : 222.1243,
-      value3_arg1: 123456.34,
-      value3_arg2: 455344,
-      value4_arg1: 123456,
-      value4_arg2: 324543,
-      value4_arg3: 213.23435,
-      arg:100,
-      pageNum: 1,
-      perPage: 50,
-      transactionTable: {
+      txStat: {
+        txHeight: 0,
+        txIndex: 0,
+        avgTxBytes : 0,
+        avgTxFee : 0,
+        avgBindingLag: 0,
+        maxBindingLag: 0,
+        numTxsInvalid: 0,
+        numTxs: 0,
+        ratioInvalid: 0,
+      },
+      statRange:100,
+      txTable: {
         headers: [
           { text: 'height', align: 'center', value: 'height'},
           { text: 'index', align: 'center', value: 'index'},
           { text: 'hash', align: 'center', value: 'hash'},
           { text: 'sender', align: 'center', value: 'sender'},
           { text: 'type', align: 'center', value: 'type'},
-          { text: 'result', align: 'center', value: 'result'},
+          { text: 'result', align: 'center', value: 'info'},
         ],
-        recentTxs: [],
+        txList: [],
+        anchor: '0.0', // we need height and index for querying txs
+        bulkSize: 20,
       },
     }),
     watch: {
       '$store.state.network'() {
         console.log('[Transaction Page] 변경 된 network value', this.$store.state.network);
         this.getPageData()
+      },
+      'txStat'() {
+        this.txTable.anchor = String(this.txStat.txHeight)
+          .concat('.', String(this.txStat.txIndex));
+        this.reqTxTableData();
       },
     },
     computed:{
@@ -152,50 +161,46 @@
       },
       network() {
         return this.$store.state.network
-      }
+      },
+      'txStat.ratioInvalid'() {
+        return this.txStat.numTxsInvalid / this.txStat.numTxs;
+      },
     },
     mounted() {
-      this.reqData();
       this.getPageData()
+      this.reqTxTableData();
     },
     methods: {
       async getPageData(){
-        // 데이터 바인딩
-        console.log('network val',this.network);
-        console.log('arg ',this.arg);
-      },
-      async reqData() {
-        // call api
-        // try {
-        //     const res = await axios.get('http://192.168.23.50:3000/api/test2', {params: {pagenum: this.pageNum, perpage: this.perPage}});
-        //     console.log(res);
-        //     if(res.data && res.data.result && res.data.result.length > 0) {
-        //         this.transactionTable.recentTxs = this.transactionTable.recentTxs.concat(res.data.result);
-        //         this.pageNum++;
-        //     }
-        // } catch(err) {
-        //     console.log('err: ', err);
-        // }
-
-        // add data
-        const startIdx = (this.pageNum-1) * this.perPage;
-        const endIdx = parseInt(startIdx) + parseInt(this.perPage);
-        let newData = [];
-        for(let i=startIdx; i<endIdx; i++) {
-          newData.push({
-            height: 100,
-            index: 234,
-            hash: 'df75be17fdd7508a9fc4f1fbdad72ee13efc47058ea37fe82a44e68c81917ee0',
-            sender: 'a3c338a54bea46c64bdde35e72b6d271c16dedf2',
-            type: 'SEND',
-            result: 'OK'
-          });
+        try {
+          this.txStat = await this.$api.getTxStat();
+        } catch (e) {
+          console.log(e);
         }
-        this.transactionTable.recentTxs = this.transactionTable.recentTxs.concat(newData);
-        this.pageNum++;
+      },
+      async reqTxTableData() {
+        var l = this.txTable.txList;
+        if (this.txTable.anchor == '0.0') {
+          return;
+        }
+        try {
+          const res = await this.$api.getTxs(
+            this.txTable.anchor, this.txTable.bulkSize, 'desc');
+          l = l.concat(res);
+          this.txTable.txList = l;
+          var h = Number(l[l.length-1]['height']);
+          var i = Number(l[l.length-1]['index']) - 1;
+          if (i < 0) {
+            h -= 1;
+            i = 99999;
+          }
+          this.txTable.anchor = String(h).concat('.', String(i));
+        } catch (e) {
+          console.log(e);
+        }
       },
       selectEvent(data){
-        console.log('select arg : ',data);
+        console.log('select statRange : ',data);
         this.getPageData();
       }
     }

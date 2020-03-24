@@ -28,7 +28,7 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <span> {{ Number(this.chainSummary.avgInterval.toFixed(2)).toLocaleString() }} sec / blk</span>
+                      <span> {{ Number(this.blockStat.avgInterval.toFixed(2)).toLocaleString() }} sec / blk</span>
                     </div>
                   </v-col>
                 </v-row>
@@ -40,7 +40,7 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <span> {{ this.$byteCalc(this.chainSummary.avgIncentive)  }} AMO / blk</span>
+                      <span> {{ this.$byteCalc(this.blockStat.avgIncentive)  }} AMO / blk</span>
                     </div>
                   </v-col>
                 </v-row>
@@ -52,7 +52,7 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <span> {{ Number(this.chainSummary.avgNumTxs.toFixed(2)).toLocaleString() }} txs / blk </span>
+                      <span> {{ Number(this.blockStat.avgNumTxs.toFixed(2)).toLocaleString() }} txs / blk </span>
                     </div>
                   </v-col>
                 </v-row>
@@ -64,7 +64,7 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <span> {{ this.$byteCalc(this.chainSummary.avgTxBytes) + 'B' }} / blk</span>
+                      <span> {{ this.$byteCalc(this.blockStat.avgTxBytes) + 'B' }} / blk</span>
                     </div>
                   </v-col>
                 </v-row>
@@ -116,7 +116,8 @@
 <script>
   export default {
     data: () => ({
-      chainSummary: {
+      blockStat: {
+        height: 0,
         avgInterval: 0,
         avgIncentive: 0,
         avgNumTxs: 0,
@@ -144,6 +145,10 @@
         console.log('[Blocks Page] 변경 된 network value', this.$store.state.network);
         this.getPageData()
       },
+      'blockStat'() {
+        this.blockTable.anchor = this.blockStat.height;
+        this.reqBlockTableData();
+      },
     },
     computed:{
       // tableBreakpoint, args -> vuex에서 선언된 데이터 사용하기 위함.
@@ -164,13 +169,16 @@
     methods: {
       async getPageData(){
         try {
-          this.chainSummary = await this.$api.getChain();
+          this.blockStat = await this.$api.getBlockStat();
         } catch (e) {
           console.log(e);
         }
       },
       async reqBlockTableData() {
         var l = this.blockTable.blockList;
+        if (this.blockTable.anchor == 0) {
+          return;
+        }
         try {
           const res = await this.$api.getBlocks(
             this.blockTable.anchor, this.blockTable.bulkSize, 'desc');

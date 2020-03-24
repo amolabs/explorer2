@@ -9,6 +9,21 @@ const options = { headers: {
 } };
 
 export default {
+  getBlockStat() {
+    return axios.get(`${server}/chain/amo-testnet-200306`,
+      options)
+      .then(res => {
+        var chain = camelcaseKeys(res.data); 
+        if (!chain.height) chain.height = 0;
+        if (!chain.avgInterval) chain.Interval = 0;
+        if (!chain.avgIncentive) chain.avgIncentive = 0;
+        if (!chain.avgNumTxs) chain.avgNumTxs = 0;
+        if (!chain.avgTxBytes) chain.avgTxBytes = 0;
+        if (!chain.avgTxFee) chain.avgTxFee = 0;
+        return Promise.resolve(chain);
+      });
+  },
+
   getBlock(height) {
     return axios.get(`${server}/chain/amo-testnet-200306/blocks/${height}`,
       options)
@@ -30,17 +45,30 @@ export default {
       });
   },
 
-  getChain() {
+  getTxStat() {
     return axios.get(`${server}/chain/amo-testnet-200306`,
       options)
       .then(res => {
         var chain = camelcaseKeys(res.data); 
-        if (!chain.avgInterval) chain.Interval = 0;
-        if (!chain.avgIncentive) chain.avgIncentive = 0;
-        if (!chain.avgNumTxs) chain.avgNumTxs = 0;
-        if (!chain.avgTxBytes) chain.avgTxBytes = 0;
-        if (!chain.avgTxFee) chain.avgTxFee = 0;
+        if (!chain.height) chain.height = 0;
+        if (!chain.txHeight) chain.txHeight = 0;
+        if (!chain.txIndex) chain.txIndex = 0;
+        if (!chain.avgTxBytes) chain.avgTxBytes  = 0;
+        if (!chain.avgTxFee) chain.avgTxFee  = 0;
+        if (!chain.avgBindingLag) chain.avgBindingLag = 0;
+        if (!chain.maxBindingLag) chain.maxBindingLag = 0;
+        if (!chain.numTxsInvalid) chain.numTxsInvalid = 0;
+        if (!chain.numTxs) chain.numTxs = 0;
+        if (!chain.ratioInvalid) chain.ratioInvalid = 0;
         return Promise.resolve(chain);
+      });
+  },
+
+  getTxs(from, num, order) {
+    return axios.get(`${server}/chain/amo-testnet-200306/txs?from=${from}&num=${num}&order=${order}`,
+      options)
+      .then(res => {
+        return Promise.resolve(res.data);
       });
   },
 }

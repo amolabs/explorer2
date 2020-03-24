@@ -346,7 +346,7 @@
       async getPageData() {
         try {
           var res;
-          res = await this.$api.getChain();
+          res = await this.$api.getBlockStat();
           var height = res.height;
           this.networkOverview.avgInterval = res.avgInterval;
           this.networkOverview.numTxsPerBlock = res.numTxs / height;
@@ -355,7 +355,7 @@
           this.networkOverview.genesisHeight = res.height;
           this.networkOverview.genesisTime = res.time;
           res = await this.$api.getBlock(height);
-          this.networkOverview.lastHeight = res.height; // = getChain().height
+          this.networkOverview.lastHeight = res.height; //=getBlockStat().height
           this.networkOverview.lastTime = res.time;
           //console.log('res', res)
         } catch (e) {
