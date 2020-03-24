@@ -60,6 +60,7 @@ if row:
 else:
     last_height = 0
 print('fetched currnet explorer status')
+print(f'currnet explorer status: {last_height}')
 
 # get node status
 r = requests.get(f'{node}/status')
@@ -67,10 +68,9 @@ dat = json.loads(r.text)
 target_height = int(dat['result']['sync_info']['latest_block_height'])
 #print(dat['result']['node_info']['network'])
 print('fetched target node status')
+print(f'target node status: {target_height}')
 
 # figure out
-print(f'currnet explorer status: {last_height}')
-print(f'target node status: {target_height}')
 limit = args.limit
 if limit > 0:
     run = min(target_height - last_height, limit)
@@ -116,7 +116,6 @@ for h in range(last_height + 1, last_height + run + 1):
         else:
             num_invalid += 1
         num += 1
-        #pprint(vars(tx))
         tx.save(cur)
 
     assert(block.num_txs == num)
