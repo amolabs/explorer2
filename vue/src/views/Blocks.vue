@@ -145,7 +145,7 @@
         console.log('[Blocks Page] 변경 된 network value', this.$store.state.network);
         this.getPageData()
       },
-      'blockStat'() {
+      'blockStat.height'() {
         this.blockTable.anchor = this.blockStat.height;
         this.reqBlockTableData();
       },
