@@ -47,11 +47,7 @@ export const ProgressBarMixin = {
         progressPadding: 0,
       }
     };
-
-    if(this.line) {
-      if(this.width.indexOf('%') == -1)
-        this.width = px(this.width);
-    }
+    
   },
   mounted () {
     this.mergeDefaultOptionsWithProp();
@@ -125,7 +121,7 @@ export const ProgressBarMixin = {
     lineStyleSvgFrame () {
       return {
         height: px(this.height),
-        width: this.width //px(this.width)
+        width: px(this.width)
       }
     },
     batteryStyleSvgFrame () {

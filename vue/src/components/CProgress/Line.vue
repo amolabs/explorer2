@@ -1,6 +1,6 @@
 <template>
   <div id="progress-bar-line"
-       :style="{ width: this.width }"
+       :style="{ width: this.width.indexOf('%') == -1? this.width+'px' : this.width}"
   >
     <v-container v-if="type === '1'" class="top-text">
       <v-layout row fill-height >
