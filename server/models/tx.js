@@ -1,6 +1,22 @@
 /* vim: set sw=2 ts=2 expandtab : */
 const db = require('../db/db');
 
+async function getStat(chain_id) {
+  return new Promise(function(resolve, reject) {
+    var query_str = "SELECT * FROM `tx_stat` WHERE (`chain_id` = ?) LIMIT 1";
+    var query_var = [chain_id];
+    db.query(query_str, query_var, function (err, rows, fields) {
+      if (err) {
+        return reject(err);
+      }
+      if (rows.length == 0) {
+        return reject('not found');
+      }
+      resolve(rows[0]);
+    });
+  });
+}
+
 async function getOne(chain_id, height, index) {
   return new Promise(function(resolve, reject) {
     var query_str;
@@ -21,6 +37,23 @@ async function getOne(chain_id, height, index) {
         return reject(err);
       }
       resolve(rows);
+    });
+  });
+}
+
+async function getLast(chain_id) {
+  return new Promise(function(resolve, reject) {
+    var query_str = "SELECT * FROM `txs` WHERE (`chain_id` = ?) \
+      ORDER BY `height` DESC, `index` DESC LIMIT 1";
+    var query_var = [chain_id];
+    db.query(query_str, query_var, function (err, rows, fields) {
+      if (err) {
+        return reject(err);
+      }
+      if (rows.length == 0) {
+        return resolve({});
+      }
+      resolve(rows[0]);
     });
   });
 }
@@ -55,6 +88,8 @@ async function getList(chain_id, from_h, from_i, num, order) {
 }
 
 module.exports = {
+  getStat: getStat,
   getOne: getOne,
+  getLast: getLast,
   getList: getList,
 }

@@ -48,3 +48,21 @@ from
     `explorer`.`blocks` `b`
 group by
     `b`.`chain_id`;
+
+
+-- explorer.tx_stat source
+
+CREATE OR REPLACE
+ALGORITHM = UNDEFINED VIEW `explorer`.`tx_stat` AS
+select
+    `t`.`chain_id` AS `chain_id`,
+    count(0) AS `num_txs`,
+    sum(if(`t`.`code` = 0, 1, 0)) AS `num_txs_valid`,
+    sum(if(`t`.`code` > 0, 1, 0)) AS `num_txs_invalid`,
+    avg(`t`.`fee`) AS `avg_fee`,
+    avg(`t`.`height` - `t`.`last_height`) AS `avg_binding_lag`,
+    10000 AS `max_binding_lag`
+from
+    `explorer`.`txs` `t`
+group by
+    `t`.`chain_id`;
