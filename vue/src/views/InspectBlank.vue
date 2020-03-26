@@ -11,6 +11,7 @@
             label="block, account, tx, validator, draftId"
             color="grey"
             v-model="search"
+            @keyup.enter="searchByKeyword"
           ></v-text-field>
         </v-col>
       </v-row>
@@ -26,37 +27,35 @@
       }
     },
     mounted() {
-      window.addEventListener('keyup', evt => {
-        // 자동완성
-        // console.log(evt.keyCode);
-        if(this.search.length === 1){
-          if(evt.keyCode === 65) {
-            this.search = 'account:'
-          }
-          if(evt.keyCode === 66) {
-            this.search = 'block:'
-          }
-          if(evt.keyCode === 68) {
-            this.search = 'draftId:'
-          }
-          if(evt.keyCode === 84) {
-            this.search = 'tx:'
-          }
-          if(evt.keyCode === 86) {
-            this.search = 'validator:'
-          }
-        }
 
-        //엔터키
-        if(evt.keyCode === 13){
-          this.searchByKeyword()
+    },
+    watch: {
+      search: function(newVal, oldVal) {
+        if(newVal === 'a') {
+          this.search = 'account:'
         }
-      })
+        if(newVal === 'b') {
+          this.search = 'block:'
+        }
+        if(newVal === 'd') {
+          this.search = 'draftId:'
+        }
+        if(newVal === 't') {
+          this.search = 'tx:'
+        }
+        if(newVal === 'v') {
+          this.search = 'validator/:'
+        }
+      }
+
     },
     methods: {
-      searchByKeyword() {
-        console.log(this.search);
-        //  TODO: api call
+      searchByKeyword(evt) {
+          //엔터키
+          if(evt.keyCode === 13){
+            console.log('searchbox in inspect blank:', this.search);
+            //  TODO: api call
+          }
       }
     }
   }
