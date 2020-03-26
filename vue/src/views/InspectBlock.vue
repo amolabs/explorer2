@@ -116,20 +116,26 @@
       },
       txTable: {
         headers: [
+          { text: 'height', align: 'center', value: 'height'},
+          { text: 'index', align: 'center', value: 'index'},
           { text: 'hash',align: 'center',  value: 'hash' },
           { text: 'sender',align: 'center',  value: 'sender' },
           { text: 'type', align: 'center',  value: 'type' },
           { text: 'result', align: 'center', value: 'result' },
         ],
         txList: [],
-        pageNum: 1,
-        perPage: 50,
+        anchor: 0,
+        bulkSize: 20,
       },
     }),
     watch: {
       '$store.state.network'() {
         console.debug('network changed:', this.$store.state.network);
         this.getPageData()
+        this.reqTxTableData();
+      },
+      'block.height'() {
+        this.txTable.anchor = this.block.numTxs - 1;
         this.reqTxTableData();
       },
     },
@@ -154,31 +160,20 @@
         }
       },
       async reqTxTableData() {
-        this.txTable.txList = [];
-        //console.log('get tx table data', this.txTable);
-        //axios.get('http://192.168.23.50:3000/api/test2', {params: {pagenum: this.pageNum, perpage: this.perPage}});
-        //     console.log(res);
-        //     if(res.data && res.data.result && res.data.result.length > 0) {
-        //         this.txTable.txList = this.txTable.txList.concat(res.data.result);
-        //         this.pageNum++;
-        //     }
-        // } catch(err) {
-        //     console.log('err: ', err);
-        // }
-
-        // res.data.result format
-        // const axoisResponse = [
-        //   {'hash':123, 'sender': '2020-03-04 11:22:33', 'type':123123,'result': 123456},
-        // ];
-        // add data
-        // const startIdx = (this.pageNum-1) * this.perPage;
-        // const endIdx = parseInt(startIdx) + parseInt(this.perPage);
-        // let newData = [];
-        // for(let i=startIdx; i<endIdx; i++) {
-        //   newData.push({hash: '9917c981107a5c7a05e171d61bfaed6046fcf1792da7fabf3fe1dbbd2eed1111', sender: '73bae62d33bb942c914d85f9ed612ec8f5a0fa62', type: 'reject', result : 'OK'});
-        // }
-        // this.txTable.txList = this.txTable.txList.concat(newData);
-        // this.pageNum++;
+        var l = this.txTable.txList;
+        if (this.txTable.anchor < 0) {
+          return;
+        }
+        try {
+          var from = String(this.block.height)
+            .concat('.', String(this.txTable.anchor));
+          const res = await this.$api.getTxs(
+            from, this.txTable.anchor + 1, 'desc');
+          l = l.concat(res);
+          this.txTable.txList = l;
+        } catch (e) {
+          console.log(e);
+        }
       },
     }
   }

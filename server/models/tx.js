@@ -1,6 +1,22 @@
 /* vim: set sw=2 ts=2 expandtab : */
 const db = require('../db/db');
 
+async function getStat(chain_id) {
+  return new Promise(function(resolve, reject) {
+    var query_str = "SELECT * FROM `tx_stat` WHERE (`chain_id` = ?) LIMIT 1";
+    var query_var = [chain_id];
+    db.query(query_str, query_var, function (err, rows, fields) {
+      if (err) {
+        return reject(err);
+      }
+      if (rows.length == 0) {
+        return reject('not found');
+      }
+      resolve(rows[0]);
+    });
+  });
+}
+
 async function getOne(chain_id, height, index) {
   return new Promise(function(resolve, reject) {
     var query_str;
@@ -17,6 +33,41 @@ async function getOne(chain_id, height, index) {
     db.query(query_str, query_var, function (err, rows, fields) {
       // Call reject on error states,
       // call resolve with results
+      if (err) {
+        return reject(err);
+      }
+      resolve(rows);
+    });
+  });
+}
+
+async function getLast(chain_id) {
+  return new Promise(function(resolve, reject) {
+    var query_str = "SELECT * FROM `txs` WHERE (`chain_id` = ?) \
+      ORDER BY `height` DESC, `index` DESC LIMIT 1";
+    var query_var = [chain_id];
+    db.query(query_str, query_var, function (err, rows, fields) {
+      if (err) {
+        return reject(err);
+      }
+      if (rows.length == 0) {
+        return resolve({});
+      }
+      resolve(rows[0]);
+    });
+  });
+}
+
+// NOTE: tx hash may not be unique in some cases, e.g. replayed txs
+async function searchHash(chain_id, hash) {
+  return new Promise(function(resolve, reject) {
+    var query_str;
+    var query_var;
+    query_str = 'select * from txs where (chain_id = ?) \
+      and (hash = ?) \
+      order by height desc, `index` desc';
+    query_var = [chain_id, hash];
+    db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
       }
@@ -55,6 +106,9 @@ async function getList(chain_id, from_h, from_i, num, order) {
 }
 
 module.exports = {
+  getStat: getStat,
   getOne: getOne,
+  getLast: getLast,
+  searchHash: searchHash,
   getList: getList,
 }

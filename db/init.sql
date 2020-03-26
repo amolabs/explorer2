@@ -27,6 +27,7 @@ CREATE TABLE `txs` (
   `type` char(32) NOT NULL,
   `sender` char(40) NOT NULL,
   `fee` bigint(20) NOT NULL,
+  `last_height` int(11) NOT NULL,
   `payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`payload`)),
   PRIMARY KEY (`chain_id`,`height`,`index`),
   KEY `txs_hash` (`chain_id`,`hash`) USING BTREE,
@@ -34,13 +35,12 @@ CREATE TABLE `txs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
--- explorer.chain_summary source
+-- explorer.block_stat source
 
 CREATE OR REPLACE
-ALGORITHM = UNDEFINED VIEW `explorer`.`chain_summary` AS
+ALGORITHM = UNDEFINED VIEW `explorer`.`block_stat` AS
 select
     `b`.`chain_id` AS `chain_id`,
-    max(`b`.`height`) AS `height`,
     count(distinct `b`.`hash`) AS `num_blocks`,
     sum(`b`.`num_txs`) AS `num_txs`,
     avg(`b`.`interval`) AS `avg_interval`
@@ -48,3 +48,21 @@ from
     `explorer`.`blocks` `b`
 group by
     `b`.`chain_id`;
+
+
+-- explorer.tx_stat source
+
+CREATE OR REPLACE
+ALGORITHM = UNDEFINED VIEW `explorer`.`tx_stat` AS
+select
+    `t`.`chain_id` AS `chain_id`,
+    count(0) AS `num_txs`,
+    sum(if(`t`.`code` = 0, 1, 0)) AS `num_txs_valid`,
+    sum(if(`t`.`code` > 0, 1, 0)) AS `num_txs_invalid`,
+    avg(`t`.`fee`) AS `avg_fee`,
+    avg(`t`.`height` - `t`.`last_height`) AS `avg_binding_lag`,
+    10000 AS `max_binding_lag`
+from
+    `explorer`.`txs` `t`
+group by
+    `t`.`chain_id`;

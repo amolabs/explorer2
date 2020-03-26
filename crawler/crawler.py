@@ -51,12 +51,12 @@ else:
 
 # get current explorer state
 cur = db.cursor()
-cur.execute("""SELECT * FROM `chain_summary`""")
+cur.execute("""SELECT `height` FROM `blocks` ORDER BY `height` DESC LIMIT 1""")
 row = cur.fetchone()
 if row:
     #print(row)
-    chain_summary = dict(zip(cur.column_names, row))
-    last_height = int(chain_summary['height'])
+    b = dict(zip(cur.column_names, row))
+    last_height = int(b['height'])
 else:
     last_height = 0
 print('fetched currnet explorer status')

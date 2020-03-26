@@ -146,7 +146,7 @@
         console.log('[Transaction Page] 변경 된 network value', this.$store.state.network);
         this.getPageData()
       },
-      'txStat'() {
+      'txStat.txHeight'() {
         this.txTable.anchor = String(this.txStat.txHeight)
           .concat('.', String(this.txStat.txIndex));
         this.reqTxTableData();

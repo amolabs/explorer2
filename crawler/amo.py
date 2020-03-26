@@ -69,6 +69,7 @@ class Tx:
         self.type = parsed['type']
         self.sender = parsed['sender']
         self.fee = int(parsed['fee'])
+        self.last_height = int(parsed['last_height'])
         self.payload = json.dumps(parsed['payload'])
 
     def set_result(self, result):
@@ -83,11 +84,11 @@ class Tx:
         cursor.execute("""
             INSERT INTO `txs`
                 (`chain_id`, `hash`, `height`, `index`, `code`, `info`,
-                `type`, `sender`, `fee`, `payload`)
+                `type`, `sender`, `fee`, `last_height`, `payload`)
             VALUES
                 (%(chain_id)s, %(hash)s,
                 %(height)s, %(index)s, %(code)s, %(info)s,
-                %(type)s, %(sender)s, %(fee)s, %(payload)s
+                %(type)s, %(sender)s, %(fee)s, %(last_height)s, %(payload)s
                 )
             """,
             (vars(self)))
