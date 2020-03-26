@@ -39,6 +39,7 @@ router.get('/:height([0-9]+)', function(req, res) {
     });
 });
 
+// CAUTION: uses tx model
 router.get('/:height([0-9]+)/:index([0-9]+)', function(req, res) {
   const chain_id = res.locals.chain_id;
   const height = req.params.height;

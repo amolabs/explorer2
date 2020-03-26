@@ -21,16 +21,16 @@ router.get('/', function(req, res) {
     });
 });
 
+// NOTE: this endpoint will return list.
+// see note of tx.searchHash()
 router.get('/:hash([a-fA-F0-9]+)', function(req, res) {
   const chain_id = res.locals.chain_id;
-  const height = req.params.height;
-  res.status(500).send('not implemented');
-  /*
-  tx.getOne(chain_id, height)
+  const hash = req.params.hash;
+  tx.searchHash(chain_id, hash)
     .then((rows) => {
       if (rows.length > 0) {
         res.status(200);
-        res.send(rows[0]);
+        res.send(rows);
       } else {
         res.status(404);
         res.send('not found');
@@ -40,7 +40,6 @@ router.get('/:hash([a-fA-F0-9]+)', function(req, res) {
       res.status(500);
       res.send(err);
     });
-  */
 });
 
 module.exports = router;

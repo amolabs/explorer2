@@ -58,6 +58,24 @@ async function getLast(chain_id) {
   });
 }
 
+// NOTE: tx hash may not be unique in some cases, e.g. replayed txs
+async function searchHash(chain_id, hash) {
+  return new Promise(function(resolve, reject) {
+    var query_str;
+    var query_var;
+    query_str = 'select * from txs where (chain_id = ?) \
+      and (hash = ?) \
+      order by height desc, `index` desc';
+    query_var = [chain_id, hash];
+    db.query(query_str, query_var, function (err, rows, fields) {
+      if (err) {
+        return reject(err);
+      }
+      resolve(rows);
+    });
+  });
+}
+
 async function getList(chain_id, from_h, from_i, num, order) {
   return new Promise(function(resolve, reject) {
     from_h = Number(from_h);
@@ -91,5 +109,6 @@ module.exports = {
   getStat: getStat,
   getOne: getOne,
   getLast: getLast,
+  searchHash: searchHash,
   getList: getList,
 }
