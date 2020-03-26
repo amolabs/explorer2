@@ -332,15 +332,22 @@
       }
     },
     mounted() {
-      // 1. template 랜더링 직전에 호출되는 cycle
-      this.getDataPer10Sec();
       this.getPageData();
+      console.debug('starting timer');
+      this.intervalId = setInterval(() => {
+        console.debug('timer tick');
+        this.getPageData()
+      }, 10000)
 
       this.validators.value9_percentage = this.validators.value9/ this.validators.value8 * 100;
       this.validators.value10_percentage = this.validators.value10/ this.validators.value8 * 100;
 
       this.coinsAndStakes.value12_percentage = this.coinsAndStakes.value12/ this.coinsAndStakes.value11 * 100;
       this.coinsAndStakes.value13_percentage = this.coinsAndStakes.value13 / this.coinsAndStakes.value11 * 100;
+    },
+    destroyed() {
+      console.debug('clearing timer');
+      clearInterval(this.intervalId);
     },
     methods: {
       async getPageData() {
@@ -362,13 +369,6 @@
           console.log('error', e);
         }
       },
-
-      async getDataPer10Sec() {
-        await setInterval(() => {
-          // 3. 10초마다 getPageData 함수 호출하여 data binding
-          this.getPageData()
-        }, 10000)
-      }
     }
   }
 </script>
