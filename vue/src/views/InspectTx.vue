@@ -11,7 +11,7 @@
                     <span> hash </span>
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span class="truncate-option"> {{ this.param.hash }} </span>
+                    <span class="truncate-option"> {{ this.tx.hash }} </span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -21,7 +21,7 @@
                     <span> block height </span>
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span> {{ this.value2.toLocaleString() }}  </span>
+                    <span> {{ this.tx.height.toLocaleString() }}  </span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -31,7 +31,7 @@
                     <span> sender </span>
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span class="truncate-option"> {{ this.value3 }} </span>
+                    <span class="truncate-option"> {{ this.tx.sender }} </span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -41,14 +41,14 @@
                     <span> type </span>
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span> {{this.value4}} </span>
+                    <span> {{this.tx.type}} </span>
                   </v-col>
                 </v-row>
               </v-col>
             </v-row>
 
             <!--Type-Specific tx Body-->
-            <v-row v-if="this.value4 === 'transfer'">
+            <v-row v-if="this.tx.type === 'transfer'">
               <v-col cols="12" md="6">
                 <v-row align="start">
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
@@ -70,7 +70,7 @@
                 </v-row>
               </v-col>
             </v-row>
-            <v-row v-else-if="this.value4 === 'stake'">
+            <v-row v-else-if="this.tx.type === 'stake'">
               <v-col cols="12" md="6">
                 <v-row align="start">
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
@@ -92,7 +92,7 @@
                 </v-row>
               </v-col>
             </v-row>
-            <v-row v-else-if="this.value4 === 'withdraw'">
+            <v-row v-else-if="this.tx.type === 'withdraw'">
               <v-col cols="12" md="6">
                 <v-row align="start">
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
@@ -104,7 +104,7 @@
                 </v-row>
               </v-col>
             </v-row>
-            <v-row v-else-if="this.value4 === 'delegate'">
+            <v-row v-else-if="this.tx.type === 'delegate'">
               <v-col cols="12" md="6">
                 <v-row align="start">
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
@@ -126,7 +126,7 @@
                 </v-row>
               </v-col>
             </v-row>
-            <v-row v-else-if="this.value4 === 'retract'">
+            <v-row v-else-if="this.tx.type === 'retract'">
               <v-col cols="12" md="6">
                 <v-row align="start">
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
@@ -138,7 +138,7 @@
                 </v-row>
               </v-col>
             </v-row>
-            <v-row v-else-if="this.value4 === 'register'">
+            <v-row v-else-if="this.tx.type === 'register'">
               <v-col cols="12" md="6">
                 <v-row align="start">
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
@@ -160,7 +160,7 @@
                 </v-row>
               </v-col>
             </v-row>
-            <v-row v-else-if="this.value4 === 'discard'">
+            <v-row v-else-if="this.tx.type === 'discard'">
               <v-col cols="12" md="6">
                 <v-row align="start">
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
@@ -172,7 +172,7 @@
                 </v-row>
               </v-col>
             </v-row>
-            <v-row v-else-if="this.value4 === 'request'">
+            <v-row v-else-if="this.tx.type === 'request'">
               <v-col cols="12" md="6">
                 <v-row align="start">
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
@@ -194,7 +194,7 @@
                 </v-row>
               </v-col>
             </v-row>
-            <v-row v-else-if="this.value4 === 'cancel'">
+            <v-row v-else-if="this.tx.type === 'cancel'">
               <v-col cols="12" md="6">
                 <v-row align="start">
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
@@ -206,7 +206,7 @@
                 </v-row>
               </v-col>
             </v-row>
-            <v-row v-else-if="this.value4 === 'grant'">
+            <v-row v-else-if="this.tx.type === 'grant'">
               <v-col cols="12" md="6">
                 <v-row align="start">
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
@@ -238,7 +238,7 @@
                 </v-row>
               </v-col>
             </v-row>
-            <v-row v-else-if="this.value4 === 'revoke'">
+            <v-row v-else-if="this.tx.type === 'revoke'">
               <v-col cols="12" md="6">
                 <v-row align="start">
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
@@ -260,6 +260,11 @@
                 </v-row>
               </v-col>
             </v-row>
+            <v-row v-else>
+              <v-col>
+                unknown transaction type
+              </v-col>
+            </v-row>
 
             <v-row>
               <v-col cols="12" md="6">
@@ -268,7 +273,7 @@
                     <span> result </span>
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span class=""> {{ this.value5_arg1 }} ( code = {{ this.value5_arg2 }} ) </span>
+                    <span class=""> {{ this.tx.info }} ( code = {{ this.tx.code }} ) </span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -281,17 +286,17 @@
                     <v-row>
                       <v-col cols="3" class="px-lg-12 text-center"> pubkey </v-col>
                       <v-col cols="1" class="px-lg-12 text-center"> : </v-col>
-                      <v-col cols="7" class="px-lg-12 text-left subtitle-2">{{ this.value6 }}</v-col>
+                      <v-col cols="7" class="px-lg-12 text-left subtitle-2">{{ this.tx.pubkey }}</v-col>
                     </v-row>
                     <v-row>
                       <v-col cols="3" class="px-lg-12 text-center"> sig bytes </v-col>
                       <v-col cols="1" class="px-lg-12 text-center"> : </v-col>
-                      <v-col cols="7" class="px-lg-12 text-left subtitle-2">{{ this.value7 }}</v-col>
+                      <v-col cols="7" class="px-lg-12 text-left subtitle-2">{{ this.tx.sigBytes }}</v-col>
                     </v-row>
                     <v-row>
                       <v-col cols="3" class="px-lg-12 text-center"> verification </v-col>
                       <v-col cols="1" class="px-lg-12 text-center"> : </v-col>
-                      <v-col cols="7" class="px-lg-12 text-left subtitle-2">{{ this.value8 }}</v-col>
+                      <v-col cols="7" class="px-lg-12 text-left subtitle-2">{{ this.tx.sigVerification }}</v-col>
                     </v-row>
                   </v-col>
                 </v-row>
@@ -308,19 +313,19 @@
 
 <script>
   export default {
-    data() {
-      return {
-        param : this.$route.params,
-        value2 : 123,
-        value3 : '3e1ca2bc03050d6e2b5868a968b551c68ee14854',
-        value4: 'transfer',
-        value5_arg1: 'ABCD',
-        value5_arg2: 344,
-        value6: '98ee0c782742cf6099d2854338562d24e24335de13cdad7012079b4f082988cdc9a25a88bf5333ec898e6f0c1efc1c6f4a70abf6e0f33fc20dfb1a9b6930bd90df',
-        value7: '9f2633241418630e7fe210a7fff0df891cbf2f53d833153b89c0a68017e1e40acfccb65c412c4fff39531234240fb825980a0b5d5db84f63977f020aebdaebff',
-        value8: '??',
-      }
-    },
+    data: () => ({
+      tx: {
+        hash: '',
+        height : 0,
+        sender : '',
+        type: '',
+        info: '',
+        code: 0,
+        pubkey: '',
+        sigBytes: '',
+        sigVerification: '',
+      },
+    }),
     watch: {
       '$store.state.network'() {
         console.log('[InspectTx Page] 변경 된 network value', this.$store.state.network);
@@ -337,9 +342,11 @@
     },
     methods: {
       async getPageData(){
-        // 데이터 바인딩
-        console.log(this.param.hash);
-        console.log('network val',this.network);
+        try {
+          this.tx = await this.$api.getTx(this.$route.params.hash);
+        } catch (e) {
+          console.log(e);
+        }
       },
     }
   }

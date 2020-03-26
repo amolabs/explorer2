@@ -48,7 +48,7 @@
                     </div>
                     <div>
                       <span> no. of txs per block : </span>
-                      <span class="ml-3"> {{Number(this.networkOverview.numTxsPerBlock.toFixed(2)).toLocaleString()}} /blk </span>
+                      <span class="ml-3"> {{Number(this.networkOverview.numTxsPerBlock.toFixed(5)).toLocaleString()}} /blk </span>
                     </div>
                     <div >
                       <span> transaction fee : </span>

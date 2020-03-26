@@ -64,6 +64,15 @@ export default {
       });
   },
 
+  getTx(hash) {
+    return axios.get(`${server}/chain/amo-testnet-200306/txs/${hash}`,
+      options)
+      .then(res => {
+        var tx = camelcaseKeys(res.data);
+        return Promise.resolve(tx[0]);
+      });
+  },
+
   getTxs(from, num, order) {
     return axios.get(`${server}/chain/amo-testnet-200306/txs?from=${from}&num=${num}&order=${order}`,
       options)
