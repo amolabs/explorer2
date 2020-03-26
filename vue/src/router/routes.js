@@ -12,7 +12,7 @@ import InspectTx from '../views/InspectTx'
 import InspectAoount from '../views/InspectAccount'
 import InspectValidator from '../views/InspectValidator'
 import InspectDraft from '../views/InspectDraft'
-import InspectStorate from '../views/InspectStorage'
+import InspectStorage from '../views/InspectStorage'
 import InspectParcel from '../views/InspectParcel'
 
 const routes = [
@@ -24,47 +24,54 @@ const routes = [
   },
   {
     path: '/inspect',
-    name: 'Inspect',
     icon: 'dashboard',
     component : Inspect,
     children: [
       {
         path:'',
+        name: 'Inspect',
         props:true,
         component : InspectBlank
       },
       {
         path: 'block/:height',
+        name: 'InspectBlock',
         props : true,
         component: InspectBlock
       },
       {
         path: 'account/:account',
+        name: 'InspectAccount',
         props : true,
         component: InspectAoount
       },
       {
         path: 'tx/:hash',
+        name: 'InspectTx',
         props : true,
         component: InspectTx
       },
       {
         path: 'validator/:address',
+        name: 'InspectValidator',
         props : true,
         component: InspectValidator
       },
       {
         path: 'draft/:draftId',
+        name: 'InspectDraft',
         props : true,
         component: InspectDraft
       },
       {
         path: 'storage/:storageId',
+        name: 'InspectStorage',
         props : true,
-        component: InspectStorate
+        component: InspectStorage
       },
       {
         path: 'parcel/:parcelId',
+        name: 'InspectParcel',
         props : true,
         component: InspectParcel
       },
@@ -93,6 +100,7 @@ const routes = [
     icon: 'dashboard',
     component: Governance
   },
+  /*
   {
     path: '/storages',
     name: 'Storages',
@@ -105,6 +113,6 @@ const routes = [
     icon: 'dashboard',
     component: Parcels
   },
-
+  */
 ];
 export default routes;
