@@ -26,7 +26,7 @@ class Block:
         dt = self.time.astimezone(tz=timezone.utc)
         self.time = dt.replace(tzinfo=None).isoformat()
         self.interval = 0
-        if self.height == 1:
+        if self.height == 1 or self.height == 2:
             self.interval = 0
         else:
             cursor.execute(f"""SELECT `time` FROM `c_blocks`
