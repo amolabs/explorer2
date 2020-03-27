@@ -1,3 +1,12 @@
+-- explorer.genesis definition
+
+CREATE TABLE `genesis` (
+  `chain_id` char(32) NOT NULL,
+  `genesis` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`genesis`)),
+  PRIMARY KEY (`chain_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 -- explorer.blocks definition
 
 CREATE TABLE `blocks` (

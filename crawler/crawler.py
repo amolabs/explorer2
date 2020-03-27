@@ -55,9 +55,21 @@ else:
     print("DB connected")
 
 if args.node:
-    # get current explorer state
     cur = db.cursor()
-    cur.execute("""SELECT `height` FROM `blocks` ORDER BY `height` DESC LIMIT 1""")
+
+    # get node status
+    r = requests.get(f'{node}/status')
+    dat = json.loads(r.text)
+    target_height = int(dat['result']['sync_info']['latest_block_height'])
+    #print(dat['result']['node_info']['network'])
+    print(f'target remote height: {target_height}')
+    chain_id = dat['result']['node_info']['network']
+
+    # get current explorer state
+    cur.execute("""SELECT `height` FROM `blocks` 
+        WHERE (`chain_id` = %(chain_id)s)
+        ORDER BY `height` DESC LIMIT 1""",
+        {'chain_id': chain_id})
     row = cur.fetchone()
     if row:
         #print(row)
@@ -67,12 +79,24 @@ if args.node:
         last_height = 0
     print(f'currnet explorer height: {last_height}')
 
-    # get node status
-    r = requests.get(f'{node}/status')
-    dat = json.loads(r.text)
-    target_height = int(dat['result']['sync_info']['latest_block_height'])
-    #print(dat['result']['node_info']['network'])
-    print(f'target remote height: {target_height}')
+    # check genesis
+    cur.execute("""
+        SELECT COUNT(*) FROM `genesis` WHERE (`chain_id` = %(chain_id)s)
+        """,
+        {'chain_id': chain_id})
+    row = cur.fetchone()
+    if row[0] == 0:
+        r = requests.get(f'{node}/genesis')
+        dat = json.loads(r.text)
+        genesis = json.dumps(dat['result']['genesis'])
+        cur.execute("""
+            INSERT INTO `genesis`
+                (`chain_id`, `genesis`)
+            VALUES
+                (%(chain_id)s, %(genesis)s)
+            """,
+            {'chain_id': chain_id, 'genesis': genesis})
+        db.commit()
 
     # figure out
     limit = args.limit
