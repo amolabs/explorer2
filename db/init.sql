@@ -35,6 +35,15 @@ CREATE TABLE `txs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
+-- explorer.play_stat definition
+
+CREATE TABLE `play_stat` (
+  `chain_id` char(32) NOT NULL,
+  `height` int(11) NOT NULL,
+  PRIMARY KEY (`chain_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 -- explorer.block_stat source
 
 CREATE OR REPLACE
