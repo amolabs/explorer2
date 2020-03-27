@@ -2,14 +2,13 @@
 # vim: set sw=4 ts=4 expandtab :
 
 import json
-import requests
 
-def block(node, height):
-    r = requests.get(f'{node}/block?height={height}')
+def block(s, node, height):
+    r = s.get(f'{node}/block?height={height}')
     dat = json.loads(r.text)['result']
     block_id = dat['block_id']
     block = dat['block']
-    r = requests.get(f'{node}/block_results?height={height}')
+    r = s.get(f'{node}/block_results?height={height}')
     txs_results = json.loads(r.text)['result']['txs_results']
     return block_id, block, txs_results
 

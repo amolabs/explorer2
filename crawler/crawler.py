@@ -56,9 +56,10 @@ else:
 
 if args.node:
     cur = db.cursor()
+    s = requests.Session()
 
     # get node status
-    r = requests.get(f'{node}/status')
+    r = s.get(f'{node}/status')
     dat = json.loads(r.text)
     target_height = int(dat['result']['sync_info']['latest_block_height'])
     #print(dat['result']['node_info']['network'])
@@ -86,7 +87,7 @@ if args.node:
         {'chain_id': chain_id})
     row = cur.fetchone()
     if row[0] == 0:
-        r = requests.get(f'{node}/genesis')
+        r = s.get(f'{node}/genesis')
         dat = json.loads(r.text)
         genesis = json.dumps(dat['result']['genesis'])
         cur.execute("""
@@ -119,7 +120,7 @@ if args.node:
             print('.', end='', flush=True)
         if h % 100 == 0:
             print(f'block height {h}', flush=True)
-        block_id, block_raw, txs_results = collector.block(node, h)
+        block_id, block_raw, txs_results = collector.block(s, node, h)
         block_header = block_raw['header']
         tx_bodies = block_raw['data']['txs']
         block = amo.Block(block_header['chain_id'], block_header['height'])
