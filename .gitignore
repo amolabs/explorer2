@@ -108,3 +108,6 @@ dist
 
 # python
 __pycache__/
+
+# local config
+db/config.json
