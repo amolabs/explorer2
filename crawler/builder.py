@@ -40,8 +40,8 @@ class Builder:
 
     def clear(self, cursor):
         print('REBUILD')
-        cursor.execute("""DELETE FROM `accounts`""")
-        cursor.execute("""OPTIMIZE TABLE `accounts`""")
+        cursor.execute("""DELETE FROM `s_accounts`""")
+        cursor.execute("""OPTIMIZE TABLE `s_accounts`""")
         cursor.fetchall()
         self.height = 0
         self._save_height(cursor)
@@ -58,7 +58,7 @@ class Builder:
 
     def play_genesis(self, cursor):
         cursor.execute("""
-            SELECT `genesis` FROM `genesis`
+            SELECT `genesis` FROM `c_genesis`
             WHERE (`chain_id` = %(chain_id)s)
             """,
             vars(self))
@@ -76,7 +76,7 @@ class Builder:
         if self.height + 1 > self.roof:
             return False
         cursor.execute("""
-            SELECT * FROM `txs`
+            SELECT * FROM `c_txs`
             WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s + 1)
             """,
             vars(self))

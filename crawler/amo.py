@@ -29,14 +29,14 @@ class Block:
         if self.height == 1:
             self.interval = 0
         else:
-            cursor.execute(f"""SELECT `time` FROM `blocks`
+            cursor.execute(f"""SELECT `time` FROM `c_blocks`
                 WHERE `height` = {self.height - 1}""")
             row = cursor.fetchone()
             # TODO exception handling
             prev = row[0].replace(tzinfo=timezone.utc)
             self.interval = (dt - prev).total_seconds()
         cursor.execute("""
-            INSERT INTO `blocks`
+            INSERT INTO `c_blocks`
                 (`chain_id`, `height`, `time`, `hash`,
                     `interval`, `proposer`)
             VALUES
@@ -47,7 +47,7 @@ class Block:
 
     def update(self, cursor):
         cursor.execute("""
-            UPDATE `blocks` SET
+            UPDATE `c_blocks` SET
                 `num_txs` = %(num_txs)s,
                 `num_txs_valid` = %(num_txs_valid)s,
                 `num_txs_invalid` = %(num_txs_invalid)s
@@ -101,7 +101,7 @@ class Tx:
     """
     def save(self, cursor):
         cursor.execute("""
-            INSERT INTO `txs`
+            INSERT INTO `c_txs`
                 (`chain_id`, `hash`, `height`, `index`, `code`, `info`,
                 `type`, `sender`, `fee`, `last_height`, `payload`)
             VALUES

@@ -66,7 +66,7 @@ if args.node:
     chain_id = dat['result']['node_info']['network']
 
     # get current explorer state
-    cur.execute("""SELECT `height` FROM `blocks` 
+    cur.execute("""SELECT `height` FROM `c_blocks` 
         WHERE (`chain_id` = %(chain_id)s)
         ORDER BY `height` DESC LIMIT 1""",
         {'chain_id': chain_id})
@@ -81,7 +81,7 @@ if args.node:
 
     # check genesis
     cur.execute("""
-        SELECT COUNT(*) FROM `genesis` WHERE (`chain_id` = %(chain_id)s)
+        SELECT COUNT(*) FROM `c_genesis` WHERE (`chain_id` = %(chain_id)s)
         """,
         {'chain_id': chain_id})
     row = cur.fetchone()
@@ -90,7 +90,7 @@ if args.node:
         dat = json.loads(r.text)
         genesis = json.dumps(dat['result']['genesis'])
         cur.execute("""
-            INSERT INTO `genesis`
+            INSERT INTO `c_genesis`
                 (`chain_id`, `genesis`)
             VALUES
                 (%(chain_id)s, %(genesis)s)

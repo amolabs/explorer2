@@ -10,7 +10,7 @@ class Account:
         self.balance = 0
         self.stake = 0
         cursor.execute("""
-            SELECT * FROM `accounts`
+            SELECT * FROM `s_accounts`
             WHERE (`chain_id` = %(chain_id)s AND `address` = %(address)s)
             """,
             vars(self))
@@ -21,7 +21,7 @@ class Account:
             self.stake = int(d['stake'])
         else:
             cursor.execute("""
-                INSERT INTO `accounts` (`chain_id`, `address`)
+                INSERT INTO `s_accounts` (`chain_id`, `address`)
                 VALUES (%(chain_id)s, %(address)s)
                 """,
                 vars(self))
@@ -31,7 +31,7 @@ class Account:
         values = vars(self)
         values['balance'] = str(values['balance'])
         cursor.execute("""
-            UPDATE `accounts`
+            UPDATE `s_accounts`
             SET
                 `balance` = %(balance)s,
                 `stake` = %(stake)s
