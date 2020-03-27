@@ -13,17 +13,27 @@ class Builder:
         cursor.execute("""
             SELECT * FROM `play_stat` WHERE (`chain_id` = %(chain_id)s)
             """,
-            ({'chain_id': self.chain_id}))
+            vars(self))
         row = cursor.fetchone()
         if row:
-            s = dict(zip(cursor.column_names, row))
-            self.height = s['height']
+            d = dict(zip(cursor.column_names, row))
+            self.height = d['height']
         else:
             cursor.execute("""
                 INSERT INTO `play_stat` (`chain_id`, `height`)
                 VALUES (%(chain_id)s, %(height)s)
                 """,
                 vars(self))
+        cursor.execute("""
+            SELECT * FROM `block_stat` WHERE (`chain_id` = %(chain_id)s)
+            """,
+            vars(self))
+        row = cursor.fetchone()
+        if row:
+            d = dict(zip(cursor.column_names, row))
+            self.roof = d['num_blocks']
+        else:
+            self.roof = 0
 
     def stat(self):
         print('state db stat', vars(self))
@@ -40,8 +50,11 @@ class Builder:
         if self.height == 0:
             if self.play_genesis(cursor) == False:
                 return False
+        if num == 0:
+            num = self.roof - self.height
         for i in range(num):
-            self.step_block(cursor)
+            if self.step_block(cursor) == True:
+                continue
 
     def play_genesis(self, cursor):
         cursor.execute("""
@@ -60,6 +73,8 @@ class Builder:
             return False # TODO: return error
 
     def step_block(self, cursor):
+        if self.height + 1 > self.roof:
+            return False
         cursor.execute("""
             SELECT * FROM `txs`
             WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s + 1)
@@ -75,6 +90,7 @@ class Builder:
 
         self.height += 1
         self._save_height(cursor)
+        return True
 
     def _save_height(self, cursor):
         cursor.execute("""
