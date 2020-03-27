@@ -31,8 +31,6 @@ async function getOne(chain_id, height) {
       query_var = [chain_id, height];
     }
     db.query(query_str, query_var, function (err, rows, fields) {
-      // Call reject on error states,
-      // call resolve with results
       if (err) {
         return reject(err);
       }

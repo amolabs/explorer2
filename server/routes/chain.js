@@ -5,9 +5,11 @@ var router = express.Router();
 const chain = require('../models/chain');
 var blocks = require('./blocks');
 var txs = require('./txs');
+var accounts = require('./accounts');
 
 router.use('/blocks', blocks);
 router.use('/txs', txs);
+router.use('/accounts', accounts);
 
 router.get('/', function(req, res) {
   const chain_id = res.locals.chain_id;
