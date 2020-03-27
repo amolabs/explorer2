@@ -179,7 +179,9 @@ if args.chain:
         builder.clear(cur)
     db.commit()
     builder.stat()
-    builder.play(cur, args.limit)
+    if builder.play(cur, args.limit) == False:
+        print('Fail')
+        exit(0)
     db.commit()
     builder.stat()
 

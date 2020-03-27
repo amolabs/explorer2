@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 # vim: set sw=4 ts=4 expandtab :
 
+import json
+
 import amo
+import state
 
 class Builder:
     def __init__(self, chain_id, cursor):
@@ -27,12 +30,34 @@ class Builder:
 
     def clear(self, cursor):
         print('REBUILD')
+        cursor.execute("""DELETE FROM `accounts`""")
+        cursor.execute("""OPTIMIZE TABLE `accounts`""")
+        cursor.fetchall()
         self.height = 0
         self._save_height(cursor)
 
     def play(self, cursor, num):
+        if self.height == 0:
+            if self.play_genesis(cursor) == False:
+                return False
         for i in range(num):
             self.step_block(cursor)
+
+    def play_genesis(self, cursor):
+        cursor.execute("""
+            SELECT `genesis` FROM `genesis`
+            WHERE (`chain_id` = %(chain_id)s)
+            """,
+            vars(self))
+        row = cursor.fetchone()
+        if row:
+            genesis = json.loads(row[0])['app_state']
+            for item in genesis['balances']:
+                acc = state.Account(self.chain_id, item['owner'], cursor)
+                acc.balance = item['amount']
+                acc.save(cursor)
+        else:
+            return False # TODO: return error
 
     def step_block(self, cursor):
         cursor.execute("""
