@@ -66,8 +66,9 @@ class Builder:
             """,
             vars(self))
         rows = cursor.fetchall()
+        cols = cursor.column_names
         for row in rows:
-            d = dict(zip(cursor.column_names, row))
+            d = dict(zip(cols, row))
             tx = amo.Tx(self.chain_id, d['height'], d['index'])
             tx.read(d)
             tx.play(cursor)
