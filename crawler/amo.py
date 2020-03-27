@@ -13,14 +13,13 @@ class Block:
     """form a block"""
     def __init__(self, chain_id, height):
         self.chain_id = chain_id
-        self.height = height
+        self.height = int(height)
 
-    def set_meta(self, meta):
-        self.time = dateparse(
-                meta['header']['time']).astimezone(tz=timezone.utc)
-        self.hash = meta['block_id']['hash']
-        self.num_txs = int(meta['header']['num_txs'])
-        self.proposer = meta['header']['proposer_address']
+    def set_meta(self, blk_id, blk_header):
+        self.time = dateparse(blk_header['time']).astimezone(tz=timezone.utc)
+        self.hash = blk_id['hash']
+        #self.num_txs = blk_header['num_txs']
+        self.proposer = blk_header['proposer_address']
 
     """cursor: db cursor"""
     def save(self, cursor):
@@ -38,10 +37,10 @@ class Block:
             self.interval = (dt - prev).total_seconds()
         cursor.execute("""
             INSERT INTO `blocks`
-                (`chain_id`, `height`, `time`, `hash`, `num_txs`,
+                (`chain_id`, `height`, `time`, `hash`,
                     `interval`, `proposer`)
             VALUES
-                (%(chain_id)s, %(height)s, %(time)s, %(hash)s, %(num_txs)s,
+                (%(chain_id)s, %(height)s, %(time)s, %(hash)s,
                 %(interval)s, %(proposer)s)
             """,
             (vars(self)))
@@ -49,6 +48,7 @@ class Block:
     def update(self, cursor):
         cursor.execute("""
             UPDATE `blocks` SET
+                `num_txs` = %(num_txs)s,
                 `num_txs_valid` = %(num_txs_valid)s,
                 `num_txs_invalid` = %(num_txs_invalid)s
             WHERE

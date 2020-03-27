@@ -119,16 +119,18 @@ if args.node:
             print('.', end='', flush=True)
         if h % 100 == 0:
             print(f'block height {h}', flush=True)
-        block_meta, tx_bodies, block_results = collector.block(node, h)
-        block = amo.Block(block_meta['header']['chain_id'], h)
-        block.set_meta(block_meta)
+        block_id, block_raw, txs_results = collector.block(node, h)
+        block_header = block_raw['header']
+        tx_bodies = block_raw['data']['txs']
+        block = amo.Block(block_header['chain_id'], block_header['height'])
+        block.set_meta(block_id, block_header)
         block.save(cur)
         num = 0
         num_valid = 0
         num_invalid = 0
         for i in range(len(tx_bodies) if tx_bodies else 0):
             body = tx_bodies[i]
-            result = block_results[i]
+            result = txs_results[i]
             tx = amo.Tx(block.chain_id, block.height, i)
             tx.parse_body(body)
             tx.set_result(result)
@@ -139,8 +141,8 @@ if args.node:
             num += 1
             tx.save(cur)
 
-        assert(block.num_txs == num)
         if num_valid > 0 or num_invalid > 0:
+            block.num_txs = num
             block.num_txs_valid = num_valid
             block.num_txs_invalid = num_invalid
             block.update(cur)

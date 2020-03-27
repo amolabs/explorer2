@@ -6,13 +6,12 @@ import requests
 
 def block(node, height):
     r = requests.get(f'{node}/block?height={height}')
-    block = json.loads(r.text)['result']
-    if int(block['block_meta']['header']['num_txs']) > 0:
-        r = requests.get(f'{node}/block_results?height={height}')
-        block_results = json.loads(r.text)['result']['results']['deliver_tx']
-    else:
-        block_results = []
-    return block['block_meta'], block['block']['data']['txs'], block_results
+    dat = json.loads(r.text)['result']
+    block_id = dat['block_id']
+    block = dat['block']
+    r = requests.get(f'{node}/block_results?height={height}')
+    txs_results = json.loads(r.text)['result']['txs_results']
+    return block_id, block, txs_results
 
 def block_metas(node, base, num):
     print(f'batch height from {base+1} to {base+num}')
