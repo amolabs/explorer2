@@ -120,11 +120,12 @@ if args.node:
             print('.', end='', flush=True)
         if h % 100 == 0:
             print(f'block height {h}', flush=True)
-        block_id, block_raw, txs_results = collector.block(s, node, h)
+        block_id, block_raw, txs_results, incs = collector.block(s, node, h)
         block_header = block_raw['header']
         tx_bodies = block_raw['data']['txs']
         block = amo.Block(block_header['chain_id'], block_header['height'])
         block.set_meta(block_id, block_header)
+        block.incentives = incs
         block.save(cur)
         num = 0
         num_valid = 0

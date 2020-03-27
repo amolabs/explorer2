@@ -38,10 +38,10 @@ class Block:
         cursor.execute("""
             INSERT INTO `c_blocks`
                 (`chain_id`, `height`, `time`, `hash`,
-                    `interval`, `proposer`)
+                    `interval`, `proposer`, `incentives`)
             VALUES
                 (%(chain_id)s, %(height)s, %(time)s, %(hash)s,
-                %(interval)s, %(proposer)s)
+                %(interval)s, %(proposer)s, %(incentives)s)
             """,
             (vars(self)))
 
