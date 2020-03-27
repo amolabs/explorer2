@@ -121,7 +121,7 @@
         avgInterval: 0,
         avgIncentive: 0,
         avgNumTxs: 0,
-        avgTxBytes: 222234.33,
+        avgTxBytes: 0,
       },
       statRange:100,
       blockTable: {

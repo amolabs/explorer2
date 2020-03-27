@@ -18,10 +18,10 @@
               <v-col cols="12" md="6">
                 <v-row align="start">
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
-                    <span> block height </span>
+                    <span> block position </span>
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span> {{ this.tx.height.toLocaleString() }}  </span>
+                    <span> height {{ this.tx.height }} # {{ this.tx.index }}  </span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -45,224 +45,35 @@
                   </v-col>
                 </v-row>
               </v-col>
+              <v-col cols="12" md="6">
+                <v-row align="start">
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                    <span> fee </span>
+                  </v-col>
+                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                    <span> {{this.$byteCalc(this.tx.fee)}} AMO </span>
+                  </v-col>
+                </v-row>
+              </v-col>
             </v-row>
 
             <!--Type-Specific tx Body-->
-            <v-row v-if="this.tx.type === 'transfer'">
-              <v-col cols="12" md="6">
+            <v-row v-if="this.tx.parsed">
+              <v-col cols="12" md="6" v-for="(val,key) in this.tx.parsed"
+                v-bind:key="key">
                 <v-row align="start">
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
-                    <span> TO </span>
+                    <span> {{key}} </span>
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span class="truncate-option"> </span>
-                  </v-col>
-                </v-row>
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-row align="start">
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
-                    <span> Amount</span>
-                  </v-col>
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span> AMO </span>
-                  </v-col>
-                </v-row>
-              </v-col>
-            </v-row>
-            <v-row v-else-if="this.tx.type === 'stake'">
-              <v-col cols="12" md="6">
-                <v-row align="start">
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
-                    <span> Validator </span>
-                  </v-col>
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span class="truncate-option"> </span>
-                  </v-col>
-                </v-row>
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-row align="start">
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
-                    <span> Amount</span>
-                  </v-col>
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span> AMO </span>
-                  </v-col>
-                </v-row>
-              </v-col>
-            </v-row>
-            <v-row v-else-if="this.tx.type === 'withdraw'">
-              <v-col cols="12" md="6">
-                <v-row align="start">
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
-                    <span> Amount </span>
-                  </v-col>
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span> AMO</span>
-                  </v-col>
-                </v-row>
-              </v-col>
-            </v-row>
-            <v-row v-else-if="this.tx.type === 'delegate'">
-              <v-col cols="12" md="6">
-                <v-row align="start">
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
-                    <span> TO </span>
-                  </v-col>
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span class="truncate-option"> AMO</span>
-                  </v-col>
-                </v-row>
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-row align="start">
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
-                    <span> Amount </span>
-                  </v-col>
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span class="truncate-option"> AMO</span>
-                  </v-col>
-                </v-row>
-              </v-col>
-            </v-row>
-            <v-row v-else-if="this.tx.type === 'retract'">
-              <v-col cols="12" md="6">
-                <v-row align="start">
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
-                    <span> Amount </span>
-                  </v-col>
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span class="truncate-option"> AMO</span>
-                  </v-col>
-                </v-row>
-              </v-col>
-            </v-row>
-            <v-row v-else-if="this.tx.type === 'register'">
-              <v-col cols="12" md="6">
-                <v-row align="start">
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
-                    <span> Parcel </span>
-                  </v-col>
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span class="truncate-option"> </span>
-                  </v-col>
-                </v-row>
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-row align="start">
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
-                    <span> Owner key custody </span>
-                  </v-col>
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span class="truncate-option"> AMO</span>
-                  </v-col>
-                </v-row>
-              </v-col>
-            </v-row>
-            <v-row v-else-if="this.tx.type === 'discard'">
-              <v-col cols="12" md="6">
-                <v-row align="start">
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
-                    <span> Parcel </span>
-                  </v-col>
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span class="truncate-option"> </span>
-                  </v-col>
-                </v-row>
-              </v-col>
-            </v-row>
-            <v-row v-else-if="this.tx.type === 'request'">
-              <v-col cols="12" md="6">
-                <v-row align="start">
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
-                    <span> Parcel </span>
-                  </v-col>
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span class="truncate-option"> </span>
-                  </v-col>
-                </v-row>
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-row align="start">
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
-                    <span> Payment </span>
-                  </v-col>
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span class="truncate-option"> AMO</span>
-                  </v-col>
-                </v-row>
-              </v-col>
-            </v-row>
-            <v-row v-else-if="this.tx.type === 'cancel'">
-              <v-col cols="12" md="6">
-                <v-row align="start">
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
-                    <span> Parcel </span>
-                  </v-col>
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span class="truncate-option"> </span>
-                  </v-col>
-                </v-row>
-              </v-col>
-            </v-row>
-            <v-row v-else-if="this.tx.type === 'grant'">
-              <v-col cols="12" md="6">
-                <v-row align="start">
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
-                    <span> Parcel </span>
-                  </v-col>
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span class="truncate-option"> </span>
-                  </v-col>
-                </v-row>
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-row align="start">
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
-                    <span> Grantee </span>
-                  </v-col>
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span class="truncate-option"></span>
-                  </v-col>
-                </v-row>
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-row align="start">
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
-                    <span> Buyer key custody </span>
-                  </v-col>
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span class="truncate-option"> </span>
-                  </v-col>
-                </v-row>
-              </v-col>
-            </v-row>
-            <v-row v-else-if="this.tx.type === 'revoke'">
-              <v-col cols="12" md="6">
-                <v-row align="start">
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
-                    <span> Parcel </span>
-                  </v-col>
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span class="truncate-option"> </span>
-                  </v-col>
-                </v-row>
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-row align="start">
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
-                    <span> Grantee </span>
-                  </v-col>
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span class="truncate-option"> AMO</span>
+                    <span class="truncate-option"> {{ val }} </span>
                   </v-col>
                 </v-row>
               </v-col>
             </v-row>
             <v-row v-else>
               <v-col>
-                unknown transaction type
+                Unable to parse tx payload.
               </v-col>
             </v-row>
 
@@ -315,15 +126,19 @@
   export default {
     data: () => ({
       tx: {
+        chain_id: 0,
+        height: 0,
+        index: 0,
         hash: '',
-        height : 0,
-        sender : '',
-        type: '',
-        info: '',
         code: 0,
+        info: '',
+        type: '',
+        sender : '',
+        fee: 0,
+        payload: '',
+        parsed: null,
         pubkey: '',
         sigBytes: '',
-        sigVerification: '',
       },
     }),
     watch: {
@@ -344,6 +159,7 @@
       async getPageData(){
         try {
           this.tx = await this.$api.getTx(this.$route.params.hash);
+          this.tx.parsed = JSON.parse(this.tx.payload);
         } catch (e) {
           console.log(e);
         }
