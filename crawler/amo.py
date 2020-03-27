@@ -7,6 +7,8 @@ from datetime import timezone
 from dateutil.parser import parse as dateparse
 import hashlib
 
+import state
+
 class Block:
     """form a block"""
     def __init__(self, chain_id, height):
@@ -61,7 +63,7 @@ class Tx:
         self.height = height
         self.index = index
 
-    def set_body(self, body):
+    def parse_body(self, body):
         b = base64.b64decode(body)
         self.hash = hashlib.sha256(b).hexdigest().upper()
         self.body = body
@@ -75,6 +77,23 @@ class Tx:
     def set_result(self, result):
         self.code = result['code']
         self.info = result['info']
+
+    def read(self, d):
+        self.type = d['type']
+        self.sender = d['sender']
+        self.fee = int(d['fee'])
+        self.last_height = int(d['last_height'])
+        self.payload = d['payload']
+        #self.payload_parsed = json.loads(d['payload'])
+        self.code = d['code']
+        self.info = d['info']
+        #print('read', vars(self))
+
+    def play(self, cursor):
+        if self.code is not 0:
+            print('pass')
+            return
+        state.processor.get(self.type, state.unknown)(self, cursor)
 
     """Save to DB
 
@@ -92,4 +111,3 @@ class Tx:
                 )
             """,
             (vars(self)))
-
