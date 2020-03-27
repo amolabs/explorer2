@@ -9,9 +9,6 @@ async function getStat(chain_id) {
       if (err) {
         return reject(err);
       }
-      if (rows.length == 0) {
-        return reject('not found');
-      }
       resolve(rows[0]);
     });
   });
@@ -31,8 +28,6 @@ async function getOne(chain_id, height, index) {
       query_var = [chain_id, height, index];
     }
     db.query(query_str, query_var, function (err, rows, fields) {
-      // Call reject on error states,
-      // call resolve with results
       if (err) {
         return reject(err);
       }
@@ -49,9 +44,6 @@ async function getLast(chain_id) {
     db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
-      }
-      if (rows.length == 0) {
-        return resolve({});
       }
       resolve(rows[0]);
     });
