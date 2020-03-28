@@ -40,7 +40,29 @@ class Collector:
         return v
 
     def stat(self):
-        print(f'[crawler] node: {self.node}, local {self.height} => remote {self.remote_height}')
+        print(f'[collector] node: {self.node}, local {self.height} => remote {self.remote_height}')
+
+    def clear(self):
+        print('REBUILD')
+        cur = self.db.cursor()
+        cur.execute("""DELETE FROM `c_genesis`
+            WHERE (`chain_id` = %(chain_id)s)
+            """, self._vars())
+        cur.execute("""OPTIMIZE TABLE `c_genesis`""")
+        cur.fetchall()
+        cur.execute("""DELETE FROM `c_txs`
+            WHERE (`chain_id` = %(chain_id)s)
+            """, self._vars())
+        cur.execute("""OPTIMIZE TABLE `c_txs`""")
+        cur.fetchall()
+        cur.execute("""DELETE FROM `c_blocks`
+            WHERE (`chain_id` = %(chain_id)s)
+            """, self._vars())
+        cur.execute("""OPTIMIZE TABLE `c_blocks`""")
+        cur.fetchall()
+        self.height = 0
+        self.db.commit()
+        cur.close()
 
     def genesis(self, s):
         cur = self.db.cursor()
@@ -76,7 +98,6 @@ class Collector:
         else:
             run = self.remote_height - self.height
 
-        print(f'==========================================================')
         batch_base = self.height
         for h in range(self.height + 1, self.height + run + 1):
             # batch start

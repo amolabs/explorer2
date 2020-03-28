@@ -54,21 +54,20 @@ else:
 
 if args.node:
     collector = collector.Collector(node, db)
+    if args.rebuild:
+        collector.clear()
     collector.stat()
     collector.play(args.limit)
     collector.stat()
 
 if args.chain:
-    cur = db.cursor()
-    builder = builder.Builder(args.chain, cur)
+    builder = builder.Builder(args.chain, db)
     if args.rebuild:
-        builder.clear(cur)
-    db.commit()
+        builder.clear()
     builder.stat()
-    if builder.play(cur, args.limit) == False:
+    if builder.play(args.limit) == False:
         print('Fail')
         exit(0)
-    db.commit()
     builder.stat()
 
 db.close()

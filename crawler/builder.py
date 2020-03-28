@@ -7,102 +7,123 @@ import amo
 import state
 
 class Builder:
-    def __init__(self, chain_id, cursor):
+    def __init__(self, chain_id, db):
         self.chain_id = chain_id
+        self.db = db
+
         self.height = 0
-        cursor.execute("""
+        cur = self.db.cursor()
+        cur.execute("""
             SELECT * FROM `play_stat` WHERE (`chain_id` = %(chain_id)s)
             """,
-            vars(self))
-        row = cursor.fetchone()
+            self._vars())
+        row = cur.fetchone()
         if row:
-            d = dict(zip(cursor.column_names, row))
+            d = dict(zip(cur.column_names, row))
             self.height = d['height']
         else:
-            cursor.execute("""
+            cur.execute("""
                 INSERT INTO `play_stat` (`chain_id`, `height`)
                 VALUES (%(chain_id)s, %(height)s)
                 """,
-                vars(self))
-        cursor.execute("""
+                self._vars())
+        cur.execute("""
             SELECT * FROM `block_stat` WHERE (`chain_id` = %(chain_id)s)
             """,
-            vars(self))
-        row = cursor.fetchone()
+            self._vars())
+        row = cur.fetchone()
         if row:
-            d = dict(zip(cursor.column_names, row))
+            d = dict(zip(cur.column_names, row))
             self.roof = d['num_blocks']
         else:
             self.roof = 0
+        self.db.commit()
+        cur.close()
+
+    def _vars(self):
+        v = vars(self).copy()
+        del v['db']
+        return v
 
     def stat(self):
-        print('state db stat', vars(self))
+        print(f'[builder] chain: {self.chain_id}, local {self.height} => remote {self.roof}')
 
-    def clear(self, cursor):
+    def clear(self):
         print('REBUILD')
-        cursor.execute("""DELETE FROM `s_accounts`""")
-        cursor.execute("""OPTIMIZE TABLE `s_accounts`""")
-        cursor.fetchall()
+        cur = self.db.cursor()
+        cur.execute("""DELETE FROM `s_accounts`
+            WHERE (`chain_id` = %(chain_id)s)
+            """, self._vars())
+        cur.execute("""OPTIMIZE TABLE `s_accounts`""")
+        cur.fetchall()
         self.height = 0
-        self._save_height(cursor)
+        self._save_height(cur)
+        self.db.commit()
+        cur.close()
 
-    def play(self, cursor, num):
+    def play(self, num):
         if self.height == 0:
-            if self.play_genesis(cursor) == False:
+            if self.play_genesis() == False:
                 return False
         if num == 0:
             num = self.roof - self.height
         for i in range(num):
-            if self.play_block(cursor) == True:
+            if self.play_block() == True:
                 continue
 
-    def play_genesis(self, cursor):
-        cursor.execute("""
+    def play_genesis(self):
+        cur = self.db.cursor()
+        cur.execute("""
             SELECT `genesis` FROM `c_genesis`
             WHERE (`chain_id` = %(chain_id)s)
             """,
-            vars(self))
-        row = cursor.fetchone()
+            self._vars())
+        row = cur.fetchone()
         if row:
             genesis = json.loads(row[0])['app_state']
             for item in genesis['balances']:
-                acc = state.Account(self.chain_id, item['owner'], cursor)
+                acc = state.Account(self.chain_id, item['owner'], cur)
                 acc.balance = item['amount']
-                acc.save(cursor)
+                acc.save(cur)
         else:
             return False # TODO: return error
+        self.db.commit()
+        cur.close()
 
-    def play_block(self, cursor):
+    def play_block(self):
+        cur = self.db.cursor()
         if self.height + 1 > self.roof:
             return False
-        cursor.execute("""
+        cur.execute("""
             SELECT * FROM `c_txs`
             WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s + 1)
             """,
-            vars(self))
-        rows = cursor.fetchall()
-        cols = cursor.column_names
+            self._vars())
+        rows = cur.fetchall()
+        cols = cur.column_names
         for row in rows:
             d = dict(zip(cols, row))
             tx = amo.Tx(self.chain_id, d['height'], d['index'])
             tx.read(d)
-            tx.play(cursor)
+            tx.play(cur)
 
-        cursor.execute("""
+        cur.execute("""
             SELECT `incentives` FROM `c_blocks`
             WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s + 1)
             """,
-            vars(self))
-        row = cursor.fetchone()
+            self._vars())
+        row = cur.fetchone()
         if row:
             incentives = json.loads(row[0])
             for inc in incentives:
-                recp = state.Account(self.chain_id, inc['address'], cursor)
+                recp = state.Account(self.chain_id, inc['address'], cur)
                 recp.balance += int(inc['amount'])
-                recp.save(cursor)
+                recp.save(cur)
 
         self.height += 1
-        self._save_height(cursor)
+        self._save_height(cur)
+        self.db.commit()
+        cur.close()
         return True
 
     def _save_height(self, cursor):
@@ -110,5 +131,5 @@ class Builder:
             UPDATE `play_stat` SET `height` = %(height)s
             WHERE `chain_id` = %(chain_id)s
             """,
-            vars(self))
+            self._vars())
 
