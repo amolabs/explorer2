@@ -53,7 +53,7 @@ class Builder:
         if num == 0:
             num = self.roof - self.height
         for i in range(num):
-            if self.step_block(cursor) == True:
+            if self.play_block(cursor) == True:
                 continue
 
     def play_genesis(self, cursor):
@@ -72,7 +72,7 @@ class Builder:
         else:
             return False # TODO: return error
 
-    def step_block(self, cursor):
+    def play_block(self, cursor):
         if self.height + 1 > self.roof:
             return False
         cursor.execute("""
@@ -87,6 +87,19 @@ class Builder:
             tx = amo.Tx(self.chain_id, d['height'], d['index'])
             tx.read(d)
             tx.play(cursor)
+
+        cursor.execute("""
+            SELECT `incentives` FROM `c_blocks`
+            WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s + 1)
+            """,
+            vars(self))
+        row = cursor.fetchone()
+        if row:
+            incentives = json.loads(row[0])
+            for inc in incentives:
+                recp = state.Account(self.chain_id, inc['address'], cursor)
+                recp.balance += int(inc['amount'])
+                recp.save(cursor)
 
         self.height += 1
         self._save_height(cursor)
