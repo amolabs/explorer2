@@ -2,6 +2,8 @@
 # vim: set sw=4 ts=4 expandtab :
 
 import json
+import base64
+from hashlib import sha256
 
 class Account:
     def __init__(self, chain_id, address, cursor):
@@ -9,6 +11,7 @@ class Account:
         self.address = address
         self.balance = 0
         self.stake = 0
+        self.val_addr = None
         cursor.execute("""
             SELECT * FROM `s_accounts`
             WHERE (`chain_id` = %(chain_id)s AND `address` = %(address)s)
@@ -19,6 +22,7 @@ class Account:
             d = dict(zip(cursor.column_names, row))
             self.balance = int(d['balance'])
             self.stake = int(d['stake'])
+            self.val_addr = d['val_addr']
         else:
             cursor.execute("""
                 INSERT INTO `s_accounts` (`chain_id`, `address`)
@@ -30,11 +34,13 @@ class Account:
         #print(vars(self))
         values = vars(self)
         values['balance'] = str(values['balance'])
+        values['stake'] = str(values['stake'])
         cursor.execute("""
             UPDATE `s_accounts`
             SET
                 `balance` = %(balance)s,
-                `stake` = %(stake)s
+                `stake` = %(stake)s,
+                `val_addr` = %(val_addr)s
             WHERE (`chain_id` = %(chain_id)s AND `address` = %(address)s)
             """,
             values)
@@ -64,6 +70,8 @@ def stake(tx, cursor):
 
     sender.stake += payload['amount']
     sender.balance -= payload['amount']
+    val_pubkey = base64.b64decode(payload['validator'])
+    sender.val_addr = sha256(val_pubkey).hexdigest()[:40].upper()
 
     sender.save(cursor)
 
