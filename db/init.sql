@@ -11,6 +11,7 @@ CREATE TABLE `c_blocks` (
   `tx_bytes` int(11) NOT NULL DEFAULT 0,
   `num_txs_valid` int(11) NOT NULL DEFAULT 0,
   `num_txs_invalid` int(11) NOT NULL DEFAULT 0,
+  `incentives` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`incentives`)),
   PRIMARY KEY (`chain_id`,`height`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -40,16 +41,10 @@ CREATE TABLE `s_accounts` (
   `address` char(40) NOT NULL,
   `balance` char(40) NOT NULL DEFAULT '0',
   `stake` char(40) NOT NULL DEFAULT '0',
+  `val_addr` char(40) DEFAULT NULL,
+  `delegate` char(40) NOT NULL DEFAULT '0',
+  `del_addr` char(40) DEFAULT NULL,
   PRIMARY KEY (`chain_id`,`address`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-
--- explorer.s_parcels definition
-
-CREATE TABLE `s_parcels` (
-  `chain_id` char(32) NOT NULL,
-  `parcel_id` char(72) NOT NULL,
-  PRIMARY KEY (`chain_id`,`parcel_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -70,6 +65,58 @@ CREATE TABLE `c_txs` (
   PRIMARY KEY (`chain_id`,`height`,`index`),
   KEY `txs_hash` (`chain_id`,`hash`) USING BTREE,
   CONSTRAINT `block_FK` FOREIGN KEY (`chain_id`, `height`) REFERENCES `c_blocks` (`chain_id`, `height`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- explorer.s_storages definition
+
+CREATE TABLE `s_storages` (
+  `chain_id` char(32) NOT NULL,
+  `storage_id` int(11) NOT NULL,
+  `owner` char(40) NOT NULL DEFAULT '',
+  `url` varchar(100) DEFAULT NULL,
+  `registration_fee` char(40) NOT NULL DEFAULT '0',
+  `hosting_fee` char(40) NOT NULL DEFAULT '0',
+  `active` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`chain_id`,`storage_id`),
+  KEY `s_storages_FK` (`chain_id`,`owner`),
+  CONSTRAINT `s_storages_FK` FOREIGN KEY (`chain_id`, `owner`) REFERENCES `s_accounts` (`chain_id`, `address`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- explorer.s_parcels definition
+
+CREATE TABLE `s_parcels` (
+  `chain_id` char(32) NOT NULL,
+  `parcel_id` char(72) NOT NULL,
+  `storage_id` int(11) NOT NULL,
+  `owner` char(40) NOT NULL DEFAULT '',
+  `custody` varchar(100) NOT NULL DEFAULT '',
+  `proxy_account` char(40) DEFAULT NULL,
+  `extra` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '{}' CHECK (json_valid(`extra`)),
+  `on_sale` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`chain_id`,`parcel_id`),
+  KEY `s_parcels_FK` (`chain_id`,`storage_id`),
+  KEY `s_parcels_FK_1` (`chain_id`,`owner`),
+  CONSTRAINT `s_parcels_FK` FOREIGN KEY (`chain_id`, `storage_id`) REFERENCES `s_storages` (`chain_id`, `storage_id`),
+  CONSTRAINT `s_parcels_FK_1` FOREIGN KEY (`chain_id`, `owner`) REFERENCES `s_accounts` (`chain_id`, `address`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- explorer.s_requests definition
+
+CREATE TABLE `s_requests` (
+  `chain_id` char(32) NOT NULL,
+  `parcel_id` char(72) NOT NULL,
+  `buyer` char(40) NOT NULL,
+  `payment` char(40) NOT NULL DEFAULT '0',
+  `dealer` char(40) DEFAULT NULL,
+  `dealer_fee` char(40) NOT NULL DEFAULT '0',
+  `extra` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '{}' CHECK (json_valid(`extra`)),
+  PRIMARY KEY (`chain_id`,`parcel_id`,`buyer`),
+  KEY `s_requests_FK_1` (`chain_id`,`buyer`),
+  CONSTRAINT `s_requests_FK` FOREIGN KEY (`chain_id`, `parcel_id`) REFERENCES `s_parcels` (`chain_id`, `parcel_id`),
+  CONSTRAINT `s_requests_FK_1` FOREIGN KEY (`chain_id`, `buyer`) REFERENCES `s_accounts` (`chain_id`, `address`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 

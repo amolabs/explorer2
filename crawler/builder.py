@@ -51,6 +51,21 @@ class Builder:
     def clear(self):
         print('REBUILD')
         cur = self.db.cursor()
+        cur.execute("""DELETE FROM `s_requests`
+            WHERE (`chain_id` = %(chain_id)s)
+            """, self._vars())
+        cur.execute("""OPTIMIZE TABLE `s_requests`""")
+        cur.fetchall()
+        cur.execute("""DELETE FROM `s_parcels`
+            WHERE (`chain_id` = %(chain_id)s)
+            """, self._vars())
+        cur.execute("""OPTIMIZE TABLE `s_parcels`""")
+        cur.fetchall()
+        cur.execute("""DELETE FROM `s_storages`
+            WHERE (`chain_id` = %(chain_id)s)
+            """, self._vars())
+        cur.execute("""OPTIMIZE TABLE `s_storages`""")
+        cur.fetchall()
         cur.execute("""DELETE FROM `s_accounts`
             WHERE (`chain_id` = %(chain_id)s)
             """, self._vars())
@@ -94,6 +109,8 @@ class Builder:
         cur = self.db.cursor()
         if self.height + 1 > self.roof:
             return False
+
+        # txs
         cur.execute("""
             SELECT * FROM `c_txs`
             WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s + 1)
@@ -107,6 +124,7 @@ class Builder:
             tx.read(d)
             tx.play(cur)
 
+        # block incentives
         cur.execute("""
             SELECT `incentives` FROM `c_blocks`
             WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s + 1)
@@ -120,6 +138,7 @@ class Builder:
                 recp.balance += int(inc['amount'])
                 recp.save(cur)
 
+        # close
         self.height += 1
         self._save_height(cur)
         self.db.commit()
