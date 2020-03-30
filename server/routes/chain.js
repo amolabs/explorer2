@@ -6,10 +6,12 @@ const chain = require('../models/chain');
 var blocks = require('./blocks');
 var txs = require('./txs');
 var accounts = require('./accounts');
+var parcels = require('./parcels');
 
 router.use('/blocks', blocks);
 router.use('/txs', txs);
 router.use('/accounts', accounts);
+router.use('/parcels', parcels);
 
 router.get('/', function(req, res) {
   const chain_id = res.locals.chain_id;
