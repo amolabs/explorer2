@@ -30,7 +30,8 @@ class Block:
             self.interval = 0
         else:
             cursor.execute(f"""SELECT `time` FROM `c_blocks`
-                WHERE `height` = {self.height - 1}""")
+                WHERE (`chain_id` = %(chain_id)s AND `height` = {self.height - 1})""",
+                vars(self))
             row = cursor.fetchone()
             # TODO exception handling
             prev = row[0].replace(tzinfo=timezone.utc)
@@ -91,7 +92,7 @@ class Tx:
 
     def play(self, cursor):
         if self.code is not 0:
-            print('pass')
+            #print('tx code is non-zero (invalid)')
             return
         state.processor.get(self.type, state.unknown)(self, cursor)
 
