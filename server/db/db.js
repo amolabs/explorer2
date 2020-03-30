@@ -3,7 +3,8 @@ var config = require('../config');
 var mysql = require('mysql');
 
 var param = config.db;
-var conn = mysql.createConnection(param);
+var pool = mysql.createPool(param);
+/*
 conn.connect((err) => {
   if (err) {
     console.log('DB connection failed.');
@@ -12,5 +13,6 @@ conn.connect((err) => {
     console.log('DB connected.');
   }
 });
+*/
 
-module.exports = conn;
+module.exports = pool;
