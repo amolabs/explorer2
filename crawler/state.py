@@ -12,6 +12,8 @@ class Account:
         self.balance = 0
         self.stake = 0
         self.val_addr = None
+        self.delegate = 0
+        self.del_addr = None
         cursor.execute("""
             SELECT * FROM `s_accounts`
             WHERE (`chain_id` = %(chain_id)s AND `address` = %(address)s)
@@ -23,6 +25,8 @@ class Account:
             self.balance = int(d['balance'])
             self.stake = int(d['stake'])
             self.val_addr = d['val_addr']
+            self.delegate = int(d['delegate'])
+            self.del_addr = d['del_addr']
         else:
             cursor.execute("""
                 INSERT INTO `s_accounts` (`chain_id`, `address`)
@@ -35,12 +39,15 @@ class Account:
         values = vars(self)
         values['balance'] = str(values['balance'])
         values['stake'] = str(values['stake'])
+        values['delegate'] = str(values['delegate'])
         cursor.execute("""
             UPDATE `s_accounts`
             SET
                 `balance` = %(balance)s,
                 `stake` = %(stake)s,
-                `val_addr` = %(val_addr)s
+                `val_addr` = %(val_addr)s,
+                `delegate` = %(delegate)s,
+                `del_addr` = %(del_addr)s
             WHERE (`chain_id` = %(chain_id)s AND `address` = %(address)s)
             """,
             values)
