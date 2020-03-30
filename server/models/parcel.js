@@ -12,6 +12,9 @@ async function getOne(chain_id, parcel_id) {
       if (err) {
         return reject(err);
       }
+      for (i = 0; i < rows.length; i++) {
+        rows[i].on_sale = rows[i].on_sale > 0 ? true : false;
+      }
       resolve(rows);
     });
   });
