@@ -20,12 +20,14 @@ BLOCK_LIMIT_THRESHOLD = 100
 p = argparse.ArgumentParser('AMO blockchain explorer builder')
 p.add_argument("-n", "--node", help="rpc node address to connect",
                type=str)
-p.add_argument("-l", "--limit", help="limit number of blocks to collect",
-               type=int, default=100)
 p.add_argument("-c", "--chain", help="chain id to build state db",
                type=str)
+p.add_argument("-l", "--limit", help="limit number of blocks to collect",
+               type=int, default=100)
 p.add_argument("-r", "--rebuild", help="rebuild state db",
                default=False, dest='rebuild', action='store_true')
+p.add_argument("-v", "--verbose", help="verbose output",
+               default=False, dest='verbose', action='store_true')
 args = p.parse_args()
 node = args.node
 
@@ -74,19 +76,23 @@ if args.node:
             else:
                 break
 
-        collector.stat()
+        if args.verbose:
+            collector.stat()
         collector.play(run_limit)
-        collector.stat()
+        if args.verbose:
+            collector.stat()
 
         if args.chain:
             builder = Builder(args.chain, db)
             if args.rebuild:
                 builder.clear()
-            builder.stat()
+            if args.verbose:
+                builder.stat()
             if builder.play(run_limit) == False:
                 print('Fail')
                 exit(0)
-            builder.stat()
+            if args.verbose:
+                builder.stat()
 
         if collector.height == collector.remote_height:
             break
