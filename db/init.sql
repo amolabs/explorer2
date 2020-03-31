@@ -48,6 +48,31 @@ CREATE TABLE `s_accounts` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
+-- explorer.s_udcs definition
+
+CREATE TABLE `s_udcs` (
+  `chain_id` char(32) NOT NULL,
+  `udc_id` int(11) NOT NULL,
+  `owner` char(40) NOT NULL DEFAULT '',
+  `desc` varchar(100) NOT NULL DEFAULT '',
+  `operators` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '[]' CHECK (json_valid(`operators`)),
+  `total` char(40) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`chain_id`,`udc_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- explorer.s_udc_balances definition
+
+CREATE TABLE `s_udc_balances` (
+  `chain_id` char(32) NOT NULL,
+  `udc_id` int(11) NOT NULL,
+  `address` char(40) NOT NULL,
+  `balance` char(40) NOT NULL DEFAULT '0',
+  `balance_lock` char(40) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`chain_id`,`udc_id`,`address`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 -- explorer.c_txs definition
 
 CREATE TABLE `c_txs` (
@@ -117,6 +142,21 @@ CREATE TABLE `s_requests` (
   KEY `s_requests_FK_1` (`chain_id`,`buyer`),
   CONSTRAINT `s_requests_FK` FOREIGN KEY (`chain_id`, `parcel_id`) REFERENCES `s_parcels` (`chain_id`, `parcel_id`),
   CONSTRAINT `s_requests_FK_1` FOREIGN KEY (`chain_id`, `buyer`) REFERENCES `s_accounts` (`chain_id`, `address`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- explorer.s_usages definition
+
+CREATE TABLE `s_usages` (
+  `chain_id` char(32) NOT NULL,
+  `parcel_id` char(72) NOT NULL,
+  `grantee` char(40) NOT NULL,
+  `custody` varchar(100) NOT NULL DEFAULT '',
+  `extra` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '{}',
+  PRIMARY KEY (`chain_id`,`parcel_id`,`grantee`),
+  KEY `s_requests_FK_1` (`chain_id`,`grantee`) USING BTREE,
+  CONSTRAINT `s_requests_FK_1_copy` FOREIGN KEY (`chain_id`, `grantee`) REFERENCES `s_accounts` (`chain_id`, `address`),
+  CONSTRAINT `s_requests_FK_copy` FOREIGN KEY (`chain_id`, `parcel_id`) REFERENCES `s_parcels` (`chain_id`, `parcel_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
