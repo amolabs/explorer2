@@ -8,8 +8,9 @@ import json
 import mysql.connector
 from mysql.connector import Error
 
-from builder import Builder
 import collector
+import filelock
+from builder import Builder
 
 # local config
 dbconfigfile = '../db/config.json'
@@ -28,8 +29,16 @@ p.add_argument("-r", "--rebuild", help="rebuild state db",
                default=False, dest='rebuild', action='store_true')
 p.add_argument("-v", "--verbose", help="verbose output",
                default=False, dest='verbose', action='store_true')
+p.add_argument("-il", "--ignore-lock", help="If this flag is enabled, delete lock file and force start", default=False)
 args = p.parse_args()
 node = args.node
+
+try:
+    lock = filelock.acquire()
+except Exception:
+    if not args.ignore_lock:
+        raise
+    lock = filelock.ignore_acquire()
 
 # read config
 try:
@@ -46,6 +55,7 @@ else:
 try:
     db = mysql.connector.connect(
         host=dbconfig['host'],
+        port=dbconfig.get('port', 3306),
         user=dbconfig['user'],
         password=dbconfig['password'],
         database=dbconfig['database'],
@@ -88,9 +98,9 @@ if args.node:
                 builder.clear()
             if args.verbose:
                 builder.stat()
-            if builder.play(run_limit) == False:
+            if builder.play(min(args.limit, run_limit)) == False:
                 print('Fail')
-                exit(0)
+                break
             if args.verbose:
                 builder.stat()
 
@@ -98,3 +108,4 @@ if args.node:
             break
 
 db.close()
+filelock.release(lock)

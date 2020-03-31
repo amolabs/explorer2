@@ -64,7 +64,7 @@ class Collector:
         self.db.commit()
         cur.close()
 
-    def genesis(self, s):
+    def ensure_genesis(self, s):
         cur = self.db.cursor()
         # check genesis
         cur.execute("""
@@ -90,7 +90,7 @@ class Collector:
         cur = self.db.cursor()
         s = requests.Session()
 
-        self.genesis(s)
+        self.ensure_genesis(s)
 
         # figure out
         if limit > 0:
