@@ -161,9 +161,9 @@ class Request:
         row = cursor.fetchone()
         if row:
             d = dict(zip(cursor.column_names, row))
-            self.payment = d.get('payment')
+            self.payment = int(d.get('payment'))
             self.dealer = d.get('dealer', None)
-            self.dealer_fee = d.get('dealer_fee')
+            self.dealer_fee = int(d.get('dealer_fee'))
             self.extra = d.get('extra', '{}')
         else:
             cursor.execute("""
@@ -198,6 +198,141 @@ class Request:
                 AND `buyer` = %(buyer)s)
             """,
             vars(self))
+
+class Usage:
+    def __init__(self, chain_id, parcel_id, grantee, cursor):
+        self.chain_id = chain_id
+        self.parcel_id = parcel_id
+        self.grantee = grantee
+        self.custody = ''
+        self.extra = '{}'
+        cursor.execute("""
+            SELECT * FROM `s_usages`
+            WHERE (`chain_id` = %(chain_id)s
+                AND `parcel_id` = %(parcel_id)s
+                AND `grantee` = %(grantee)s)
+            """,
+            vars(self))
+        row = cursor.fetchone()
+        if row:
+            d = dict(zip(cursor.column_names, row))
+            self.custody = d.get('custody')
+            self.extra = d.get('extra', '{}')
+        else:
+            cursor.execute("""
+                INSERT INTO `s_usages`
+                    (`chain_id`, `parcel_id`, `grantee`)
+                VALUES (%(chain_id)s, %(parcel_id)s, %(grantee)s)
+                """,
+                vars(self))
+
+    def save(self, cursor):
+        values = vars(self)
+        cursor.execute("""
+            UPDATE `s_usages`
+            SET
+                `custody` = %(custody)s,
+                `extra` = %(extra)s
+            WHERE (`chain_id` = %(chain_id)s
+                AND `parcel_id` = %(parcel_id)s
+                AND `grantee` = %(grantee)s)
+            """,
+            values)
+
+    def delete(self, cursor):
+        cursor.execute("""
+            DELETE FROM `s_usages`
+            WHERE (`chain_id` = %(chain_id)s
+                AND `parcel_id` = %(parcel_id)s
+                AND `grantee` = %(grantee)s)
+            """,
+            vars(self))
+
+class UDC:
+    def __init__(self, chain_id, udc_id, cursor):
+        self.chain_id = chain_id
+        self.udc_id = udc_id
+        self.owner = ''
+        self.desc = ''
+        self.operators = '[]'
+        self.total = 0
+        cursor.execute("""
+            SELECT * FROM `s_udcs`
+            WHERE (`chain_id` = %(chain_id)s
+                AND `udc_id` = %(udc_id)s)
+            """,
+            vars(self))
+        row = cursor.fetchone()
+        if row:
+            d = dict(zip(cursor.column_names, row))
+            self.owner = d.get('owner')
+            self.desc = d.get('desc')
+            self.operators = d.get('operators')
+            self.total = int(d.get('total'))
+        else:
+            cursor.execute("""
+                INSERT INTO `s_udcs`
+                    (`chain_id`, `udc_id`)
+                VALUES (%(chain_id)s, %(udc_id)s)
+                """,
+                vars(self))
+
+    def save(self, cursor):
+        values = vars(self)
+        values['total'] = str(values['total'])
+        cursor.execute("""
+            UPDATE `s_udcs`
+            SET
+                `owner` = %(owner)s,
+                `desc` = %(desc)s,
+                `operators` = %(operators)s,
+                `total` = %(total)s
+            WHERE (`chain_id` = %(chain_id)s
+                AND `udc_id` = %(udc_id)s)
+            """,
+            values)
+
+class UDCBalance:
+    def __init__(self, chain_id, udc_id, address, cursor):
+        self.chain_id = chain_id
+        self.udc_id = udc_id
+        self.address = address
+        self.balance = 0
+        self.balance_lock = 0
+        cursor.execute("""
+            SELECT * FROM `s_udc_balances`
+            WHERE (`chain_id` = %(chain_id)s
+                AND `udc_id` = %(udc_id)s
+                AND `address` = %(address)s)
+            """,
+            vars(self))
+        row = cursor.fetchone()
+        if row:
+            d = dict(zip(cursor.column_names, row))
+            self.balance = int(d.get('balance'))
+            self.balance_lock = int(d.get('balance_lock'))
+        else:
+            cursor.execute("""
+                INSERT INTO `s_udc_balances`
+                    (`chain_id`, `udc_id`, `address`)
+                VALUES (%(chain_id)s, %(udc_id)s, %(address)s)
+                """,
+                vars(self))
+
+    def save(self, cursor):
+        values = vars(self)
+        values['balance'] = str(values['balance'])
+        values['balance_lock'] = str(values['balance_lock'])
+        cursor.execute("""
+            UPDATE `s_udc_balances`
+            SET
+                `balance` = %(balance)s,
+                `balance_lock` = %(balance_lock)s
+            WHERE (`chain_id` = %(chain_id)s
+                AND `udc_id` = %(udc_id)s
+                AND `address` = %(address)s)
+            """,
+            values)
 
 def unknown(tx, cursor):
     print(f'tx type ({tx.type}) unknown')
@@ -344,23 +479,58 @@ def cancel(tx, cursor):
 
 def grant(tx, cursor):
     #print(f'tx type ({tx.type}) (not implemented)')
-    pass
+    payload = json.loads(tx.payload)
+
+    usage = Usage(tx.chain_id, payload['target'], payload['grantee'], cursor)
+
+    usage.custody = payload['custody']
+    usage.extra = payload.get('extra', '{}')
+
+    usage.save(cursor)
 
 def revoke(tx, cursor):
     #print(f'tx type ({tx.type}) (not implemented)')
-    pass
+    payload = json.loads(tx.payload)
+
+    usage = Usage(tx.chain_id, payload['target'], payload['grantee'], cursor)
+
+    usage.delete(cursor)
 
 def issue(tx, cursor):
     #print(f'tx type ({tx.type}) (not implemented)')
-    pass
+    payload = json.loads(tx.payload)
+
+    udc = UDC(tx.chain_id, payload['udc'], cursor)
+
+    if udc.total == 0: # initial issue
+        udc.owner = tx.sender
+    udc.desc = payload['desc']
+    udc.operators = json.dumps(payload.get('operators', []))
+    udc.total += payload['amount']
+
+    udc.save(cursor)
 
 def lock(tx, cursor):
     #print(f'tx type ({tx.type}) (not implemented)')
-    pass
+    payload = json.loads(tx.payload)
+
+    udc_balance = UDCBalance(tx.chain_id, payload['udc'], payload['holder'],
+            cursor)
+    udc_balance.balance_lock = payload['amount']
+
+    udc_balance.save(cursor)
 
 def burn(tx, cursor):
     #print(f'tx type ({tx.type}) (not implemented)')
-    pass
+    payload = json.loads(tx.payload)
+    # udc
+    # amount
+
+    udc_balance = UDCBalance(tx.chain_id, payload['udc'], tx.sender,
+            cursor)
+    udc_balance.balance -= payload['amount']
+
+    udc_balance.save(cursor)
 
 def propose(tx, cursor):
     #print(f'tx type ({tx.type}) (not implemented)')
