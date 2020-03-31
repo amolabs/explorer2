@@ -436,13 +436,20 @@ def register(tx, cursor):
 
     owner = Account(tx.chain_id, tx.sender, cursor)
     parcel = Parcel(tx.chain_id, payload['target'], owner.address, cursor)
+    storage = Storage(tx.chain_id, parcel.storage_id, None, cursor)
+    host = Account(tx.chain_id, storage.owner, cursor)
 
     parcel.custody = payload['custody']
     parcel.proxy_account = payload.get('proxy_account', None)
     parcel.extra = payload.get('extra', '{}')
     parcel.on_sale = True
 
+    owner.balance -= storage.registration_fee
+    host.balance += storage.registration_fee
+
     parcel.save(cursor)
+    owner.save(cursor)
+    host.save(cursor)
 
 def discard(tx, cursor):
     #print(f'tx type ({tx.type}) (not implemented)')
@@ -460,6 +467,8 @@ def request(tx, cursor):
 
     buyer = Account(tx.chain_id, tx.sender, cursor)
     parcel = Parcel(tx.chain_id, payload['target'], None, cursor)
+    storage = Storage(tx.chain_id, parcel.storage_id, None, cursor)
+    host = Account(tx.chain_id, storage.owner, cursor)
     request = Request(tx.chain_id, parcel.parcel_id, buyer.address, cursor)
 
     request.payment = int(payload['payment'])
@@ -467,25 +476,49 @@ def request(tx, cursor):
     request.dealer_fee = int(payload.get('dealer_fee', '0'))
     request.extra = payload.get('extra', '{}')
 
+    if request.dealer is not None:
+        buyer.balance -= request.dealer_fee
+    buyer.balance -= request.payment
+
     request.save(cursor)
+    dealer.save(cursor)
+    buyer.save(cursor)
 
 def cancel(tx, cursor):
     #print(f'tx type ({tx.type}) (not implemented)')
     payload = json.loads(tx.payload)
 
+    buyer = Account(tx.chain_id, tx.sender, cursor)
     request = Request(tx.chain_id, payload['target'], tx.sender, cursor)
 
+    buyer.balance += request.payment
+    buyer.balance += request.dealer_fee
+
     request.delete(cursor)
+    buyer.save(cursor)
 
 def grant(tx, cursor):
     #print(f'tx type ({tx.type}) (not implemented)')
     payload = json.loads(tx.payload)
 
+    parcel = Parcel(tx.chain_id, payload['target'], None, cursor)
+    storage = Storage(tx.chain_id, parcel.storage_id, None, cursor)
+    host = Account(tx.chain_id, storage.owner, cursor)
+    owner = Account(tx.chain_id, parcel.owner, cursor)
+    request = Request(tx.chain_id, payload['target'], payload['grantee'], cursor)
     usage = Usage(tx.chain_id, payload['target'], payload['grantee'], cursor)
 
     usage.custody = payload['custody']
     usage.extra = payload.get('extra', '{}')
 
+    owner.balance += request.payment
+    if request.dealer is not None:
+        dealer = Account(tx.chain_id, request.dealer, cursor)
+        dealer.balance += request.dealer_fee
+    owner.balance -= storage.hosting_fee
+    host.balance += storage.hosting_fee
+
+    request.delete(cursor)
     usage.save(cursor)
 
 def revoke(tx, cursor):
@@ -499,8 +532,10 @@ def revoke(tx, cursor):
 def issue(tx, cursor):
     #print(f'tx type ({tx.type}) (not implemented)')
     payload = json.loads(tx.payload)
+    payload['amount'] = int(payload['amount'])
 
     udc = UDC(tx.chain_id, payload['udc'], cursor)
+    issuer = UDCBalance(tx.chain_id, udc.udc_id, tx.sender, cursor)
 
     if udc.total == 0: # initial issue
         udc.owner = tx.sender
@@ -508,7 +543,10 @@ def issue(tx, cursor):
     udc.operators = json.dumps(payload.get('operators', []))
     udc.total += payload['amount']
 
+    issuer.balace += payload['amount']
+
     udc.save(cursor)
+    issuer.save(cursor)
 
 def lock(tx, cursor):
     #print(f'tx type ({tx.type}) (not implemented)')
