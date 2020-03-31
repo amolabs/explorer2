@@ -8,12 +8,14 @@ var blocks = require('./blocks');
 var txs = require('./txs');
 var accounts = require('./accounts');
 var parcels = require('./parcels');
+var storages = require('./storages');
 
 router.use('/genesis', genesis);
 router.use('/blocks', blocks);
 router.use('/txs', txs);
 router.use('/accounts', accounts);
 router.use('/parcels', parcels);
+router.use('/storages', storages);
 
 router.get('/', function(req, res) {
   const chain_id = res.locals.chain_id;
