@@ -8,7 +8,7 @@ import json
 import mysql.connector
 from mysql.connector import Error
 
-import builder
+from builder import Builder
 import collector
 
 # local config
@@ -79,13 +79,16 @@ if args.node:
         collector.stat()
 
         if args.chain:
-            builder = builder.Builder(args.chain, db)
+            builder = Builder(args.chain, db)
             if args.rebuild:
                 builder.clear()
             builder.stat()
-            if builder.play(args.limit) == False:
+            if builder.play(run_limit) == False:
                 print('Fail')
                 exit(0)
             builder.stat()
+
+        if collector.height == collector.remote_height:
+            break
 
 db.close()
