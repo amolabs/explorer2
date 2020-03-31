@@ -111,3 +111,6 @@ __pycache__/
 
 # local config
 db/config.json
+
+.idea/
+.venv
