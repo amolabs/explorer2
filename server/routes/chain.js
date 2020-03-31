@@ -3,11 +3,13 @@ var express = require('express');
 var router = express.Router();
 
 const chain = require('../models/chain');
+var genesis = require('./genesis');
 var blocks = require('./blocks');
 var txs = require('./txs');
 var accounts = require('./accounts');
 var parcels = require('./parcels');
 
+router.use('/genesis', genesis);
 router.use('/blocks', blocks);
 router.use('/txs', txs);
 router.use('/accounts', accounts);
