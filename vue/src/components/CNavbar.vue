@@ -90,7 +90,7 @@
           <v-tabs background-color="transparent" grow slider-color="coinYellow" class="tab-option" slider-size="3">
             <v-tab v-for="page in routes" :key="page.name" :to="page.path" @click="currentPage = page"
                    class="white--text tabs-item-font">
-              {{ page.name ? page.name : page.children[0].name }}
+              {{ page.name || page.children[0].name }}
             </v-tab>
           </v-tabs>
         </v-row>
@@ -104,7 +104,7 @@
             <v-icon>{{page.icon}}</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title class="app-menu-item-text">{{page.name}}</v-list-item-title>
+            <v-list-item-title class="app-menu-item-text">{{page.name || page.children[0].name}}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list>
