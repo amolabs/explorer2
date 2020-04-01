@@ -1,16 +1,20 @@
 import os
 
-LOCK_FILE_NAME = '/var/tmp/amo-crawler.lock'
 
-def acquire():
-    try:
-        return os.open(LOCK_FILE_NAME, os.O_CREAT | os.O_EXCL | os.O_RDWR)
-    except Exception:
-        raise
+class FileLock:
+    LOCK_FILE_NAME = '/var/tmp/amo-crawler.lock'
 
-def ignore_acquire():
-    return os.open(LOCK_FILE_NAME, os.O_RDWR)
+    def __init__(self):
+        self.fd = None
 
-def release(lock):
-    os.close(lock)
-    os.unlink(LOCK_FILE_NAME)
+    def acquire(self):
+        self.fd = os.open(self.LOCK_FILE_NAME, os.O_CREAT | os.O_EXCL | os.O_RDWR)
+
+    def ignore_acquire(self):
+        self.fd = os.open(self.LOCK_FILE_NAME, os.O_RDWR)
+
+    def release(self):
+        if self.fd is not None:
+            os.close(self.fd)
+        if os.path.exists(self.LOCK_FILE_NAME):
+            os.unlink(self.LOCK_FILE_NAME)

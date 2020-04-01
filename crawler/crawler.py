@@ -9,7 +9,7 @@ import mysql.connector
 from mysql.connector import Error
 
 import collector
-import filelock
+from filelock import FileLock
 from builder import Builder
 
 # local config
@@ -35,13 +35,16 @@ p.add_argument("--build-only", help="do not collect, only build state",
                default=False, dest='build_only', action='store_true')
 args = p.parse_args()
 
+
+lock = FileLock()
+
 try:
-    lock = filelock.acquire()
+    lock.acquire()
 except Exception:
     if not args.force:
         print('lock file exists. exiting.')
         exit(-1)
-    lock = filelock.ignore_acquire()
+    lock.ignore_acquire()
 
 # read config
 try:
@@ -69,61 +72,73 @@ except Error as e:
 else:
     print("DB connected")
 
-if args.node and not args.build_only:
-    collector = collector.Collector(args.node, db)
-    if args.rebuild:
-        collector.clear()
+try:
+    if args.node and not args.build_only:
+        collector = collector.Collector(args.node, db)
+        if args.rebuild:
+            collector.clear()
 
-    if args.limit > 0:
-        l = min(args.limit, collector.remote_height - collector.height)
-    else:
-        l = collector.remote_height - collector.height
-    while l > 0:
-        batch = min(l, BATCH_SIZE)
-        # collect
-        if args.verbose:
-            collector.stat()
-        collector.play(batch)
-        if args.verbose:
-            collector.stat()
-        # build
-        builder = Builder(collector.chain_id, db)
+        if args.limit > 0:
+            l = min(args.limit, collector.remote_height - collector.height)
+        else:
+            l = collector.remote_height - collector.height
+        while l > 0:
+            batch = min(l, BATCH_SIZE)
+            # collect
+            if args.verbose:
+                collector.stat()
+            collector.play(batch)
+            if args.verbose:
+                collector.stat()
+            # build
+            builder = Builder(collector.chain_id, db)
+            if args.verbose:
+                builder.stat()
+            if builder.play(0) == False:
+                print('Fail')
+                break
+            if args.verbose:
+                builder.stat()
+            l -= batch
+except Exception as e:
+    print(e)
+    db.close()
+    lock.release()
+    exit(-1)
+
+try:
+    if args.chain and args.build_only:
+        chain_id = args.chain
+        builder = Builder(chain_id, db)
+        cur = db.cursor()
+        cur.execute("""SELECT height FROM `c_blocks`
+            WHERE (`chain_id` = %(chain_id)s)
+            ORDER BY `height` DESC
+            LIMIT 1
+            """,
+            {'chain_id': chain_id})
+        row = cur.fetchone()
+        if row:
+            dest = row[0]
+        else:
+            exit(0)
+        cur.close()
+        if args.rebuild:
+            builder.clear()
+        run_size = dest - builder.height
+        if args.limit > 0:
+            run_size = min(run_size, args.limit)
         if args.verbose:
             builder.stat()
-        if builder.play(0) == False:
+        if builder.play(run_size) == False:
             print('Fail')
-            break
         if args.verbose:
             builder.stat()
-        l -= batch
-
-if args.chain and args.build_only:
-    chain_id = args.chain
-    builder = Builder(chain_id, db)
-    cur = db.cursor()
-    cur.execute("""SELECT height FROM `c_blocks`
-        WHERE (`chain_id` = %(chain_id)s)
-        ORDER BY `height` DESC
-        LIMIT 1
-        """,
-        {'chain_id': chain_id})
-    row = cur.fetchone()
-    if row:
-        dest = row[0]
-    else:
-        exit(0)
-    cur.close()
-    if args.rebuild:
-        builder.clear()
-    run_size = dest - builder.height
-    if args.limit > 0:
-        run_size = min(run_size, args.limit)
-    if args.verbose:
-        builder.stat()
-    if builder.play(run_size) == False:
-        print('Fail')
-    if args.verbose:
-        builder.stat()
+except Exception as e:
+    print(e)
+    db.close()
+    lock.release()
+    exit(-1)
 
 db.close()
-filelock.release(lock)
+lock.release()
