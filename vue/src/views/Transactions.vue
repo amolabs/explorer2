@@ -32,7 +32,7 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <span> {{ this.$byteCalc(this.txStat.avgTxBytes) }}B</span>
+                      <span> {{ this.$byteHuman(this.txStat.avgTxBytes) }}B</span>
                     </div>
                   </v-col>
                 </v-row>
@@ -44,7 +44,7 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <span> {{ this.$byteCalc(this.txStat.avgTxFee) }} AMO / tx </span>
+                      <span> {{ this.$amoHuman(this.txStat.avgTxFee) }} AMO / tx </span>
                     </div>
                   </v-col>
                 </v-row>
@@ -93,15 +93,15 @@
               :mobile-breakpoint="tableBreakpoint"
             >
               <template #height="{item}">
-                <router-link :to="{ path: '/inspect/block/' + item.height, params : {block: item.height } }">{{ item.height }}</router-link>
+                <router-link :to="{ name: 'InspectBlock', params: { height: item.height} }">{{ item.height }}</router-link>
               </template>
               <template #hash="{item}">
                 <router-link class="truncate-option"
-                             :to="{ path: '/inspect/tx/' + item.hash, params: {hash : item.hash }}">{{ item.hash }}</router-link>
+                             :to="{ name: 'InspectTx', params: {hash : item.hash }}">{{ item.hash }}</router-link>
               </template>
               <template #sender="{item}">
                 <router-link class="truncate-option"
-                             :to="{ path: '/inspect/account/' + item.sender, params: {account : item.sender }}">{{ item.sender }}</router-link>
+                             :to="{ name: 'InspectAccount', params: {account : item.sender }}">{{ item.sender }}</router-link>
               </template>
             </c-scroll-table>
           </c-card>

@@ -119,9 +119,11 @@
       drawer: false,
       routes: routes,
       currentPage: {},
-      menuItem: ['mainnet', 'testnet'],
+      //menuItem: ['mainnet', 'testnet'],
+      menuItem: ['mainnet'],
       search: '',
-      network: 'testnet',
+      //network: 'testnet',
+      network: 'mainnet',
     }),
     components: {
       // Popup

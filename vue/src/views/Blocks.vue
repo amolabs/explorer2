@@ -40,7 +40,7 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <span> {{ this.$byteCalc(this.blockStat.avgIncentive)  }} AMO / blk</span>
+                      <span> {{ this.$amoHuman(this.blockStat.avgIncentive)  }} AMO / blk</span>
                     </div>
                   </v-col>
                 </v-row>
@@ -64,7 +64,7 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <span> {{ this.$byteCalc(this.blockStat.avgTxBytes) + 'B' }} / blk</span>
+                      <span> {{ this.$byteHuman(this.blockStat.avgTxBytes) + 'B' }} / blk</span>
                     </div>
                   </v-col>
                 </v-row>
@@ -169,7 +169,7 @@
     methods: {
       async getPageData(){
         try {
-          this.blockStat = await this.$api.getBlockStat();
+          this.blockStat = await this.$api.getChainStat();
         } catch (e) {
           console.log(e);
         }

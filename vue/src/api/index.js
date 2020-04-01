@@ -3,14 +3,15 @@ import camelcaseKeys from 'camelcase-keys'
 
 // axios.defaults.withCredentials = true;
 const server = 'http://localhost:3000';
+const chain_id = 'amo-cherryblossom-01';
 const options = { headers: { 
   // for CORS
   'Access-Control-Allow-Origin': '*',
 } };
 
 export default {
-  getBlockStat() {
-    return axios.get(`${server}/chain/amo-testnet-200306`,
+  getChainStat() {
+    return axios.get(`${server}/chain/${chain_id}`,
       options)
       .then(res => {
         var chain = camelcaseKeys(res.data); 
@@ -25,7 +26,7 @@ export default {
   },
 
   getBlock(height) {
-    return axios.get(`${server}/chain/amo-testnet-200306/blocks/${height}`,
+    return axios.get(`${server}/chain/${chain_id}/blocks/${height}`,
       options)
       .then(res => {
         var block = camelcaseKeys(res.data);
@@ -38,7 +39,7 @@ export default {
   },
 
   getBlocks(from, num, order) {
-    return axios.get(`${server}/chain/amo-testnet-200306/blocks?from=${from}&num=${num}&order=${order}`,
+    return axios.get(`${server}/chain/${chain_id}/blocks?from=${from}&num=${num}&order=${order}`,
       options)
       .then(res => {
         return Promise.resolve(res.data);
@@ -46,7 +47,7 @@ export default {
   },
 
   getTxStat() {
-    return axios.get(`${server}/chain/amo-testnet-200306`,
+    return axios.get(`${server}/chain/${chain_id}`,
       options)
       .then(res => {
         var chain = camelcaseKeys(res.data); 
@@ -65,7 +66,7 @@ export default {
   },
 
   getTx(hash) {
-    return axios.get(`${server}/chain/amo-testnet-200306/txs/${hash}`,
+    return axios.get(`${server}/chain/${chain_id}/txs/${hash}`,
       options)
       .then(res => {
         var tx = camelcaseKeys(res.data);
@@ -74,7 +75,7 @@ export default {
   },
 
   getTxs(from, num, order) {
-    return axios.get(`${server}/chain/amo-testnet-200306/txs?from=${from}&num=${num}&order=${order}`,
+    return axios.get(`${server}/chain/${chain_id}/txs?from=${from}&num=${num}&order=${order}`,
       options)
       .then(res => {
         return Promise.resolve(res.data);

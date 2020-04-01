@@ -24,7 +24,7 @@ async function getSummary(chain_id) {
       ret.height = res[3].height;
       ret.time = res[3].time;
       ret.tx_height = res[4]?res[4].height:0;
-      ret.tx_index = res[3]?res[3].index:0;
+      ret.tx_index = res[4]?res[4].index:0;
       return ret;
     });
 }

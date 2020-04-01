@@ -3,6 +3,8 @@ var config = require('../config');
 var mysql = require('mysql');
 
 var param = config.db;
+//param.supportBigNumbers = true;
+//param.bigNumberStrings = true;
 var pool = mysql.createPool(param);
 /*
 conn.connect((err) => {

@@ -101,7 +101,7 @@
                   </v-col>
                   <v-spacer></v-spacer>
                   <v-col cols="12" md="6" class="py-0 px-lg-4 text-right subtitle-3">
-                      <span> {{ this.$byteCalc(this.currentActiveDraft.value4) }} AMO </span>
+                      <span> {{ this.$amoHuman(this.currentActiveDraft.value4) }} AMO </span>
                   </v-col>
                 </v-row>
                 <v-row>
@@ -110,7 +110,7 @@
                   </v-col>
                   <v-spacer></v-spacer>
                   <v-col cols="12" md="6" class="py-0 px-lg-4 text-right subtitle-3">
-                    <span> {{ this.$byteCalc(this.currentActiveDraft.value5) }} AMO </span>
+                    <span> {{ this.$amoHuman(this.currentActiveDraft.value5) }} AMO </span>
                   </v-col>
                 </v-row>
                 <v-row>
@@ -119,7 +119,7 @@
                   </v-col>
                   <v-spacer></v-spacer>
                   <v-col cols="12" md="6"class="py-0 px-lg-4 text-right subtitle-3">
-                    <span> {{ this.$byteCalc(this.currentActiveDraft.value6) }} AMO </span>
+                    <span> {{ this.$amoHuman(this.currentActiveDraft.value6) }} AMO </span>
                     <span>  <br class="hidden-md-and-up"> (would be counted as BAY when closing vote)</span>
                   </v-col>
                 </v-row>

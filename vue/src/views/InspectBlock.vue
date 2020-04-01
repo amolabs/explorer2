@@ -42,7 +42,7 @@
                     <span> Tx bytes </span>
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span> {{$byteCalc(block.txBytes) + 'B'}} </span>
+                    <span> {{$byteHuman(block.txBytes) + 'B'}} </span>
                   </v-col>
                 </v-row>
               </v-col>

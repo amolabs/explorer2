@@ -52,7 +52,7 @@
                     </div>
                     <div >
                       <span> transaction fee : </span>
-                      <span class="ml-3">  {{ this.$byteCalc(this.networkOverview.avgTxFee) }} AMO</span>
+                      <span class="ml-3">  {{ this.$amoHuman(this.networkOverview.avgTxFee) }} AMO</span>
                     </div>
                   </v-col>
                 </v-row>
@@ -81,16 +81,16 @@
                 </c-progress-line>
               </v-col>
               <v-col cols="4" class="pl-0 py-0">
-                <router-link :to="{path: '/validators'}"> {{this.$byteCalc(this.validators.value8)}} AMO (100%)</router-link>
+                <router-link :to="{path: '/validators'}"> {{this.$amoHuman(this.validators.effStakes)}} AMO (100%)</router-link>
                 <span>
                   <!-- TODO 증감표시가 필요한 모든 영역에는 v-icon 태그 적용이 필요-->
-                  <v-icon small> {{this.validators.value8_change}}</v-icon>
+                  <v-icon small> {{this.validators.effStakes_change}}</v-icon>
                 </span>
               </v-col>
               <v-col cols="8" class="pl-lg-12 py-0">
                 <c-progress-line
                   type="1"
-                  :value="this.validators.value9/ this.validators.value8 * 100"
+                  :value="this.validators.stakeOnline/ this.validators.effStakes * 100"
                   color="deepBlueGrey2"
                   height="10"
                   title="On-line"
@@ -98,12 +98,12 @@
                 </c-progress-line>
               </v-col>
               <v-col cols="4" class="pl-0 py-0">
-                <router-link :to="{path: '/validators'}">{{this.$byteCalc(this.validators.value9)}} AMO ({{this.validators.value9_percentage.toFixed(2)}}%)</router-link>
+                <router-link :to="{path: '/validators'}">{{this.$amoHuman(this.validators.stakeOnline)}} AMO ({{this.validators.stakeOnline_ratio.toFixed(2)}}%)</router-link>
               </v-col>
               <v-col cols="8" class="pl-lg-12 py-0">
                 <c-progress-line
                   type="1"
-                  :value="this.validators.value10_percentage"
+                  :value="this.validators.stakeOffline_ratio"
                   color="deepLightGrey"
                   height="10"
                   title="Off-line"
@@ -112,7 +112,7 @@
               </v-col>
               <v-col cols="4" class="pl-0 py-0">
                 <router-link :to="{path:'/validators'}">
-                  {{this.$byteCalc(this.validators.value10)}} AMO ({{this.validators.value10_percentage.toFixed(2)}}%)</router-link>
+                  {{this.$amoHuman(this.validators.stakeOffline)}} AMO ({{this.validators.stakeOffline_ratio.toFixed(2)}}%)</router-link>
               </v-col>
             </v-row>
           </c-card>
@@ -133,7 +133,7 @@
                 </c-progress-line>
               </v-col>
               <v-col cols="4" class="pl-0 py-0">
-                <span> {{this.$byteCalc(this.coinsAndStakes.value11)}} AMO (100%)</span>
+                <span> {{this.$amoHuman(this.coinsAndStakes.coinTotal)}} AMO (100%)</span>
                 <span>
                   <!-- arrow_upward / arrow_downward-->
                   <!--<v-icon>remove</v-icon>-->
@@ -142,7 +142,7 @@
               <v-col cols="8" class="pl-lg-12 py-0">
                 <c-progress-line
                   type="1"
-                  :value="this.coinsAndStakes.value12_percentage"
+                  :value="this.coinsAndStakes.activeCoins_percentage"
                   color="deepBlueGrey2"
                   height="10"
                   title="Free Coin"
@@ -150,12 +150,12 @@
                 </c-progress-line>
               </v-col>
               <v-col cols="4" class="pl-0 py-0">
-                <span> {{this.$byteCalc(this.coinsAndStakes.value12)}} AMO ({{this.coinsAndStakes.value12_percentage.toFixed(2)}}%)</span>
+                <span> {{this.$amoHuman(this.coinsAndStakes.activeCoins)}} AMO ({{this.coinsAndStakes.activeCoins_percentage.toFixed(2)}}%)</span>
               </v-col>
               <v-col cols="8" class="pl-lg-12 py-0">
                 <c-progress-line
                   type="1"
-                  :value="this.coinsAndStakes.value13_percentage"
+                  :value="this.coinsAndStakes.effStakes_percentage"
                   color="deepLightGrey"
                   height="10"
                   title="Eff. Stake"
@@ -163,7 +163,7 @@
                 </c-progress-line>
               </v-col>
               <v-col cols="4" class="pl-0 py-0">
-                <span>  {{this.$byteCalc(this.coinsAndStakes.value13)}} AMO ({{this.coinsAndStakes.value13_percentage.toFixed(2)}}%)</span>
+                <span>  {{this.$amoHuman(this.coinsAndStakes.effStakes)}} AMO ({{this.coinsAndStakes.effStakes_percentage.toFixed(2)}}%)</span>
               </v-col>
             </v-row>
           </c-card>
@@ -245,7 +245,7 @@
                     <span>Trade value in 1 month</span>
                   </v-col>
                   <v-col class="py-0 px-lg-12 text-left subtitle-2 mobile-content" cols="12" sm="6">
-                    <span> {{ this.$byteCalc(this.dataTradeOverview.value19) }}  AMO </span>
+                    <span> {{ this.$amoHuman(this.dataTradeOverview.value19) }}  AMO </span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -267,38 +267,38 @@
         lastHeight: 0,
         lastTime: 'not yet',
         avgInterval: 0,
-        numTxsPerBlock: 117.332323,
-        avgTxFee: 12312312313212.123123
+        numTxsPerBlock: 0,
+        avgTxFee: 0,
       },
       validators: {
-        value8 : 323423423200.456456,
-        value8_change: '',
-        value9 : 234234525440.1233,
-        value9_percentage : 1,
-        value10 : 100009934922.123123,
-        value10_percentage : 1,
+        effStakes : 1,
+        effStakes_change: '',
+        stakeOnline : 0,
+        stakeOnline_ratio : 0,
+        stakeOffline : 0,
+        stakeOffline_ratio : 0,
       },
       coinsAndStakes: {
-        value11:123123.2342,
-        value12:114.2323,
-        value12_percentage: 1,
-        value13:34345.2423,
-        value13_percentage: 1,
+        coinTotal: 1,
+        activeCoins: 0,
+        activeCoins_percentage: 0,
+        effStakes: 0,
+        effStakes_percentage: 0,
       },
       governanceOverview: {
-        value14_arg1: 223,
-        value14_arg2: 'rejected',
-        value14_arg3: 223.234,
-        value15_arg1: 223,
-        value15_arg2: 234,
-        value16_arg1: 777234,
-        value16_arg2: 554234,
-        value16_arg3: 123234,
+        value14_arg1: 0,
+        value14_arg2: '-',
+        value14_arg3: 0,
+        value15_arg1: 0,
+        value15_arg2: 0,
+        value16_arg1: 0,
+        value16_arg2: 0,
+        value16_arg3: 0,
       },
       dataTradeOverview: {
-        value17: 123356,
-        value18: 333225,
-        value19: 2411.33354
+        value17: 0,
+        value18: 0,
+        value19: 0,
       },
       testVal: '',
     }),
@@ -316,8 +316,8 @@
         this.getPageData()
       },
 
-      // validators.value8 값이 변경되면 호춣되는 함수 : 값의 증감 확인 용도
-      'validators.value8': function (newVal, oldVal) {
+      // validators.effStakes 값이 변경되면 호춣되는 함수 : 값의 증감 확인 용도
+      'validators.effStakes': function (newVal, oldVal) {
         console.log('new', newVal);
         console.log('old', oldVal);
         let result = '';
@@ -328,7 +328,7 @@
         } else {
           result =  'remove'
         }
-        this.validators.value8_change = result;
+        this.validators.effStakes_change = result;
       }
     },
     mounted() {
@@ -339,11 +339,11 @@
         this.getPageData()
       }, 10000)
 
-      this.validators.value9_percentage = this.validators.value9/ this.validators.value8 * 100;
-      this.validators.value10_percentage = this.validators.value10/ this.validators.value8 * 100;
+      this.validators.stakeOnline_ratio = this.validators.stakeOnline/ this.validators.effStakes * 100;
+      this.validators.stakeOffline_ratio = this.validators.stakeOffline/ this.validators.effStakes * 100;
 
-      this.coinsAndStakes.value12_percentage = this.coinsAndStakes.value12/ this.coinsAndStakes.value11 * 100;
-      this.coinsAndStakes.value13_percentage = this.coinsAndStakes.value13 / this.coinsAndStakes.value11 * 100;
+      this.coinsAndStakes.activeCoins_percentage = this.coinsAndStakes.activeCoins/ this.coinsAndStakes.coinTotal * 100;
+      this.coinsAndStakes.effStakes_percentage = this.coinsAndStakes.effStakes / this.coinsAndStakes.coinTotal * 100;
     },
     destroyed() {
       console.debug('clearing timer');
@@ -353,18 +353,32 @@
       async getPageData() {
         try {
           var res;
-          res = await this.$api.getBlockStat();
-          var height = res.height;
-          this.networkOverview.avgInterval = res.avgInterval;
-          this.networkOverview.numTxsPerBlock = res.numTxs / height;
-          this.networkOverview.avgTxFee = res.avgTxFee;
+          var stat = await this.$api.getChainStat();
+          var height = stat.height;
+          this.networkOverview.avgInterval = stat.avgInterval;
+          this.networkOverview.numTxsPerBlock = stat.numTxs / height;
+          this.networkOverview.avgTxFee = stat.avgTxFee;
           res = await this.$api.getBlock(1);
           this.networkOverview.genesisHeight = res.height;
           this.networkOverview.genesisTime = res.time;
           res = await this.$api.getBlock(height);
-          this.networkOverview.lastHeight = res.height; //=getBlockStat().height
+          this.networkOverview.lastHeight = res.height; //=getChainStat().height
           this.networkOverview.lastTime = res.time;
-          //console.log('res', res)
+
+          this.validators.effStakes
+            = Number(stat.stakes) + Number(stat.delegates);
+          this.validators.stakeOnline
+            = Number(stat.stakes) + Number(stat.delegates);
+          this.validators.stakeOffline = 0;
+          //console.log('validators', this.validators)
+
+          this.coinsAndStakes.coinTotal
+            = Number(stat.activeCoins) + Number(stat.stakes)
+            + Number(stat.delegates);
+          this.coinsAndStakes.activeCoins = Number(stat.activeCoins);
+          this.coinsAndStakes.effStakes
+            = Number(stat.stakes) + Number(stat.delegates);
+          //console.log('coinsAndStakes', this.coinsAndStakes)
         } catch (e) {
           console.log('error', e);
         }

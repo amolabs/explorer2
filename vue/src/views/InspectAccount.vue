@@ -11,7 +11,7 @@
                     <span> Address </span>
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span class="truncate-option-box"> {{ this.param.account }} </span>
+                    <span class="truncate-option-box"> {{ this.account.address }} </span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -21,29 +21,27 @@
                     <span> AMO balance </span>
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span> {{this.$byteCalc(this.value2)}} AMO</span>
+                    <span> {{this.$amoHuman(this.account.balance)}} AMO</span>
                   </v-col>
                 </v-row>
               </v-col>
-              <v-col cols="12" md="6">
+              <v-col cols="12" md="6" v-if="this.account.stake">
                 <v-row align="center">
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
                     <span> Stake </span>
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span v-if="this.value3_arg1 === ''"> none </span>
-                    <span v-else> {{ this.$byteCalc(this.value3_arg1)}} AMO for validator <br>{{ this.value3_arg2 }}</span>
+                    <span> {{ this.$amoHuman(this.account.stake)}} AMO for validator <br>{{ this.account.validator }}</span>
                   </v-col>
                 </v-row>
               </v-col>
-              <v-col cols="12" md="6">
+              <v-col cols="12" md="6" v-if="this.account.delegate">
                 <v-row align="center">
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
                     <span> Delegate </span>
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span v-if="this.value4_arg1 === ''"> none</span>
-                    <span v-else> {{this.$byteCalc(this.value4_arg1)}}AMO for account <br> {{this.value4_arg2}}</span>
+                    <span> {{this.$amoHuman(this.account.delegate)}}AMO for account <br> {{this.account.delegatee}}</span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -85,27 +83,27 @@
 
 <script>
   export default {
-    data() {
-      return {
-        param : this.$route.params,
-        value2: 22234.435,
-        value3_arg1: 234.234,
-        value3_arg2:'d1b1af47c016e7b6a4b92b99ca4df24261b8d22b',
-        value4_arg1:342.3455,
-        value4_arg2: '0cbb6558ba7864d3b4ca12906e0739d28b38b027',
-        pageNum: 1,
-        perPage: 50,
-        relatedTxsTable: {
-          headers: [
-            { text: 'hash',align: 'center',  value: 'hash' },
-            { text: 'sender',align: 'center',  value: 'sender' },
-            { text: 'type', align: 'center',  value: 'type' },
-            { text: 'result', align: 'center', value: 'result' },
-          ],
-          relatedTxItem: [],
-        },
-      }
-    },
+    data: () => ({
+      account: {
+        address: '-',
+        balance: 0,
+        stake: 0,
+        validator: '-',
+        delegate: 0,
+        delegatee: '-',
+      },
+      pageNum: 1,
+      perPage: 50,
+      relatedTxsTable: {
+        headers: [
+          { text: 'hash',align: 'center',  value: 'hash' },
+          { text: 'sender',align: 'center',  value: 'sender' },
+          { text: 'type', align: 'center',  value: 'type' },
+          { text: 'result', align: 'center', value: 'result' },
+        ],
+        relatedTxItem: [],
+      },
+    }),
     watch: {
       '$route' (to, from) {
         this.param = this.$route.params;

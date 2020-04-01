@@ -70,9 +70,9 @@
                 <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                   <span v-if="value5_arg1 === 'waiting' || value5_arg1 ==='voting'"> vote not closed yet</span>
                   <span v-else>
-                    {{this.$byteCalc(this.value6_arg1)}} AMO approved, <br>
-                    {{this.$byteCalc(this.value6_arg2)}} AMO rejected, <br>
-                    {{this.$byteCalc(this.value6_arg3)}} AMO absent
+                    {{this.$amoHuman(this.value6_arg1)}} AMO approved, <br>
+                    {{this.$amoHuman(this.value6_arg2)}} AMO rejected, <br>
+                    {{this.$amoHuman(this.value6_arg3)}} AMO absent
                   </span>
                 </v-col>
               </v-row>

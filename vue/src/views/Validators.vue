@@ -37,7 +37,7 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <span> {{ this.$byteCalc(this.value3) }} AMO </span>
+                      <span> {{ this.$amoHuman(this.value3) }} AMO </span>
                     </div>
                   </v-col>
                 </v-row>
@@ -49,7 +49,7 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <span> {{ this.$byteCalc(this.value4) }} AMO / validators </span>
+                      <span> {{ this.$amoHuman(this.value4) }} AMO / validators </span>
                     </div>
                   </v-col>
                 </v-row>
@@ -90,7 +90,7 @@
                     <span> Average incentive </span>
                   </v-col>
                   <v-col cols="12" md="5" class="py-0 px-lg-12 text-right subtitle-2">
-                  <span>{{ this.$byteCalc(this.value5) }} AMO /blk</span>
+                  <span>{{ this.$amoHuman(this.value5) }} AMO /blk</span>
                   </v-col>
                   <v-col cols="12" md="2">
                     <span class="hidden-md-and-down"> = </span>
@@ -103,13 +103,13 @@
                     <span class="hidden-lg-and-up">=</span>
                     <span> Average reward : </span>
                     <!--<br class="hidden-sm-and-up">-->
-                    <span> {{ this.$byteCalc(this.value6) }} AMO /blk </span>
+                    <span> {{ this.$amoHuman(this.value6) }} AMO /blk </span>
                   </v-col>
                   <v-col cols="12" class="py-0 px-lg-12 text-left text-lg-right subtitle-2"> + </v-col>
                   <v-col cols="12" class="py-0 px-lg-12  text-left text-lg-right subtitle-2">
                     <span> Average tx fee :</span>
                     <!--<br class="hidden-sm-and-up">-->
-                    <span>  {{ this.$byteCalc(this.value7) }} AMO /blk </span>
+                    <span>  {{ this.$amoHuman(this.value7) }} AMO /blk </span>
                   </v-col>
                 </v-row>
 
@@ -257,7 +257,7 @@
         for(let i=startIdx; i<endIdx; i++) {
           let col3_arg1 = 1233;
           let col3_arg2 = 1233.329;
-          let col2 = this.$byteCalc(232221231344.33);
+          let col2 = this.$amoHuman(232221231344.33);
           newData.push({
             address: 'a3c338a54bea46c64bdde35e72b6d271c16dedf2',
             effStake: col2,

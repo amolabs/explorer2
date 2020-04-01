@@ -3,4 +3,7 @@ module.exports = {
     "vuetify"
   ],
   "lintOnSave": false,
+  //devServer: {
+  //public: 'localhost:8080',
+  //},
 }
