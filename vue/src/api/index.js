@@ -2,7 +2,7 @@ import axios from 'axios'
 import camelcaseKeys from 'camelcase-keys'
 
 // axios.defaults.withCredentials = true;
-const server = 'http://localhost:3000';
+const server = 'http://explorer.amolabs.io/api';
 const chain_id = 'amo-cherryblossom-01';
 const options = { headers: { 
   // for CORS
