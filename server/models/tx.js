@@ -84,9 +84,37 @@ async function getList(chain_id, from_h, from_i, num, order) {
   });
 }
 
+async function getListBySender(chain_id, address, top, from, num) {
+  return new Promise(function(resolve, reject) {
+    top = Number(top);
+    from = Number(from);
+    num = Number(num);
+    var query_str;
+    var query_var;
+    if (top == 0) {
+      query_str = "select * from `c_txs` where (`chain_id` = ?) \
+        and (`sender` = ?) \
+        order by `height` desc, `index` desc limit ?,?";
+      query_var = [chain_id, address, from, num];
+    } else {
+      query_str = "select * from `c_txs` where (`chain_id` = ?) \
+        and (`sender` = ?) and (`height` <= ?) \
+        order by `height` desc, `index` desc limit ?,?";
+      query_var = [chain_id, address, top, from, num];
+    }
+    db.query(query_str, query_var, function (err, rows, fields) {
+      if (err) {
+        return reject(err);
+      }
+      resolve(rows);
+    });
+  });
+}
+
 module.exports = {
   getOne: getOne,
   getLast: getLast,
   searchHash: searchHash,
   getList: getList,
+  getListBySender: getListBySender,
 }
