@@ -15,7 +15,7 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(cors({origin: '*.amolabs.io', optionsSuccessStatus: 200}));
+app.use(cors({origin: '*', optionsSuccessStatus: 200}));
 
 app.param('chain_id', function(req, res, next, val) {
   //console.log('chain_id');
