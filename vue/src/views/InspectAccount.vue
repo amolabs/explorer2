@@ -57,11 +57,11 @@
         <v-col cols="12">
           <c-card class="text-center" title="Related txs" outlined>
             <c-scroll-table
-              :headers="relatedTxsTable.headers"
+              :headers="txTable.headers"
               itemKey="name"
-              :items="relatedTxsTable.relatedTxItem"
+              :items="txTable.txList"
               height="500"
-              @loadMore="reqData"
+              @loadMore="reqTxTableData"
               :mobile-breakpoint="tableBreakpoint"
             >
               <template #hash="{item}">
@@ -92,16 +92,19 @@
         delegate: 0,
         delegatee: '-',
       },
-      pageNum: 1,
-      perPage: 50,
-      relatedTxsTable: {
+      txTable: {
         headers: [
+          { text: 'height', align: 'center', value: 'height'},
+          { text: 'index', align: 'center', value: 'index'},
           { text: 'hash',align: 'center',  value: 'hash' },
           { text: 'sender',align: 'center',  value: 'sender' },
           { text: 'type', align: 'center',  value: 'type' },
-          { text: 'result', align: 'center', value: 'result' },
+          { text: 'result', align: 'center', value: 'info' },
         ],
-        relatedTxItem: [],
+        txList: [],
+        topHeight: 0,
+        anchor: 0,
+        bulkSize: 20,
       },
     }),
     watch: {
@@ -122,37 +125,30 @@
       }
     },
     mounted() {
-      console.log('params', this.param);
-      this.reqData();
       this.getPageData();
+      this.reqTxTableData();
     },
     methods: {
       async getPageData(){
-        // 데이터 바인딩
-        console.log('network val',this.network);
-      },
-      async reqData() {
-        // call api
-        // try {
-        //     const res = await axios.get('http://192.168.23.50:3000/api/test2', {params: {pagenum: this.pageNum, perpage: this.perPage}});
-        //     console.log(res);
-        //     if(res.data && res.data.result && res.data.result.length > 0) {
-        //         this.relatedTxsTable.relatedTxItem = this.relatedTxsTable.relatedTxItem.concat(res.data.result);
-        //         this.pageNum++;
-        //     }
-        // } catch(err) {
-        //     console.log('err: ', err);
-        // }
-
-        // add data
-        const startIdx = (this.pageNum-1) * this.perPage;
-        const endIdx = parseInt(startIdx) + parseInt(this.perPage);
-        let newData = [];
-        for(let i=startIdx; i<endIdx; i++) {
-          newData.push({hash: 'c9ae0c3a27ed1f807a65598d30abd94c249c70ac08a2bb792ff018f7193227b4', sender: 'b19a5131795d70c24d6bd74d1e61fb1d7c411795', type: 'SEND', result: 'Error'});
+        try {
+          this.account = await this.$api.getAccount(this.$route.params.address);
+          stat = await this.$api.getTxStat();
+          this.txTable.topHeight = stat.txHeight;
+        } catch(err) {
+          console.debug(err);
+          this.account.address = this.$route.params.address;
         }
-        this.relatedTxsTable.relatedTxItem = this.relatedTxsTable.relatedTxItem.concat(newData);
-        this.pageNum++;
+      },
+      async reqTxTableData() {
+        try {
+          const res = await this.$api.getTxsBySender(
+            this.$route.params.address, this.txTable.topHeight,
+            this.txTable.anchor, this.txTable.bulkSize);
+          this.txTable.txList = this.txTable.txList.concat(res);
+          this.txTable.anchor = this.txTable.txList.length;
+        } catch (e) {
+          console.log(e);
+        }
       },
     }
   }

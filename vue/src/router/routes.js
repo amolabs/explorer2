@@ -40,7 +40,7 @@ const routes = [
         component: InspectBlock
       },
       {
-        path: 'account/:account',
+        path: 'account/:address',
         name: 'InspectAccount',
         props : true,
         component: InspectAoount

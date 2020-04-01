@@ -81,4 +81,20 @@ export default {
         return Promise.resolve(res.data);
       });
   },
+
+  getAccount(address) {
+    return axios.get(`${server}/chain/${chain_id}/accounts/${address}`,
+      options)
+      .then(res => {
+        return Promise.resolve(res.data);
+      });
+  },
+
+  getTxsBySender(address, top, from, num) {
+    return axios.get(`${server}/chain/${chain_id}/accounts/${address}/txs?top=${top}&from=${from}&num=${num}`,
+      options)
+      .then(res => {
+        return Promise.resolve(res.data);
+      });
+  }
 }

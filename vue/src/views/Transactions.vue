@@ -101,7 +101,7 @@
               </template>
               <template #sender="{item}">
                 <router-link class="truncate-option"
-                             :to="{ name: 'InspectAccount', params: {account : item.sender }}">{{ item.sender }}</router-link>
+                             :to="{ name: 'InspectAccount', params: {address : item.sender }}">{{ item.sender }}</router-link>
               </template>
             </c-scroll-table>
           </c-card>
