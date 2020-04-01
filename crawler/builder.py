@@ -5,6 +5,7 @@ import json
 
 import amo
 import state
+import stats
 
 class Builder:
     def __init__(self, chain_id, db):
@@ -71,6 +72,11 @@ class Builder:
             """, self._vars())
         cur.execute("""OPTIMIZE TABLE `s_accounts`""")
         cur.fetchall()
+        cur.execute("""DELETE FROM `asset_stat`
+            WHERE (`chain_id` = %(chain_id)s)
+            """, self._vars())
+        cur.execute("""OPTIMIZE TABLE `asset_stat`""")
+        cur.fetchall()
         self.height = 0
         self._save_height(cur)
         self.db.commit()
@@ -94,14 +100,20 @@ class Builder:
             """,
             self._vars())
         row = cur.fetchone()
+        asset_stat = stats.Asset(self.chain_id, cur)
         if row:
             genesis = json.loads(row[0])['app_state']
             for item in genesis['balances']:
                 acc = state.Account(self.chain_id, item['owner'], cur)
-                acc.balance = item['amount']
+                acc.balance = int(item['amount'])
+                asset_stat.active_coins += int(item['amount'])
                 acc.save(cur)
         else:
             return False # TODO: return error
+
+        # stat
+        asset_stat.save(cur)
+
         self.db.commit()
         cur.close()
 
@@ -131,16 +143,19 @@ class Builder:
             """,
             self._vars())
         row = cur.fetchone()
+        asset_stat = stats.Asset(self.chain_id, cur)
         if row:
             incentives = json.loads(row[0])
             for inc in incentives:
                 recp = state.Account(self.chain_id, inc['address'], cur)
                 recp.balance += int(inc['amount'])
+                asset_stat.active_coins += int(inc['amount'])
                 recp.save(cur)
 
         # close
         self.height += 1
         self._save_height(cur)
+        asset_stat.save(cur)
         self.db.commit()
         cur.close()
         return True

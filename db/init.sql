@@ -160,6 +160,17 @@ CREATE TABLE `s_usages` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
+-- explorer.asset_stat definition
+
+CREATE TABLE `asset_stat` (
+  `chain_id` char(32) NOT NULL,
+  `active_coins` char(40) NOT NULL DEFAULT '0',
+  `stakes` char(40) NOT NULL DEFAULT '0',
+  `delegates` char(40) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`chain_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 -- explorer.block_stat source
 
 CREATE OR REPLACE

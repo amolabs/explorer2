@@ -5,6 +5,8 @@ import json
 import base64
 from hashlib import sha256
 
+import stats
+
 class Account:
     def __init__(self, chain_id, address, cursor):
         self.chain_id = chain_id
@@ -363,6 +365,11 @@ def stake(tx, cursor):
     val_pubkey = base64.b64decode(payload['validator'])
     sender.val_addr = sha256(val_pubkey).hexdigest()[:40].upper()
 
+    asset_stat = stats.Asset(tx.chain_id, cursor)
+    asset_stat.active_coins -= payload['amount']
+    asset_stat.stakes += payload['amount']
+    asset_stat.save(cursor)
+
     sender.save(cursor)
 
 def withdraw(tx, cursor):
@@ -377,6 +384,11 @@ def withdraw(tx, cursor):
     if sender.stake == 0:
         sender.val_addr = None
 
+    asset_stat = stats.Asset(tx.chain_id, cursor)
+    asset_stat.active_coins += payload['amount']
+    asset_stat.stakes -= payload['amount']
+    asset_stat.save(cursor)
+
     sender.save(cursor)
 
 def delegate(tx, cursor):
@@ -390,6 +402,11 @@ def delegate(tx, cursor):
     sender.balance -= payload['amount']
     sender.del_addr = payload['to']
 
+    asset_stat = stats.Asset(tx.chain_id, cursor)
+    asset_stat.active_coins -= payload['amount']
+    asset_stat.delegates += payload['amount']
+    asset_stat.save(cursor)
+
     sender.save(cursor)
 
 def retract(tx, cursor):
@@ -401,8 +418,13 @@ def retract(tx, cursor):
 
     sender.delegate -= payload['amount']
     sender.balance += payload['amount']
-    if sender.stake == 0:
+    if sender.delegate == 0:
         sender.del_addr = None
+
+    asset_stat = stats.Asset(tx.chain_id, cursor)
+    asset_stat.active_coins += payload['amount']
+    asset_stat.delegates -= payload['amount']
+    asset_stat.save(cursor)
 
     sender.save(cursor)
 
