@@ -126,8 +126,8 @@ class Parcel:
         else:
             cursor.execute("""
                 INSERT INTO `s_parcels`
-                    (`chain_id`, `parcel_id`, `storage_id`, `owner`)
-                VALUES (%(chain_id)s, %(parcel_id)s, %(storage_id)s, %(owner)s)
+                    (`chain_id`, `parcel_id`, `storage_id`)
+                VALUES (%(chain_id)s, %(parcel_id)s, %(storage_id)s)
                 """,
                 vars(self))
 
@@ -136,11 +136,12 @@ class Parcel:
         cursor.execute("""
             UPDATE `s_parcels`
             SET
+                `storage_id` = %(storage_id)s,
                 `custody` = %(custody)s,
                 `proxy_account` = %(proxy_account)s,
                 `extra` = %(extra)s,
                 `on_sale` = %(on_sale)s
-            WHERE (`chain_id` = %(chain_id)s AND `storage_id` = %(storage_id)s)
+            WHERE (`chain_id` = %(chain_id)s AND `parcel_id` = %(parcel_id)s)
             """,
             values)
 
