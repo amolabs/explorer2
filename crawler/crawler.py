@@ -15,7 +15,7 @@ from builder import Builder
 # local config
 dbconfigfile = '../db/config.json'
 
-BLOCK_LIMIT_THRESHOLD = 100
+BATCH_SIZE = 100
 
 # command line args
 p = argparse.ArgumentParser('AMO blockchain explorer builder')
@@ -29,15 +29,18 @@ p.add_argument("-r", "--rebuild", help="rebuild state db",
                default=False, dest='rebuild', action='store_true')
 p.add_argument("-v", "--verbose", help="verbose output",
                default=False, dest='verbose', action='store_true')
-p.add_argument("-il", "--ignore-lock", help="If this flag is enabled, delete lock file and force start", default=False)
+p.add_argument("-f", "--force", help="force-run even if there is a lock",
+               default=False, dest='force', action='store_true')
+p.add_argument("--build-only", help="do not collect, only build state",
+               default=False, dest='build_only', action='store_true')
 args = p.parse_args()
-node = args.node
 
 try:
     lock = filelock.acquire()
 except Exception:
-    if not args.ignore_lock:
-        raise
+    if not args.force:
+        print('lock file exists. exiting.')
+        exit(-1)
     lock = filelock.ignore_acquire()
 
 # read config
@@ -66,46 +69,61 @@ except Error as e:
 else:
     print("DB connected")
 
-if args.node:
-    collector = collector.Collector(node, db)
+if args.node and not args.build_only:
+    collector = collector.Collector(args.node, db)
     if args.rebuild:
         collector.clear()
 
-    target = [int(args.limit / BLOCK_LIMIT_THRESHOLD), args.limit % BLOCK_LIMIT_THRESHOLD]
-    limited = args.limit != 0
-
-    while True:
-        run_limit = BLOCK_LIMIT_THRESHOLD
-
-        if limited:
-            if target[0] > 0:
-                target[0] -= 1
-            elif target[1] != 0:
-                run_limit = target[1]
-                target[1] = 0
-            else:
-                break
-
+    if args.limit > 0:
+        l = min(args.limit, collector.remote_height - collector.height)
+    else:
+        l = collector.remote_height - collector.height
+    while l > 0:
+        batch = min(l, BATCH_SIZE)
+        # collect
         if args.verbose:
             collector.stat()
-        collector.play(run_limit)
+        collector.play(batch)
         if args.verbose:
             collector.stat()
-
-        if args.chain:
-            builder = Builder(args.chain, db)
-            if args.rebuild:
-                builder.clear()
-            if args.verbose:
-                builder.stat()
-            if builder.play(min(args.limit, run_limit)) == False:
-                print('Fail')
-                break
-            if args.verbose:
-                builder.stat()
-
-        if collector.height == collector.remote_height:
+        # build
+        builder = Builder(collector.chain_id, db)
+        if args.verbose:
+            builder.stat()
+        if builder.play(0) == False:
+            print('Fail')
             break
+        if args.verbose:
+            builder.stat()
+        l -= batch
+
+if args.chain and args.build_only:
+    chain_id = args.chain
+    builder = Builder(chain_id, db)
+    cur = db.cursor()
+    cur.execute("""SELECT height FROM `c_blocks`
+        WHERE (`chain_id` = %(chain_id)s)
+        ORDER BY `height` DESC
+        LIMIT 1
+        """,
+        {'chain_id': chain_id})
+    row = cur.fetchone()
+    if row:
+        dest = row[0]
+    else:
+        exit(0)
+    cur.close()
+    if args.rebuild:
+        builder.clear()
+    run_size = dest - builder.height
+    if args.limit > 0:
+        run_size = min(run_size, args.limit)
+    if args.verbose:
+        builder.stat()
+    if builder.play(run_size) == False:
+        print('Fail')
+    if args.verbose:
+        builder.stat()
 
 db.close()
 filelock.release(lock)
