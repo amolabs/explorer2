@@ -33,7 +33,7 @@ globalMethods.install = function (Vue, options) {
       data /= 1000;
     }
     //console.log('bytecalc', param, data);
-    return Number(data.toFixed(3)).toLocaleString() + ' ' +  units[idx];
+    return Number(data.toFixed(3)).toLocaleString() + '' +  units[idx];
   };
 };
 
