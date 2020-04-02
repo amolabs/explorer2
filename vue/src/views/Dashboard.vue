@@ -142,28 +142,28 @@
               <v-col cols="8" class="pl-lg-12 py-0">
                 <c-progress-line
                   type="1"
-                  :value="this.coinsAndStakes.activeCoins_percentage"
-                  color="deepBlueGrey2"
+                  :value="this.coinsAndStakes.stakes_percentage"
+                  color="deepLightGrey"
                   height="10"
-                  title="Free Coin"
+                  title="Stakes"
                 >
                 </c-progress-line>
               </v-col>
               <v-col cols="4" class="pl-0 py-0">
-                <span> {{this.$amoHuman(this.coinsAndStakes.activeCoins)}} AMO ({{this.coinsAndStakes.activeCoins_percentage.toFixed(2)}}%)</span>
+                <span>  {{this.$amoHuman(this.coinsAndStakes.stakes)}} AMO ({{this.coinsAndStakes.stakes_percentage.toFixed(2)}}%)</span>
               </v-col>
               <v-col cols="8" class="pl-lg-12 py-0">
                 <c-progress-line
                   type="1"
-                  :value="this.coinsAndStakes.effStakes_percentage"
-                  color="deepLightGrey"
+                  :value="this.coinsAndStakes.delegates_percentage"
+                  color="deepBlueGrey2"
                   height="10"
-                  title="Eff. Stake"
+                  title="Delegated stakes"
                 >
                 </c-progress-line>
               </v-col>
               <v-col cols="4" class="pl-0 py-0">
-                <span>  {{this.$amoHuman(this.coinsAndStakes.effStakes)}} AMO ({{this.coinsAndStakes.effStakes_percentage.toFixed(2)}}%)</span>
+                <span> {{this.$amoHuman(this.coinsAndStakes.delegates)}} AMO ({{this.coinsAndStakes.delegates_percentage.toFixed(2)}}%)</span>
               </v-col>
             </v-row>
           </c-card>
@@ -280,10 +280,10 @@
       },
       coinsAndStakes: {
         coinTotal: 1,
-        activeCoins: 0,
-        activeCoins_percentage: 0,
-        effStakes: 0,
-        effStakes_percentage: 0,
+        stakes: 0,
+        stakes_percentage: 0,
+        delegates: 0,
+        delegates_percentage: 0,
       },
       governanceOverview: {
         value14_arg1: 0,
@@ -312,14 +312,10 @@
       // network 값이 변경되면 호출되는 함수
       '$store.state.network'() {
         console.log('network changed:', this.$store.state.network);
-        // 데이터 불러오기 위한 함수 호출
         this.getPageData()
       },
 
-      // validators.effStakes 값이 변경되면 호춣되는 함수 : 값의 증감 확인 용도
-      'validators.effStakes': function (newVal, oldVal) {
-        console.log('new', newVal);
-        console.log('old', oldVal);
+      'validators.effStakes'(newVal, oldVal) {
         let result = '';
         if(oldVal > newVal) {
           result = 'arrow_drop_down'
@@ -338,12 +334,6 @@
         console.debug('timer tick');
         this.getPageData()
       }, 10000)
-
-      this.validators.stakeOnline_ratio = this.validators.stakeOnline/ this.validators.effStakes * 100;
-      this.validators.stakeOffline_ratio = this.validators.stakeOffline/ this.validators.effStakes * 100;
-
-      this.coinsAndStakes.activeCoins_percentage = this.coinsAndStakes.activeCoins/ this.coinsAndStakes.coinTotal * 100;
-      this.coinsAndStakes.effStakes_percentage = this.coinsAndStakes.effStakes / this.coinsAndStakes.coinTotal * 100;
     },
     destroyed() {
       console.debug('clearing timer');
@@ -358,27 +348,35 @@
           this.networkOverview.avgInterval = stat.avgInterval;
           this.networkOverview.numTxsPerBlock = stat.numTxs / height;
           this.networkOverview.avgTxFee = stat.avgTxFee;
-          res = await this.$api.getBlock(1);
-          this.networkOverview.genesisHeight = res.height;
-          this.networkOverview.genesisTime = res.time;
-          res = await this.$api.getBlock(height);
-          this.networkOverview.lastHeight = res.height; //=getChainStat().height
-          this.networkOverview.lastTime = res.time;
 
           this.validators.effStakes
             = Number(stat.stakes) + Number(stat.delegates);
           this.validators.stakeOnline
             = Number(stat.stakes) + Number(stat.delegates);
           this.validators.stakeOffline = 0;
-          //console.log('validators', this.validators)
+          this.validators.stakeOnline_ratio =
+            this.validators.stakeOnline / this.validators.effStakes * 100;
+          this.validators.stakeOffline_ratio =
+            this.validators.stakeOffline / this.validators.effStakes * 100;
 
           this.coinsAndStakes.coinTotal
             = Number(stat.activeCoins) + Number(stat.stakes)
             + Number(stat.delegates);
-          this.coinsAndStakes.activeCoins = Number(stat.activeCoins);
-          this.coinsAndStakes.effStakes
-            = Number(stat.stakes) + Number(stat.delegates);
-          //console.log('coinsAndStakes', this.coinsAndStakes)
+          this.coinsAndStakes.stakes = Number(stat.stakes);
+          this.coinsAndStakes.delegates = Number(stat.delegates);
+          this.coinsAndStakes.stakes_percentage =
+            this.coinsAndStakes.stakes / this.coinsAndStakes.coinTotal * 100;
+          this.coinsAndStakes.delegates_percentage =
+            this.coinsAndStakes.delegates / this.coinsAndStakes.coinTotal * 100;
+
+          res = await this.$api.getBlock(1);
+          this.networkOverview.genesisHeight = res.height;
+          this.networkOverview.genesisTime = res.time;
+
+          res = await this.$api.getBlock(height);
+          this.networkOverview.lastHeight = res.height;
+          this.networkOverview.lastTime = res.time;
+
         } catch (e) {
           console.log('error', e);
         }

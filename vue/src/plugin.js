@@ -13,7 +13,7 @@ globalMethods.install = function (Vue, options) {
       idx++;
       data /= 1024;
     }
-    return Number(data.toFixed(3)).toLocaleString() + ' ' +  units[idx];
+    return Number(data.toFixed(2)).toLocaleString() + ' ' +  units[idx];
   };
 
   Vue.prototype.$amoHuman = (param) => {
@@ -30,7 +30,7 @@ globalMethods.install = function (Vue, options) {
       idx++;
       data /= 1000;
     }
-    return Number(data.toFixed(3)).toLocaleString() + '' +  units[idx];
+    return Number(data.toFixed(2)).toLocaleString() + '' +  units[idx];
   };
 
   Vue.prototype.$numHuman = (param) => {
@@ -46,7 +46,7 @@ globalMethods.install = function (Vue, options) {
       idx++;
       data /= 1000;
     }
-    return Number(data.toFixed(3)).toLocaleString() + '' +  units[idx];
+    return Number(data.toFixed(2)).toLocaleString() + '' +  units[idx];
   };
 };
 
