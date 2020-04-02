@@ -96,5 +96,46 @@ export default {
       .then(res => {
         return Promise.resolve(res.data);
       });
-  }
+  },
+
+  getValidatorStat() {
+    return axios.get(`${server}/chain/${chain_id}`,
+      options)
+      .then(res => {
+        var chain = camelcaseKeys(res.data); 
+        if (!chain.num) chain.num = 0;
+        if (!chain.avgOnline) chain.avgOnline = 0;
+        if (!chain.totalEffStakes) chain.totalEffStakes = 0;
+        if (!chain.avgEffStake) chain.avgEffStake = 0;
+        return Promise.resolve(chain);
+      });
+  },
+
+  getIncentiveStat() {
+    return axios.get(`${server}/chain/${chain_id}`,
+      options)
+      .then(res => {
+        var chain = camelcaseKeys(res.data); 
+        if (!chain.avgIncentive) chain.avgIncentive = 0;
+        if (!chain.avgReward) chain.avgReward = 0;
+        if (!chain.avgTxFee) chain.avgTxFee = 0;
+        if (!chain.estInterest) chain.estInterest = 0;
+        return Promise.resolve(chain);
+      });
+  },
+
+  getValidators(from, num) {
+    return axios.get(`${server}/chain/${chain_id}/accounts?validators&from=${from}&num=${num}`,
+      options)
+      .then(res => {
+        //var vals = camelcaseKeys(res.data);
+        var vals = []
+        for (var i = 0; i < res.data.length; i++) {
+          var val = camelcaseKeys(res.data[i]);
+          val['activity'] = 100;
+          vals.push(val);
+        }
+        return Promise.resolve(vals);
+      });
+  },
 }

@@ -2,7 +2,7 @@ import Dashboard from '../views/Dashboard.vue';
 import Inspect from '../views/Inspect'
 import Blocks from '../views/Blocks'
 import Transactions from '../views/Transactions'
-import Validators from '../views/Validators_blank' //
+import Validators from '../views/Validators'
 import Governance from '../views/Governance_blank' //
 import Storages from '../views/Storages'
 import Parcels from '../views/Parcels'

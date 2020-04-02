@@ -2,7 +2,6 @@ const globalMethods = {};
 
 globalMethods.install = function (Vue, options) {
   Vue.prototype.$byteHuman = (param) => {
-    //console.log('byte calc', param);
     let data = param;
     if (data === undefined) {
       data = 0;
@@ -14,7 +13,6 @@ globalMethods.install = function (Vue, options) {
       idx++;
       data /= 1024;
     }
-    //console.log('bytecalc', param, data);
     return Number(data.toFixed(3)).toLocaleString() + ' ' +  units[idx];
   };
 
@@ -32,7 +30,22 @@ globalMethods.install = function (Vue, options) {
       idx++;
       data /= 1000;
     }
-    //console.log('bytecalc', param, data);
+    return Number(data.toFixed(3)).toLocaleString() + '' +  units[idx];
+  };
+
+  Vue.prototype.$numHuman = (param) => {
+    //console.log('byte calc', param);
+    let data = param;
+    if (data === undefined) {
+      data = 0;
+    }
+    let units = ['', 'K', 'M', 'G', 'T'];
+
+    var idx = 0;
+    while (data >= 1000 && idx < 4) {
+      idx++;
+      data /= 1000;
+    }
     return Number(data.toFixed(3)).toLocaleString() + '' +  units[idx];
   };
 };
