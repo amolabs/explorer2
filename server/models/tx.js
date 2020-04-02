@@ -55,27 +55,24 @@ async function searchHash(chain_id, hash) {
   });
 }
 
-async function getList(chain_id, from_h, from_i, num, order) {
+async function getList(chain_id, top, from, num) {
   return new Promise(function(resolve, reject) {
-    from_h = Number(from_h);
-    from_i = Number(from_i);
+    top = Number(top);
+    from = Number(from);
     num = Number(num);
     var query_str;
     var query_var;
-    if (order == 'asc') {
-      query_str = "select * from c_txs where (chain_id = ?) \
-        and (height >= ? and `index` >= ?) \
-        order by height asc, `index` asc limit ?";
-      query_var = [chain_id, from_h, from_i, num];
+    if (top == 0) {
+      query_str = "select * from `c_txs` where (`chain_id` = ?) \
+        order by `height` desc, `index` desc limit ?,?";
+      query_var = [chain_id, from, num];
     } else {
-      query_str = "select * from c_txs where (chain_id = ?) \
-        and (height <= ? and `index` <= ?) \
-        order by height desc, `index` desc limit ?";
-      query_var = [chain_id, from_h, from_i, num];
+      query_str = "select * from `c_txs` where (`chain_id` = ?) \
+        and (`height` <= ?) \
+        order by `height` desc, `index` desc limit ?,?";
+      query_var = [chain_id, top, from, num];
     }
     db.query(query_str, query_var, function (err, rows, fields) {
-      // Call reject on error states,
-      // call resolve with results
       if (err) {
         return reject(err);
       }

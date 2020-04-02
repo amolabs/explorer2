@@ -137,7 +137,8 @@
           { text: 'result', align: 'center', value: 'info'},
         ],
         txList: [],
-        anchor: '0.0', // we need height and index for querying txs
+        topHeight: 0,
+        anchor: 0,
         bulkSize: 20,
       },
     }),
@@ -145,11 +146,6 @@
       '$store.state.network'() {
         console.log('[Transaction Page] 변경 된 network value', this.$store.state.network);
         this.getPageData()
-      },
-      'txStat.txHeight'() {
-        this.txTable.anchor = String(this.txStat.txHeight)
-          .concat('.', String(this.txStat.txIndex));
-        this.reqTxTableData();
       },
     },
     computed:{
@@ -174,27 +170,18 @@
       async getPageData(){
         try {
           this.txStat = await this.$api.getTxStat();
+          this.txTable.topHeight = this.txStat.txHeight;
         } catch (e) {
           console.log(e);
         }
       },
       async reqTxTableData() {
-        var l = this.txTable.txList;
-        if (this.txTable.anchor == '0.0') {
-          return;
-        }
         try {
           const res = await this.$api.getTxs(
-            this.txTable.anchor, this.txTable.bulkSize, 'desc');
-          l = l.concat(res);
-          this.txTable.txList = l;
-          var h = Number(l[l.length-1]['height']);
-          var i = Number(l[l.length-1]['index']) - 1;
-          if (i < 0) {
-            h -= 1;
-            i = 99999;
-          }
-          this.txTable.anchor = String(h).concat('.', String(i));
+            this.txTable.topHeight,
+            this.txTable.anchor, this.txTable.bulkSize);
+          this.txTable.txList = this.txTable.txList.concat(res);
+          this.txTable.anchor = this.txTable.txList.length;
         } catch (e) {
           console.log(e);
         }

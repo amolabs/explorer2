@@ -74,8 +74,8 @@ export default {
       });
   },
 
-  getTxs(from, num, order) {
-    return axios.get(`${server}/chain/${chain_id}/txs?from=${from}&num=${num}&order=${order}`,
+  getTxs(top, from, num) {
+    return axios.get(`${server}/chain/${chain_id}/txs?top=${top}&from=${from}&num=${num}`,
       options)
       .then(res => {
         return Promise.resolve(res.data);
