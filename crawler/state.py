@@ -2,7 +2,6 @@
 # vim: set sw=4 ts=4 expandtab :
 
 import json
-import base64
 from hashlib import sha256
 
 import stats
@@ -14,6 +13,8 @@ class Account:
         self.balance = 0
         self.stake = 0
         self.val_addr = None
+        self.val_pubkey = None
+        self.val_power = 0
         self.delegate = 0
         self.del_addr = None
         cursor.execute("""
@@ -27,6 +28,8 @@ class Account:
             self.balance = int(d['balance'])
             self.stake = int(d['stake'])
             self.val_addr = d['val_addr']
+            self.val_pubkey = d['val_pubkey']
+            self.val_power = int(d['val_power'])
             self.delegate = int(d['delegate'])
             self.del_addr = d['del_addr']
         else:
@@ -42,12 +45,15 @@ class Account:
         values['balance'] = str(values['balance'])
         values['stake'] = str(values['stake'])
         values['delegate'] = str(values['delegate'])
+        values['val_power'] = str(values['val_power'])
         cursor.execute("""
             UPDATE `s_accounts`
             SET
                 `balance` = %(balance)s,
                 `stake` = %(stake)s,
                 `val_addr` = %(val_addr)s,
+                `val_pubkey` = %(val_pubkey)s,
+                `val_power` = %(val_power)s,
                 `delegate` = %(delegate)s,
                 `del_addr` = %(del_addr)s
             WHERE (`chain_id` = %(chain_id)s AND `address` = %(address)s)
@@ -363,8 +369,9 @@ def stake(tx, cursor):
 
     sender.stake += payload['amount']
     sender.balance -= payload['amount']
-    val_pubkey = base64.b64decode(payload['validator'])
-    sender.val_addr = sha256(val_pubkey).hexdigest()[:40].upper()
+    sender.val_pubkey = payload['validator']
+    b = bytearray.fromhex(sender.val_pubkey)
+    sender.val_addr = sha256(b).hexdigest()[:40].upper()
 
     asset_stat = stats.Asset(tx.chain_id, cursor)
     asset_stat.active_coins -= payload['amount']

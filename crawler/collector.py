@@ -110,23 +110,19 @@ class Collector:
                 print('.', end='', flush=True)
             if h % 100 == 0:
                 print(f'block height {h}', flush=True)
-            block_id, block_raw, txs_results, incs = collect_block(s, self.node, h)
-            block_header = block_raw['header']
-            tx_bodies = block_raw['data']['txs']
-            block = amo.Block(block_header['chain_id'], block_header['height'])
-            block.set_meta(block_id, block_header)
-            block.incentives = incs
+            block = self.collect_block(s, h)
             block.save(cur)
+
             num = 0
             num_valid = 0
             num_invalid = 0
-            for i in range(len(tx_bodies) if tx_bodies else 0):
-                body = tx_bodies[i]
-                result = txs_results[i]
+            for i in range(len(block.txs) if block.txs else 0):
+                tx_body = block.txs[i]
+                tx_result = block.txs_results[i]
                 tx = amo.Tx(block.chain_id, block.height, i)
-                tx.parse_body(body)
-                tx.set_result(result)
-                if result['code'] == 0:
+                tx.parse_body(tx_body)
+                tx.set_result(tx_result)
+                if tx_result['code'] == 0:
                     num_valid += 1
                 else:
                     num_invalid += 1
@@ -137,7 +133,7 @@ class Collector:
                 block.num_txs = num
                 block.num_txs_valid = num_valid
                 block.num_txs_invalid = num_invalid
-                block.update(cur)
+                block.update_num_txs(cur)
 
             ### NOTE: the following strategy is effective when tx density is low.
 
@@ -167,24 +163,27 @@ class Collector:
         # closing
         cur.close()
 
-def collect_block(s, node, height):
-    r = s.get(f'{node}/block?height={height}')
-    dat = json.loads(r.text)['result']
-    block_id = dat['block_id']
-    block = dat['block']
+    def collect_block(self, s, height):
+        r = s.get(f'{self.node}/block?height={height}')
+        dat = json.loads(r.text)['result']
+        block = amo.Block(dat['block']['header']['chain_id'],
+                dat['block']['header']['height'])
+        block.read(dat)
 
-    r = s.get(f'{node}/block_results?height={height}')
-    txs_results = json.loads(r.text)['result']['txs_results']
+        r = s.get(f'{self.node}/block_results?height={height}')
+        dat = json.loads(r.text)['result']
+        block.read_results(dat)
 
-    q = f'"{height}"'.encode('latin1').hex()
-    r = s.get(f'{node}/abci_query?path="/inc_block"&data=0x{q}')
-    b = json.loads(r.text)['result']['response']['value']
-    if b == None:
-        incs = json.dumps([])
-    else:
-        incs = base64.b64decode(b)
+        q = f'"{height}"'.encode('latin1').hex()
+        r = s.get(f'{self.node}/abci_query?path="/inc_block"&data=0x{q}')
+        b = json.loads(r.text)['result']['response']['value']
+        if b == None:
+            incs = json.dumps([])
+        else:
+            incs = base64.b64decode(b)
+        block.incentives = incs
 
-    return block_id, block, txs_results, incs
+        return block
 
 #def block_metas(node, base, num):
 #    print(f'batch height from {base+1} to {base+num}')

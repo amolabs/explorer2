@@ -92,6 +92,8 @@ try:
                 collector.stat()
             # build
             builder = Builder(collector.chain_id, db)
+            if args.rebuild:
+                builder.clear()
             if args.verbose:
                 builder.stat()
             if builder.play(0) == False:

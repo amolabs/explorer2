@@ -15,6 +15,36 @@ class Block:
         self.chain_id = chain_id
         self.height = int(height)
 
+    def _vars(self):
+        v = vars(self).copy()
+        del v['txs']
+        del v['txs_results']
+        v['validator_updates'] = json.dumps(v['validator_updates'])
+        return v
+
+    def read(self, raw):
+        self.hash = raw['block_id']['hash']
+        header = raw['block']['header']
+        self.time = dateparse(header['time']) .astimezone(tz=timezone.utc)
+        self.proposer = header['proposer_address']
+        self.txs = raw['block']['data']['txs']
+
+    def read_results(self, raw):
+        self.txs_results = raw['txs_results']
+        self.validator_updates = raw['validator_updates']
+        if self.validator_updates == None:
+            self.validator_updates = []
+        #val_updates = json.loads(r.text)['result']['validator_updates']
+        #"validator_updates": [
+        #  {
+        #    "pub_key": {
+        #      "type": "ed25519",
+        #      "data": "G73RonjbbShWc0JXQ2lqStkx67tt5U8uyfcJy+SM6AQ="
+        #    },
+        #    "power": "325962901115417480"
+        #  }
+        #],
+
     def set_meta(self, blk_id, blk_header):
         self.time = dateparse(blk_header['time']).astimezone(tz=timezone.utc)
         self.hash = blk_id['hash']
@@ -31,7 +61,7 @@ class Block:
         else:
             cursor.execute(f"""SELECT `time` FROM `c_blocks`
                 WHERE (`chain_id` = %(chain_id)s AND `height` = {self.height - 1})""",
-                vars(self))
+                self._vars())
             row = cursor.fetchone()
             # TODO exception handling
             prev = row[0].replace(tzinfo=timezone.utc)
@@ -39,14 +69,15 @@ class Block:
         cursor.execute("""
             INSERT INTO `c_blocks`
                 (`chain_id`, `height`, `time`, `hash`,
-                    `interval`, `proposer`, `incentives`)
+                    `interval`, `proposer`, `incentives`, `validator_updates`)
             VALUES
                 (%(chain_id)s, %(height)s, %(time)s, %(hash)s,
-                %(interval)s, %(proposer)s, %(incentives)s)
+                %(interval)s, %(proposer)s,
+                %(incentives)s, %(validator_updates)s)
             """,
-            (vars(self)))
+            self._vars())
 
-    def update(self, cursor):
+    def update_num_txs(self, cursor):
         cursor.execute("""
             UPDATE `c_blocks` SET
                 `num_txs` = %(num_txs)s,
@@ -55,7 +86,7 @@ class Block:
             WHERE
                 `chain_id` = %(chain_id)s and `height` = %(height)s
             """,
-            (vars(self)))
+            self._vars())
 
 class Tx:
     """form a tx"""
@@ -63,6 +94,10 @@ class Tx:
         self.chain_id = chain_id
         self.height = height
         self.index = index
+
+    def _vars(self):
+        v = vars(self).copy()
+        return v
 
     def parse_body(self, body):
         b = base64.b64decode(body)
@@ -88,7 +123,6 @@ class Tx:
         #self.payload_parsed = json.loads(d['payload'])
         self.code = d['code']
         self.info = d['info']
-        #print('read', vars(self))
 
     def play(self, cursor):
         if self.code is not 0:
@@ -111,4 +145,4 @@ class Tx:
                 %(type)s, %(sender)s, %(fee)s, %(last_height)s, %(payload)s
                 )
             """,
-            (vars(self)))
+            self._vars())

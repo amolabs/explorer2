@@ -2,6 +2,8 @@
 # vim: set sw=4 ts=4 expandtab :
 
 import json
+import base64
+from hashlib import sha256
 
 import amo
 import state
@@ -152,6 +154,24 @@ class Builder:
                 asset_stat.active_coins += int(inc['amount'])
                 recp.save(cur)
 
+        # validator updates
+        cur.execute("""
+            SELECT `validator_updates` FROM `c_blocks`
+            WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s + 1)
+            """,
+            self._vars())
+        row = cur.fetchone()
+        #asset_stat = stats.Asset(self.chain_id, cur)
+        if row:
+            vals = json.loads(row[0])
+            for val in vals:
+                b = base64.b64decode(val['pub_key']['data'])
+                val_addr = sha256(b).hexdigest()[:40].upper()
+                if val['power'] == '0':
+                    delete_val(self.chain_id, val_addr, cur)
+                else:
+                    update_val(self.chain_id, val_addr, val['power'], cur)
+
         # close
         self.height += 1
         self._save_height(cur)
@@ -166,4 +186,24 @@ class Builder:
             WHERE `chain_id` = %(chain_id)s
             """,
             self._vars())
+
+def delete_val(chain_id, addr, cur):
+    cur.execute("""
+        UPDATE `s_accounts`
+        SET
+            `val_addr` = NULL,
+            `val_pubkey` = NULL,
+            `val_power` = '0'
+        WHERE (`chain_id` = %(chain_id)s AND `val_addr` = %(val_addr)s)
+        """,
+        {'chain_id': chain_id, 'val_addr': addr})
+
+def update_val(chain_id, addr, power, cur):
+    cur.execute("""
+        UPDATE `s_accounts`
+        SET
+            `val_power` = %(val_power)s
+        WHERE (`chain_id` = %(chain_id)s AND `val_addr` = %(val_addr)s)
+        """,
+        {'chain_id': chain_id, 'val_addr': addr, 'val_power': str(power)})
 
