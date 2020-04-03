@@ -44,14 +44,11 @@ router.get('/:height([0-9]+)/txs', function(req, res) {
   const height = req.params.height;
   var from = req.query.from || 0;
   var num = req.query.num || 20;
-  tx.getList(chain_id, height, from, num)
+  tx.getListByBlock(chain_id, height, from, num)
     .then((rows) => {
       if (rows.length > 0) {
         res.status(200);
-        res.send(rows[0]);
-      } else {
-        res.status(404);
-        res.send('not found');
+        res.send(rows);
       }
     })
     .catch((err) => {

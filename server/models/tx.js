@@ -133,5 +133,6 @@ module.exports = {
   getLast: getLast,
   searchHash: searchHash,
   getList: getList,
+  getListByBlock: getListByBlock,
   getListBySender: getListBySender,
 }

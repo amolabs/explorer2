@@ -121,7 +121,7 @@
           { text: 'hash',align: 'center',  value: 'hash' },
           { text: 'sender',align: 'center',  value: 'sender' },
           { text: 'type', align: 'center',  value: 'type' },
-          { text: 'result', align: 'center', value: 'result' },
+          { text: 'result', align: 'center', value: 'info' },
         ],
         txList: [],
         anchor: 0,
