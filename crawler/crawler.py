@@ -4,6 +4,7 @@
 
 import argparse
 import json
+import traceback
 
 import mysql.connector
 from mysql.connector import Error

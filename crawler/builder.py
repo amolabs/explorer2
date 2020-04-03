@@ -124,61 +124,73 @@ class Builder:
         if self.height + 1 > self.roof:
             return False
 
+        self.play_block_txs(cur)
+        self.play_block_incentives(cur)
+        self.play_block_val_updates(cur)
+
+        # close
+        self.height += 1
+        self._save_height(cur)
+        self.db.commit()
+        cur.close()
+
+        # progress report
+        if self.height % 1000 == 0:
+            print(f'block height {self.height}', flush=True)
+
+        return True
+
+    def play_block_txs(self, cursor):
         # txs
-        cur.execute("""
+        cursor.execute("""
             SELECT * FROM `c_txs`
             WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s + 1)
             """,
             self._vars())
-        rows = cur.fetchall()
-        cols = cur.column_names
+        rows = cursor.fetchall()
+        cols = cursor.column_names
         for row in rows:
             d = dict(zip(cols, row))
             tx = amo.Tx(self.chain_id, d['height'], d['index'])
             tx.read(d)
-            tx.play(cur)
+            tx.play(cursor)
 
+    def play_block_incentives(self, cursor):
         # block incentives
-        cur.execute("""
+        cursor.execute("""
             SELECT `incentives` FROM `c_blocks`
             WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s + 1)
             """,
             self._vars())
-        row = cur.fetchone()
-        asset_stat = stats.Asset(self.chain_id, cur)
+        row = cursor.fetchone()
+        asset_stat = stats.Asset(self.chain_id, cursor)
         if row:
             incentives = json.loads(row[0])
             for inc in incentives:
-                recp = state.Account(self.chain_id, inc['address'], cur)
+                recp = state.Account(self.chain_id, inc['address'], cursor)
                 recp.balance += int(inc['amount'])
                 asset_stat.active_coins += int(inc['amount'])
-                recp.save(cur)
+                recp.save(cursor)
+        asset_stat.save(cursor)
 
+    def play_block_val_updates(self, cursor):
         # validator updates
-        cur.execute("""
+        cursor.execute("""
             SELECT `validator_updates` FROM `c_blocks`
             WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s + 1)
             """,
             self._vars())
-        row = cur.fetchone()
-        #asset_stat = stats.Asset(self.chain_id, cur)
+        row = cursor.fetchone()
+        #asset_stat = stats.Asset(self.chain_id, cursor)
         if row:
             vals = json.loads(row[0])
             for val in vals:
                 b = base64.b64decode(val['pub_key']['data'])
                 val_addr = sha256(b).hexdigest()[:40].upper()
                 if val['power'] == '0':
-                    delete_val(self.chain_id, val_addr, cur)
+                    delete_val(self.chain_id, val_addr, cursor)
                 else:
-                    update_val(self.chain_id, val_addr, val['power'], cur)
-
-        # close
-        self.height += 1
-        self._save_height(cur)
-        asset_stat.save(cur)
-        self.db.commit()
-        cur.close()
-        return True
+                    update_val(self.chain_id, val_addr, val['power'], cursor)
 
     def _save_height(self, cursor):
         cursor.execute("""
