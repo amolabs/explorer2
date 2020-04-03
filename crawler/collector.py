@@ -88,7 +88,7 @@ class Collector:
             self.db.commit()
         cur.close()
 
-    def play(self, limit, mode='block'):
+    def play(self, limit):
         cur = self.db.cursor()
         s = requests.Session()
 
@@ -102,13 +102,16 @@ class Collector:
 
         batch_base = self.height
 
+        # mode: true(dense) -> block
+        # mode: false(not dense) -> tx_search
         metas, mode = estimate_transaction_density(s, self.node, batch_base, min(run, 20))
 
-        for h in range(self.height + 1, self.height + run + 1):
-            # batch start
-            self.db.autocommit = False
-
-            if mode:
+        if mode:
+            # mode: true(dense) -> block
+            for h in range(self.height + 1, self.height + run + 1):
+                # batch start
+                self.db.autocommit = False
+    
                 ### NOTE: the following strategy is effective when tx density is high.
                 if h % 50 == 0:
                     print('.', flush=True)
@@ -138,37 +141,44 @@ class Collector:
                         num_invalid += 1
                     num += 1
                     tx.save(cur)
-
+    
                 if num_valid > 0 or num_invalid > 0:
                     block.num_txs = num
                     block.num_txs_valid = num_valid
                     block.num_txs_invalid = num_invalid
                     block.update(cur)
 
-            else:
-                ### NOTE: the following strategy is effective when tx density is low.
-                # XXX: This limit is due to the limit of tendermint rpc.
-                # collect raw data
-                for meta in metas:
-                    block_header = meta['header']
-                    block = amo.Block(block_header['chain_id'], block_header['height'])
-                    block.set_meta(meta['block_id'], block_header)
-                    block.incentives = collect_incentive(s, self.node, block.height)
-                    block.save(cur)
+                self.db.commit()
+                # batch end
 
-                    if int(meta['num_txs']) > 0:
-                        items = collect_block_txs(s, self.node, block.height)
-                        for item in items:
-                            tx = amo.format_tx(item)
-                            save_tx(block['chain_id'], tx)
-                # update stat
-                # done
+        else:
+            # mode: false(not dense) -> blockchain
+            ### NOTE: the following strategy is effective when tx density is low.
+            # collect raw meta data 
+            metas = collect_block_metas(s, self.node, s.height, run)
 
-                run -= len(metas)
-                batch_base += len(metas)
+            for meta in metas:
+                # batch start
+                self.db.autocommit = False
 
-            self.db.commit()
-            # batch end
+                block_header = meta['header']
+                block = amo.Block(block_header['chain_id'], block_header['height'])
+                block.set_meta(meta['block_id'], block_header)
+                block.incentives = collect_incentive(s, self.node, block.height)
+                block.save(cur)
+
+                if int(meta['num_txs']) == 0:
+                    # batch end
+                    self.db.commit()
+                    continue
+
+                items = collect_block_txs(s, self.node, block.height)
+                for item in items:
+                    tx = amo.format_tx(item)
+                    save_tx(block['chain_id'], tx)
+
+                # batch end
+                self.db.commit()
 
         self.height += run
         print()
@@ -196,15 +206,7 @@ def collect_block(s, node, height):
 
     return block_id, block, txs_results, incs
 
-
-def estimate_transaction_density(s, node, base, num):
-    metas = block_metas(s, node, base, num)
-    density = statistics.mean(map(lambda m: int(m['num_txs']), metas))
-
-    return metas, density > 30
-
-
-def block_metas(s, node, base, num):
+def collect_block_metas(s, node, base, num):
     print(f'batch height from {base + 1} to {base + num}')
     r = s.get(
         f'{node}/blockchain?minHeight={base + 1}&maxHeight={base + num}')
@@ -219,3 +221,10 @@ def collect_block_txs(s, node, height):
     items = json.loads(r.text)['result']['txs']
     print(f'- block height {height}: num_txs = {len(items)}')
     return items
+
+def estimate_transaction_density(s, node, base, num):
+    metas = block_metas(s, node, base, num)
+    density = statistics.mean(map(lambda m: int(m['num_txs']), metas))
+
+    return metas, density > 30
+
