@@ -573,7 +573,7 @@ def issue(tx, cursor):
     udc.operators = json.dumps(payload.get('operators', []))
     udc.total += payload['amount']
 
-    issuer.balace += payload['amount']
+    issuer.balance += payload['amount']
 
     udc.save(cursor)
     issuer.save(cursor)
