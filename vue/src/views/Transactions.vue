@@ -147,6 +147,9 @@
         console.log('[Transaction Page] 변경 된 network value', this.$store.state.network);
         this.getPageData()
       },
+      'txTable.topHeight'() {
+        this.reqTxTableData();
+      },
     },
     computed:{
       tableBreakpoint(){
@@ -164,7 +167,6 @@
     },
     mounted() {
       this.getPageData()
-      this.reqTxTableData();
     },
     methods: {
       async getPageData(){

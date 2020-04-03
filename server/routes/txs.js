@@ -5,12 +5,10 @@ const tx = require('../models/tx');
 
 router.get('/', function(req, res) {
   const chain_id = res.locals.chain_id;
-  var from = req.query.from || '0.0';
-  var from_h = from.split('.')[0] || 0;
-  var from_i = from.split('.')[1] || 0;
+  var top = req.query.to || 0;
+  var from = req.query.from || 0;
   var num = req.query.num || 20;
-  var order = req.query.order || 'desc';
-  tx.getList(chain_id, from_h, from_i, num, order)
+  tx.getList(chain_id, top, from, num)
     .then((rows) => {
       res.status(200);
       res.send(rows);
