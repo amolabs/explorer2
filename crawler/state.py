@@ -111,7 +111,7 @@ class Parcel:
         self.chain_id = chain_id
         self.parcel_id = parcel_id
         self.storage_id = int(parcel_id[:8], 16)
-        self.owner = owner
+        self.owner = owner # FK
         self.custody = ''
         self.proxy_account = None
         self.extra = '{}'
@@ -132,8 +132,8 @@ class Parcel:
         else:
             cursor.execute("""
                 INSERT INTO `s_parcels`
-                    (`chain_id`, `parcel_id`, `storage_id`)
-                VALUES (%(chain_id)s, %(parcel_id)s, %(storage_id)s)
+                    (`chain_id`, `parcel_id`, `storage_id`, `owner`)
+                VALUES (%(chain_id)s, %(parcel_id)s, %(storage_id)s, %(owner)s)
                 """,
                 vars(self))
 
@@ -477,8 +477,8 @@ def register(tx, cursor):
     owner.balance -= storage.registration_fee
     host.balance += storage.registration_fee
 
-    parcel.save(cursor)
     owner.save(cursor)
+    parcel.save(cursor)
     host.save(cursor)
 
 def discard(tx, cursor):
