@@ -77,6 +77,8 @@ try:
         collector = collector.Collector(args.node, db)
         if args.rebuild:
             collector.clear()
+            builder = Builder(collector.chain_id, db)
+            builder.clear()
 
         if args.limit > 0:
             l = min(args.limit, collector.remote_height - collector.height)
@@ -92,8 +94,6 @@ try:
                 collector.stat()
             # build
             builder = Builder(collector.chain_id, db)
-            if args.rebuild:
-                builder.clear()
             if args.verbose:
                 builder.stat()
             if builder.play(0) == False:
@@ -103,7 +103,8 @@ try:
                 builder.stat()
             l -= batch
 except Exception as e:
-    print(e)
+    #print(e)
+    traceback.print_exc()
     db.close()
     lock.release()
     exit(-1)
@@ -137,7 +138,8 @@ try:
         if args.verbose:
             builder.stat()
 except Exception as e:
-    print(e)
+    #print(e)
+    traceback.print_exc()
     db.close()
     lock.release()
     exit(-1)

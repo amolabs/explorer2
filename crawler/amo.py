@@ -29,6 +29,17 @@ class Block:
         self.proposer = header['proposer_address']
         self.txs = raw['block']['data']['txs']
 
+    def read_meta(self, raw):
+        self.hash = raw['block_id']['hash']
+        header = raw['header']
+        self.time = dateparse(header['time']) .astimezone(tz=timezone.utc)
+        self.proposer = header['proposer_address']
+        self.num_txs = int(raw['num_txs'])
+        self.txs = []
+        self.txs_results = []
+        self.incentives = '[]' # hmmm...
+        self.validator_updates = []
+
     def read_results(self, raw):
         self.txs_results = raw['txs_results']
         self.validator_updates = raw['validator_updates']
@@ -56,11 +67,12 @@ class Block:
         dt = self.time.astimezone(tz=timezone.utc)
         self.time = dt.replace(tzinfo=None).isoformat()
         self.interval = 0
-        if self.height == 1 or self.height == 2:
+        if self.height <= 2:
             self.interval = 0
         else:
-            cursor.execute(f"""SELECT `time` FROM `c_blocks`
-                WHERE (`chain_id` = %(chain_id)s AND `height` = {self.height - 1})""",
+            cursor.execute(f"""
+                SELECT `time` FROM `c_blocks`
+                WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s - 1)""",
                 self._vars())
             row = cursor.fetchone()
             # TODO exception handling

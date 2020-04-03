@@ -52,7 +52,7 @@ class Builder:
         print(f'[builder] chain: {self.chain_id}, local {self.height} => remote {self.roof}')
 
     def clear(self):
-        print('REBUILD')
+        print('REBUILD state db')
         cur = self.db.cursor()
         cur.execute("""DELETE FROM `s_requests`
             WHERE (`chain_id` = %(chain_id)s)

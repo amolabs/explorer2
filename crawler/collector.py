@@ -43,7 +43,7 @@ class Collector:
         print(f'[collector] node: {self.node}, local {self.height} => remote {self.remote_height}')
 
     def clear(self):
-        print('REBUILD')
+        print('REBUILD block db')
         cur = self.db.cursor()
         cur.execute("""DELETE FROM `c_genesis`
             WHERE (`chain_id` = %(chain_id)s)
@@ -99,66 +99,109 @@ class Collector:
             run = self.remote_height - self.height
 
         batch_base = self.height
-        for h in range(self.height + 1, self.height + run + 1):
-            # batch start
+        while run > 0:
+            # 20 blocks is a tendermint limitation
+            blocks = self.collect_block_metas(s, batch_base + 1, 20)
             self.db.autocommit = False
-
-            ### NOTE: the following strategy is effective when tx density is high.
-            if h % 50 == 0:
-                print('.', flush=True)
-            else:
-                print('.', end='', flush=True)
-            if h % 100 == 0:
-                print(f'block height {h}', flush=True)
-            block = self.collect_block(s, h)
-            block.save(cur)
-
-            num = 0
-            num_valid = 0
-            num_invalid = 0
-            for i in range(len(block.txs) if block.txs else 0):
-                tx_body = block.txs[i]
-                tx_result = block.txs_results[i]
-                tx = amo.Tx(block.chain_id, block.height, i)
-                tx.parse_body(tx_body)
-                tx.set_result(tx_result)
-                if tx_result['code'] == 0:
-                    num_valid += 1
+            for block in blocks:
+                h = block.height
+                if h % 50 == 0:
+                    print('.', flush=True)
                 else:
-                    num_invalid += 1
-                num += 1
-                tx.save(cur)
+                    print('.', end='', flush=True)
+                if h % 100 == 0:
+                    print(f'block height {h}', flush=True)
 
-            if num_valid > 0 or num_invalid > 0:
-                block.num_txs = num
-                block.num_txs_valid = num_valid
-                block.num_txs_invalid = num_invalid
-                block.update_num_txs(cur)
+                if block.num_txs > 0:
+                    block = self.collect_block(s, h)
+                    block.save(cur) # for FK contraint
 
-            ### NOTE: the following strategy is effective when tx density is low.
+                    num = 0
+                    num_valid = 0
+                    num_invalid = 0
+                    for i in range(len(block.txs) if block.txs else 0):
+                        tx_body = block.txs[i]
+                        tx_result = block.txs_results[i]
+                        tx = amo.Tx(block.chain_id, block.height, i)
+                        tx.parse_body(tx_body)
+                        tx.set_result(tx_result)
+                        if tx_result['code'] == 0:
+                            num_valid += 1
+                        else:
+                            num_invalid += 1
+                        num += 1
+                        tx.save(cur)
 
-            # XXX: This limit is due to the limit of tendermint rpc.
-            #batch_run = min(run,20)
-            # collect raw data
-            #metas = collect_block_headers(node, batch_base, batch_run)
-            #for meta in metas:
-            #    block = amo.format_block(meta)
-            #    save_block(block)
-            #    if int(block['num_txs']) > 0:
-            #        items = collect_block_txs(node, block['height'])
-            #        for item in items:
-            #            tx = amo.format_tx(item)
-            #            save_tx(block['chain_id'], tx)
-            # update stat
-            # done
-
-            #run -= len(metas)
-            #batch_base += len(metas)
-
+                    if num_valid > 0 or num_invalid > 0:
+                        block.num_txs = num
+                        block.num_txs_valid = num_valid
+                        block.num_txs_invalid = num_invalid
+                        block.update_num_txs(cur)
+                else:
+                    block.save(cur)
+            run -= len(blocks)
+            batch_base += len(blocks)
+            self.height += len(blocks)
             self.db.commit()
-            # batch end
+
+        #for h in range(self.height + 1, self.height + run + 1):
+        #    # batch start
+        #    self.db.autocommit = False
+
+        #    if h % 50 == 0:
+        #        print('.', flush=True)
+        #    else:
+        #        print('.', end='', flush=True)
+        #    if h % 100 == 0:
+        #        print(f'block height {h}', flush=True)
+        #    block = self.collect_block(s, h)
+        #    block.save(cur)
+
+        #    num = 0
+        #    num_valid = 0
+        #    num_invalid = 0
+        #    for i in range(len(block.txs) if block.txs else 0):
+        #        tx_body = block.txs[i]
+        #        tx_result = block.txs_results[i]
+        #        tx = amo.Tx(block.chain_id, block.height, i)
+        #        tx.parse_body(tx_body)
+        #        tx.set_result(tx_result)
+        #        if tx_result['code'] == 0:
+        #            num_valid += 1
+        #        else:
+        #            num_invalid += 1
+        #        num += 1
+        #        tx.save(cur)
+
+        #    if num_valid > 0 or num_invalid > 0:
+        #        block.num_txs = num
+        #        block.num_txs_valid = num_valid
+        #        block.num_txs_invalid = num_invalid
+        #        block.update_num_txs(cur)
+
+        #    # XXX: This limit is due to the limit of tendermint rpc.
+        #    #batch_run = min(run,20)
+        #    # collect raw data
+        #    #metas = collect_block_headers(node, batch_base, batch_run)
+        #    #for meta in metas:
+        #    #    block = amo.format_block(meta)
+        #    #    save_block(block)
+        #    #    if int(block['num_txs']) > 0:
+        #    #        items = collect_block_txs(node, block['height'])
+        #    #        for item in items:
+        #    #            tx = amo.format_tx(item)
+        #    #            save_tx(block['chain_id'], tx)
+        #    # update stat
+        #    # done
+
+        #    #run -= len(metas)
+        #    #batch_base += len(metas)
+
+        #    self.db.commit()
+        #    # batch end
         
-        self.height += run
+        #self.height += run
+
         print()
         # closing
         cur.close()
@@ -184,6 +227,19 @@ class Collector:
         block.incentives = incs
 
         return block
+
+    def collect_block_metas(self, s, start, num):
+        # NOTE: max 20 items
+        r = s.get(f'{self.node}/blockchain?minHeight={start}&maxHeight={start+num-1}')
+        metas = json.loads(r.text)['result']['block_metas']
+        list.sort(metas, key=lambda val: int(val['header']['height']))
+        blocks = []
+        for meta in metas:
+            block = amo.Block(meta['header']['chain_id'],
+                    meta['header']['height'])
+            block.read_meta(meta)
+            blocks.append(block)
+        return blocks
 
 #def block_metas(node, base, num):
 #    print(f'batch height from {base+1} to {base+num}')
