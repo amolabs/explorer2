@@ -81,6 +81,26 @@ async function getList(chain_id, top, from, num) {
   });
 }
 
+async function getListByBlock(chain_id, height, from, num) {
+  return new Promise(function(resolve, reject) {
+    height = Number(height);
+    from = Number(from);
+    num = Number(num);
+    var query_str;
+    var query_var;
+    query_str = "select * from `c_txs` where (`chain_id` = ?) \
+      and (`height` = ?) \
+      order by `height` desc, `index` desc limit ?,?";
+    query_var = [chain_id, height, from, num];
+    db.query(query_str, query_var, function (err, rows, fields) {
+      if (err) {
+        return reject(err);
+      }
+      resolve(rows);
+    });
+  });
+}
+
 async function getListBySender(chain_id, address, top, from, num) {
   return new Promise(function(resolve, reject) {
     top = Number(top);

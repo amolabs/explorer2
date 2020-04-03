@@ -135,8 +135,9 @@
         this.reqTxTableData();
       },
       'block.height'() {
-        this.txTable.anchor = this.block.numTxs - 1;
-        this.reqTxTableData();
+        if (this.block.height > 0) {
+          this.reqTxTableData();
+        }
       },
     },
     computed:{
@@ -149,7 +150,6 @@
     },
     mounted() {
       this.getPageData();
-      this.reqTxTableData();
     },
     methods: {
       async getPageData() {
@@ -160,17 +160,12 @@
         }
       },
       async reqTxTableData() {
-        var l = this.txTable.txList;
-        if (this.txTable.anchor < 0) {
-          return;
-        }
         try {
-          var from = String(this.block.height)
-            .concat('.', String(this.txTable.anchor));
-          const res = await this.$api.getTxs(
-            from, this.txTable.anchor + 1, 'desc');
-          l = l.concat(res);
-          this.txTable.txList = l;
+          const res = await this.$api.getTxsByBlock(
+            this.block.height,
+            this.txTable.anchor, this.txTable.bulkSize);
+          this.txTable.txList = this.txTable.txList.concat(res);
+          this.txTable.anchor = this.txTable.txList.length;
         } catch (e) {
           console.log(e);
         }

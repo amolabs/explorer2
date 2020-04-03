@@ -82,6 +82,14 @@ export default {
       });
   },
 
+  getTxsByBlock(height, from, num) {
+    return axios.get(`${server}/chain/${chain_id}/blocks/${height}/txs?from=${from}&num=${num}`,
+      options)
+      .then(res => {
+        return Promise.resolve(res.data);
+      });
+  },
+
   getAccount(address) {
     return axios.get(`${server}/chain/${chain_id}/accounts/${address}`,
       options)
