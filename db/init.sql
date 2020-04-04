@@ -169,36 +169,3 @@ CREATE TABLE `asset_stat` (
   `delegates` char(40) NOT NULL DEFAULT '0',
   PRIMARY KEY (`chain_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-
--- explorer.block_stat source
-
-CREATE OR REPLACE
-ALGORITHM = UNDEFINED VIEW `explorer`.`block_stat` AS
-select
-    `b`.`chain_id` AS `chain_id`,
-    count(distinct `b`.`hash`) AS `num_blocks`,
-    sum(`b`.`num_txs`) AS `num_txs`,
-    avg(`b`.`interval`) AS `avg_interval`
-from
-    `explorer`.`c_blocks` `b`
-group by
-    `b`.`chain_id`;
-
-
--- explorer.tx_stat source
-
-CREATE OR REPLACE
-ALGORITHM = UNDEFINED VIEW `explorer`.`tx_stat` AS
-select
-    `t`.`chain_id` AS `chain_id`,
-    count(0) AS `num_txs`,
-    sum(if(`t`.`code` = 0, 1, 0)) AS `num_txs_valid`,
-    sum(if(`t`.`code` > 0, 1, 0)) AS `num_txs_invalid`,
-    avg(`t`.`fee`) AS `avg_fee`,
-    avg(`t`.`height` - `t`.`last_height`) AS `avg_binding_lag`,
-    10000 AS `max_binding_lag`
-from
-    `explorer`.`c_txs` `t`
-group by
-    `t`.`chain_id`;

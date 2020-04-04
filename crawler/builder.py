@@ -31,13 +31,15 @@ class Builder:
                 """,
                 self._vars())
         cur.execute("""
-            SELECT * FROM `block_stat` WHERE (`chain_id` = %(chain_id)s)
+            SELECT `height` FROM `explorer`.`c_blocks` cb
+            WHERE cb.`chain_id` = %(chain_id)s
+            ORDER BY cb.`height` DESC LIMIT 1
             """,
             self._vars())
         row = cur.fetchone()
         if row:
             d = dict(zip(cur.column_names, row))
-            self.roof = d['num_blocks']
+            self.roof = d['height']
         else:
             self.roof = 0
         self.db.commit()
