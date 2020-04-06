@@ -12,6 +12,7 @@ CREATE TABLE `c_blocks` (
   `num_txs_valid` int(11) NOT NULL DEFAULT 0,
   `num_txs_invalid` int(11) NOT NULL DEFAULT 0,
   `incentives` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`incentives`)),
+  `validator_updates` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`validator_updates`)),
   PRIMARY KEY (`chain_id`,`height`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -44,6 +45,8 @@ CREATE TABLE `s_accounts` (
   `val_addr` char(40) DEFAULT NULL,
   `delegate` char(40) NOT NULL DEFAULT '0',
   `del_addr` char(40) DEFAULT NULL,
+  `val_pubkey` char(64) DEFAULT NULL,
+  `val_power` char(40) NOT NULL DEFAULT '0',
   PRIMARY KEY (`chain_id`,`address`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -61,15 +64,14 @@ CREATE TABLE `s_udcs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
--- explorer.s_udc_balances definition
+-- explorer.asset_stat definition
 
-CREATE TABLE `s_udc_balances` (
+CREATE TABLE `asset_stat` (
   `chain_id` char(32) NOT NULL,
-  `udc_id` int(11) NOT NULL,
-  `address` char(40) NOT NULL,
-  `balance` char(40) NOT NULL DEFAULT '0',
-  `balance_lock` char(40) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`chain_id`,`udc_id`,`address`)
+  `active_coins` char(40) NOT NULL DEFAULT '0',
+  `stakes` char(40) NOT NULL DEFAULT '0',
+  `delegates` char(40) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`chain_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -106,6 +108,19 @@ CREATE TABLE `s_storages` (
   PRIMARY KEY (`chain_id`,`storage_id`),
   KEY `s_storages_FK` (`chain_id`,`owner`),
   CONSTRAINT `s_storages_FK` FOREIGN KEY (`chain_id`, `owner`) REFERENCES `s_accounts` (`chain_id`, `address`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- explorer.s_udc_balances definition
+
+CREATE TABLE `s_udc_balances` (
+  `chain_id` char(32) NOT NULL,
+  `udc_id` int(11) NOT NULL,
+  `address` char(40) NOT NULL,
+  `balance` char(40) NOT NULL DEFAULT '0',
+  `balance_lock` char(40) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`chain_id`,`udc_id`,`address`),
+  CONSTRAINT `s_udc_balances_FK` FOREIGN KEY (`chain_id`, `udc_id`) REFERENCES `s_udcs` (`chain_id`, `udc_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -157,15 +172,4 @@ CREATE TABLE `s_usages` (
   KEY `s_requests_FK_1` (`chain_id`,`grantee`) USING BTREE,
   CONSTRAINT `s_requests_FK_1_copy` FOREIGN KEY (`chain_id`, `grantee`) REFERENCES `s_accounts` (`chain_id`, `address`),
   CONSTRAINT `s_requests_FK_copy` FOREIGN KEY (`chain_id`, `parcel_id`) REFERENCES `s_parcels` (`chain_id`, `parcel_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-
--- explorer.asset_stat definition
-
-CREATE TABLE `asset_stat` (
-  `chain_id` char(32) NOT NULL,
-  `active_coins` char(40) NOT NULL DEFAULT '0',
-  `stakes` char(40) NOT NULL DEFAULT '0',
-  `delegates` char(40) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`chain_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
