@@ -3,15 +3,26 @@ import camelcaseKeys from 'camelcase-keys'
 
 // axios.defaults.withCredentials = true;
 const server = 'http://explorer.amolabs.io/api';
-const chain_id = 'amo-cherryblossom-01';
-const options = { headers: { 
-  // for CORS
+const options = { headers: { // for CORS
   'Access-Control-Allow-Origin': '*',
 } };
 
 export default {
-  getChainStat() {
-    return axios.get(`${server}/chain/${chain_id}`,
+  getNetworks() {
+    return axios.get(`${server}/networks`, options)
+      .then(res => {
+        var networks = [];
+        for (var i = 0; i < res.data.length; i++) {
+          var net = camelcaseKeys(res.data[i]);
+          networks.push(net);
+        }
+        return networks;
+      });
+  },
+
+  getChainStat(chainId, num_blks) {
+    num_blks = num_blks || 1000;
+    return axios.get(`${server}/chain/${chainId}?num_blks=${num_blks}`,
       options)
       .then(res => {
         var chain = camelcaseKeys(res.data); 
@@ -25,8 +36,8 @@ export default {
       });
   },
 
-  getBlockStat(statRange) {
-    return axios.get(`${server}/chain/${chain_id}/blocks?stat&num_blks=${statRange}`,
+  getBlockStat(chainId, statRange) {
+    return axios.get(`${server}/chain/${chainId}/blocks?stat&num_blks=${statRange}`,
       options)
       .then(res => {
         var stat = camelcaseKeys(res.data); 
@@ -39,8 +50,8 @@ export default {
       });
   },
 
-  getBlock(height) {
-    return axios.get(`${server}/chain/${chain_id}/blocks/${height}`,
+  getBlock(chainId, height) {
+    return axios.get(`${server}/chain/${chainId}/blocks/${height}`,
       options)
       .then(res => {
         var block = camelcaseKeys(res.data);
@@ -52,16 +63,16 @@ export default {
       });
   },
 
-  getBlocks(from, num, order) {
-    return axios.get(`${server}/chain/${chain_id}/blocks?from=${from}&num=${num}&order=${order}`,
+  getBlocks(chainId, from, num, order) {
+    return axios.get(`${server}/chain/${chainId}/blocks?from=${from}&num=${num}&order=${order}`,
       options)
       .then(res => {
         return Promise.resolve(res.data);
       });
   },
 
-  getTxStat() {
-    return axios.get(`${server}/chain/${chain_id}`,
+  getTxStat(chainId) { // TODO: statRange
+    return axios.get(`${server}/chain/${chainId}`,
       options)
       .then(res => {
         var chain = camelcaseKeys(res.data); 
@@ -79,8 +90,8 @@ export default {
       });
   },
 
-  getTx(hash) {
-    return axios.get(`${server}/chain/${chain_id}/txs/${hash}`,
+  getTx(chainId, hash) {
+    return axios.get(`${server}/chain/${chainId}/txs/${hash}`,
       options)
       .then(res => {
         var tx = camelcaseKeys(res.data);
@@ -88,40 +99,40 @@ export default {
       });
   },
 
-  getTxs(top, from, num) {
-    return axios.get(`${server}/chain/${chain_id}/txs?top=${top}&from=${from}&num=${num}`,
+  getTxs(chainId, top, from, num) {
+    return axios.get(`${server}/chain/${chainId}/txs?top=${top}&from=${from}&num=${num}`,
       options)
       .then(res => {
         return Promise.resolve(res.data);
       });
   },
 
-  getTxsByBlock(height, from, num) {
-    return axios.get(`${server}/chain/${chain_id}/blocks/${height}/txs?from=${from}&num=${num}`,
+  getTxsByBlock(chainId, height, from, num) {
+    return axios.get(`${server}/chain/${chainId}/blocks/${height}/txs?from=${from}&num=${num}`,
       options)
       .then(res => {
         return Promise.resolve(res.data);
       });
   },
 
-  getAccount(address) {
-    return axios.get(`${server}/chain/${chain_id}/accounts/${address}`,
+  getAccount(chainId, address) {
+    return axios.get(`${server}/chain/${chainId}/accounts/${address}`,
       options)
       .then(res => {
         return Promise.resolve(res.data);
       });
   },
 
-  getTxsBySender(address, top, from, num) {
-    return axios.get(`${server}/chain/${chain_id}/accounts/${address}/txs?top=${top}&from=${from}&num=${num}`,
+  getTxsBySender(chainId, address, top, from, num) {
+    return axios.get(`${server}/chain/${chainId}/accounts/${address}/txs?top=${top}&from=${from}&num=${num}`,
       options)
       .then(res => {
         return Promise.resolve(res.data);
       });
   },
 
-  getValidatorStat() {
-    return axios.get(`${server}/chain/${chain_id}`,
+  getValidatorStat(chainId) {
+    return axios.get(`${server}/chain/${chainId}`,
       options)
       .then(res => {
         var chain = camelcaseKeys(res.data); 
@@ -133,8 +144,8 @@ export default {
       });
   },
 
-  getIncentiveStat() {
-    return axios.get(`${server}/chain/${chain_id}`,
+  getIncentiveStat(chainId) {
+    return axios.get(`${server}/chain/${chainId}`,
       options)
       .then(res => {
         var chain = camelcaseKeys(res.data); 
@@ -146,12 +157,12 @@ export default {
       });
   },
 
-  getValidators(from, num) {
-    return axios.get(`${server}/chain/${chain_id}/accounts?validators&from=${from}&num=${num}`,
+  getValidators(chainId, from, num) {
+    return axios.get(`${server}/chain/${chainId}/accounts?validators&from=${from}&num=${num}`,
       options)
       .then(res => {
         //var vals = camelcaseKeys(res.data);
-        var vals = []
+        var vals = [];
         for (var i = 0; i < res.data.length; i++) {
           var val = camelcaseKeys(res.data[i]);
           val['activity'] = 100;

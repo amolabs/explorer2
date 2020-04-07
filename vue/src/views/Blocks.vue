@@ -142,12 +142,13 @@
     }),
     watch: {
       '$store.state.network'() {
-        console.log('[Blocks Page] 변경 된 network value', this.$store.state.network);
-        this.getPageData()
+        this.blockTable.anchor = 0;
+        this.blockTable.blockList = [];
+        if (this.network) this.getPageData();
       },
       'blockStat.lastHeight'() {
         this.blockTable.anchor = this.blockStat.lastHeight;
-        this.reqBlockTableData();
+        if (this.network) this.reqBlockTableData();
       },
     },
     computed:{
@@ -163,13 +164,12 @@
       }
     },
     mounted() {
-      this.getPageData();
-      this.reqBlockTableData();
+      if (this.network) this.getPageData();
     },
     methods: {
       async getPageData(){
         try {
-          this.blockStat = await this.$api.getBlockStat(this.statRange);
+          this.blockStat = await this.$api.getBlockStat(this.network, this.statRange);
         } catch (e) {
           console.log(e);
         }
@@ -180,7 +180,7 @@
           return;
         }
         try {
-          const res = await this.$api.getBlocks(
+          const res = await this.$api.getBlocks(this.network, 
             this.blockTable.anchor, this.blockTable.bulkSize, 'desc');
           l = l.concat(res);
           this.blockTable.blockList = l;
@@ -190,7 +190,7 @@
         }
       },
       selectEvent(){
-        this.getPageData()
+        if (this.network) this.getPageData()
       }
     }
   }

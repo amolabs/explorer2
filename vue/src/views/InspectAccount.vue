@@ -111,9 +111,16 @@
       '$route' (to, from) {
         this.param = this.$route.params;
       },
-      '$store.state.network'() {
-        console.log('[InspectAccount Page] 변경 된 network value', this.$store.state.network);
-        this.getPageData()
+      network() {
+        if (this.network) this.getPageData()
+        this.txTable.anchor = 0;
+        this.txTable.txList = [];
+        if (this.network) this.reqTxTableData();
+      },
+      'txTable.topHeight'() {
+        this.txTable.anchor = 0;
+        this.txTable.txList = [];
+        if (this.network) this.reqTxTableData();
       },
     },
     computed: {
@@ -125,23 +132,30 @@
       }
     },
     mounted() {
-      this.getPageData();
-      this.reqTxTableData();
+      if (this.network) this.getPageData();
     },
     methods: {
       async getPageData(){
         try {
-          this.account = await this.$api.getAccount(this.$route.params.address);
-          stat = await this.$api.getTxStat();
+          this.account = await this.$api.getAccount(this.network, this.$route.params.address);
+          var stat = await this.$api.getTxStat(this.network);
           this.txTable.topHeight = stat.txHeight;
         } catch(err) {
           console.debug(err);
+          this.account = {
+            address: '-',
+            balance: 0,
+            stake: 0,
+            validator: '-',
+            delegate: 0,
+            delegatee: '-',
+          };
           this.account.address = this.$route.params.address;
         }
       },
       async reqTxTableData() {
         try {
-          const res = await this.$api.getTxsBySender(
+          const res = await this.$api.getTxsBySender(this.network,
             this.$route.params.address, this.txTable.topHeight,
             this.txTable.anchor, this.txTable.bulkSize);
           this.txTable.txList = this.txTable.txList.concat(res);

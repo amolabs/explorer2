@@ -129,14 +129,15 @@
       },
     }),
     watch: {
-      '$store.state.network'() {
-        console.debug('network changed:', this.$store.state.network);
-        this.getPageData()
-        this.reqTxTableData();
+      network() {
+        if (this.network) this.getPageData()
+        this.txTable.anchor = 0;
+        this.txTable.txList = [];
+        if (this.network) this.reqTxTableData();
       },
       'block.height'() {
         if (this.block.height > 0) {
-          this.reqTxTableData();
+          if (this.network) this.reqTxTableData();
         }
       },
     },
@@ -149,19 +150,30 @@
       }
     },
     mounted() {
-      this.getPageData();
+      if (this.network) this.getPageData();
     },
     methods: {
       async getPageData() {
         try {
-          this.block = await this.$api.getBlock(this.$route.params.height);
+          this.block = await this.$api.getBlock(this.network, this.$route.params.height);
         } catch (e) {
-          console.log(e);
+          console.debug(e);
+          this.block = {
+            height: 0,
+            time: '-',
+            hash: '-',
+            txBytes: 0,
+            proposer: '-',
+            numTxs: 0,
+            numTxsValid: 0,
+            numTxsInvalid: 0,
+          };
+          this.block.height = this.$route.params.height;
         }
       },
       async reqTxTableData() {
         try {
-          const res = await this.$api.getTxsByBlock(
+          const res = await this.$api.getTxsByBlock(this.network,
             this.block.height,
             this.txTable.anchor, this.txTable.bulkSize);
           this.txTable.txList = this.txTable.txList.concat(res);

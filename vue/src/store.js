@@ -16,7 +16,7 @@ export default new Vuex.Store({
       info: true,
       persistent: false
     },
-    network: 'testnet',
+    network: '',
   },
 
   mutations: {

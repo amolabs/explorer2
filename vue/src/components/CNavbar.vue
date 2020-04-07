@@ -22,7 +22,7 @@
               item-color="teal"
               label="network"
               single-line outlined hide-details dark dense
-              :items="menuItem"
+              :items="networks"
               :menu-props="{ top: false, offsetY: true, color : '#ffffff' }"
               v-model="network"
 
@@ -70,7 +70,7 @@
                     item-color="coinTeal"
                     label="network"
                     single-line outlined hide-details dark dense
-                    :items="menuItem"
+                    :items="networks"
                     :menu-props="{ top: false, offsetY: true, color : '#ffffff' }"
                   ></v-select>
                 </v-row>
@@ -119,11 +119,9 @@
       drawer: false,
       routes: routes,
       currentPage: {},
-      //menuItem: ['mainnet', 'testnet'],
-      menuItem: ['mainnet'],
+      networks: [],
       search: '',
-      //network: 'testnet',
-      network: 'mainnet',
+      network: '',
     }),
     components: {
       // Popup
@@ -133,10 +131,12 @@
     //         return this.$store.state.network
     //     }
     // },
+    created() {
+      this.getNetworks();
+    },
     mounted() {
       console.debug('current page', this.$route);
       this.currentPage = this.$route;
-
     },
     watch: {
       search: function(newVal, oldVal) {
@@ -159,6 +159,16 @@
 
     },
     methods: {
+      async getNetworks() {
+        var res = await this.$api.getNetworks();
+        var items = [];
+        for (var i = 0; i < res.length; i++) {
+          items.push(res[i].chainId);
+        }
+        this.networks = items;
+        this.network = items[0];
+        this.$store.commit('network', this.network);
+      },
       searchByKeyword(evt) {
           //엔터키
           if(evt.keyCode === 13){

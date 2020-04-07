@@ -196,9 +196,11 @@
       },
     }),
     watch: {
-      '$store.state.network'() {
-        console.log('[Validators Page] 변경 된 network value', this.$store.state.network);
-        this.getPageData()
+      network() {
+        if (this.network) this.getPageData()
+        this.validatorTable.anchor = 0;
+        this.validatorTable.validatorList = [];
+        if (this.network) this.reqTableData();
       },
     },
     computed:{
@@ -213,14 +215,14 @@
       }
     },
     mounted() {
-      this.getPageData()
-      this.reqTableData();
+      if (this.network) this.getPageData()
+      if (this.network) this.reqTableData();
     },
     methods: {
       async getPageData(){
         try {
-          this.validatorStat = await this.$api.getValidatorStat();
-          this.incentiveStat = await this.$api.getIncentiveStat();
+          this.validatorStat = await this.$api.getValidatorStat(this.network);
+          this.incentiveStat = await this.$api.getIncentiveStat(this.network);
         } catch (e) {
           console.log(e);
         }
@@ -228,7 +230,7 @@
       async reqTableData() {
         try {
           let l = this.validatorTable.validatorList;
-          const res = await this.$api.getValidators(
+          const res = await this.$api.getValidators(this.network,
             this.validatorTable.anchor, this.validatorTable.bulkSize);
           l = l.concat(res);
           this.validatorTable.validatorList = l;
@@ -238,9 +240,7 @@
         }
       },
       selectEvent(data){
-        console.log('network val',this.network);
-        console.log('select statRange : ',data);
-        this.getPageData();
+        if (this.network) this.getPageData();
       }
     }
   }

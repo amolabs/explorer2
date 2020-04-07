@@ -309,10 +309,8 @@
       }
     },
     watch: {
-      // network 값이 변경되면 호출되는 함수
-      '$store.state.network'() {
-        console.log('network changed:', this.$store.state.network);
-        this.getPageData()
+      network() {
+        if (this.network) this.getPageData();
       },
 
       'validators.effStakes'(newVal, oldVal) {
@@ -328,11 +326,11 @@
       }
     },
     mounted() {
-      this.getPageData();
+      if (this.network) this.getPageData();
       console.debug('starting timer');
       this.intervalId = setInterval(() => {
         console.debug('timer tick');
-        this.getPageData()
+        if (this.network) this.getPageData();
       }, 10000)
     },
     destroyed() {
@@ -343,7 +341,7 @@
       async getPageData() {
         try {
           var res;
-          var stat = await this.$api.getChainStat();
+          var stat = await this.$api.getChainStat(this.network, 1000);
           var height = stat.height;
           this.networkOverview.avgInterval = stat.avgInterval;
           this.networkOverview.numTxsPerBlock = stat.numTxs / height;
@@ -369,11 +367,11 @@
           this.coinsAndStakes.delegates_percentage =
             this.coinsAndStakes.delegates / this.coinsAndStakes.coinTotal * 100;
 
-          res = await this.$api.getBlock(1);
+          res = await this.$api.getBlock(this.network, 1);
           this.networkOverview.genesisHeight = res.height;
           this.networkOverview.genesisTime = res.time;
 
-          res = await this.$api.getBlock(height);
+          res = await this.$api.getBlock(this.network, height);
           this.networkOverview.lastHeight = res.height;
           this.networkOverview.lastTime = res.time;
 

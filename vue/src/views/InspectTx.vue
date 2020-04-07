@@ -142,9 +142,8 @@
       },
     }),
     watch: {
-      '$store.state.network'() {
-        console.log('[InspectTx Page] 변경 된 network value', this.$store.state.network);
-        this.getPageData()
+      network() {
+        if (this.network) this.getPageData()
       },
     },
     computed: {
@@ -153,14 +152,29 @@
       }
     },
     mounted() {
-      this.getPageData();
+      if (this.network) this.getPageData();
     },
     methods: {
       async getPageData(){
         try {
-          this.tx = await this.$api.getTx(this.$route.params.hash);
+          this.tx = await this.$api.getTx(this.network, this.$route.params.hash);
           this.tx.parsed = JSON.parse(this.tx.payload);
         } catch (e) {
+          this.tx = {
+            chain_id: 0,
+            height: 0,
+            index: 0,
+            hash: '',
+            code: 0,
+            info: '',
+            type: '',
+            sender : '',
+            fee: 0,
+            payload: '',
+            parsed: null,
+            pubkey: '',
+            sigBytes: '',
+          };
           console.log(e);
         }
       },
