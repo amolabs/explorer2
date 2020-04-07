@@ -103,6 +103,8 @@ try:
             if args.verbose:
                 builder.stat()
             l -= batch
+        else:
+            print('Done. No more blocks.')
 except Exception as e:
     #print(e)
     traceback.print_exc()

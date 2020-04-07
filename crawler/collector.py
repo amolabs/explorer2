@@ -40,7 +40,7 @@ class Collector:
         return v
 
     def stat(self):
-        print(f'[collector] node: {self.node}, local {self.height} => remote {self.remote_height}')
+        print(f'[collector] node: {self.node}, local {self.height} => remote {self.remote_height}', flush=True)
 
     def clear(self):
         print('REBUILD block db')

@@ -113,6 +113,7 @@ class Tx:
 
     def parse_body(self, body):
         b = base64.b64decode(body)
+        self.tx_bytes = len(b)
         self.hash = hashlib.sha256(b).hexdigest().upper()
         self.body = body
         parsed = json.loads(b)
@@ -149,11 +150,12 @@ class Tx:
     def save(self, cursor):
         cursor.execute("""
             INSERT INTO `c_txs`
-                (`chain_id`, `hash`, `height`, `index`, `code`, `info`,
+                (`chain_id`, `height`, `index`, `hash`, `tx_bytes`,
+                `code`, `info`,
                 `type`, `sender`, `fee`, `last_height`, `payload`)
             VALUES
-                (%(chain_id)s, %(hash)s,
-                %(height)s, %(index)s, %(code)s, %(info)s,
+                (%(chain_id)s, %(height)s, %(index)s, %(hash)s, %(tx_bytes)s,
+                %(code)s, %(info)s,
                 %(type)s, %(sender)s, %(fee)s, %(last_height)s, %(payload)s
                 )
             """,
