@@ -1,0 +1,61 @@
+import {Action} from "redux"
+
+const initialBlock = {
+  chain_id: "amo-cherryblossom-01",
+  height: 1,
+  time: "2020-03-31T05:00:00.000Z",
+  hash: "68C0F91BA364AF540D6828A4CD84B1CFD6A6442976E87F2DDA99F09FDD860B3D",
+  num_txs: 0,
+  interval: 0,
+  proposer: "AB293BF0BFBCD22AE8D5346C5D672B3696AAED05",
+  tx_bytes: 0,
+  num_txs_valid: 0,
+  num_txs_invalid: 0,
+  incentives: "[]",
+  validator_updates: "[]"
+}
+
+const initialState = {
+  currentHeight: 1,
+  blocks: [initialBlock]
+}
+
+export type BlocksInitialState = typeof initialState
+
+export type BlockState = typeof initialBlock
+
+export const UPDATE_BLOCKS = 'UPDATE_BLOCKS'
+
+export const NEW_BLOCKS = 'NEW_BLOCKS'
+
+export const newBlocksAction = (payload: {
+  blocks: BlockState[],
+  currentHeight: number
+}) => ({
+  type: NEW_BLOCKS,
+  payload
+})
+
+interface NewRecentBlocks extends Action {
+  type: typeof NEW_BLOCKS,
+  payload: {
+    blocks: BlockState[]
+    currentHeight: number
+  }
+}
+
+type actions =
+  NewRecentBlocks |
+  Action<typeof UPDATE_BLOCKS>
+
+export default (state: BlocksInitialState = initialState, action: actions) => {
+  switch (action.type) {
+    case NEW_BLOCKS:
+      return {
+        ...state,
+        ...action.payload
+      }
+    default:
+      return state
+  }
+}
