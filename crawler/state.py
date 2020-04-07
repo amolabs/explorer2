@@ -257,6 +257,92 @@ class Usage:
             """,
             vars(self))
 
+class Draft:
+    def __init__(self, chain_id, draft_id, proposer, cursor):
+        self.chain_id = chain_id
+        self.draft_id = draft_id
+        self.proposer = proposer # FK
+        cursor.execute("""
+            SELECT * FROM `s_drafts`
+            WHERE (`chain_id` = %(chain_id)s
+                AND `draft_id` = %(draft_id)s)
+            """,
+            vars(self))
+        row = cursor.fetchone()
+        if row:
+            d = dict(zip(cursor.column_names, row))
+            self.proposer = d['proposer']
+            self.config = d['config']
+            self.desc = d['desc']
+            self.open_count = d['open_count']
+            self.close_count = d['close_count']
+            self.apply_count = d['apply_count']
+            self.deposit = int(d['deposit'])
+            self.tally_approve = d['tally_approve']
+            self.tally_reject = d['tally_reject']
+        else:
+            cursor.execute("""
+                INSERT INTO `s_drafts`
+                    (`chain_id`, `draft_id`, `proposer`)
+                VALUES (%(chain_id)s, %(draft_id)s, %(proposer)s)
+                """,
+                vars(self))
+
+    def save(self, cursor):
+        values = vars(self)
+        values['deposit'] = str(values.get('deposit', '0'))
+        cursor.execute("""
+            UPDATE `s_drafts`
+            SET
+                `proposer` = %(proposer)s,
+                `config` = %(config)s,
+                `desc` = %(desc)s,
+                `open_count` = %(open_count)s,
+                `close_count` = %(close_count)s,
+                `apply_count` = %(apply_count)s,
+                `deposit` = %(deposit)s,
+                `tally_approve` = %(tally_approve)s,
+                `tally_reject` = %(tally_reject)s
+            WHERE (`chain_id` = %(chain_id)s
+                AND `draft_id` = %(draft_id)s)
+            """,
+            values)
+
+class Vote:
+    def __init__(self, chain_id, draft_id, voter, cursor):
+        self.chain_id = chain_id
+        self.draft_id = draft_id
+        self.voter = voter
+        cursor.execute("""
+            SELECT * FROM `s_votes`
+            WHERE (`chain_id` = %(chain_id)s
+                AND `draft_id` = %(draft_id)s
+                AND `voter` = %(voter)s)
+            """,
+            vars(self))
+        row = cursor.fetchone()
+        if row:
+            d = dict(zip(cursor.column_names, row))
+            self.approve = d.get('approve')
+        else:
+            cursor.execute("""
+                INSERT INTO `s_votes`
+                    (`chain_id`, `draft_id`, `voter`)
+                VALUES (%(chain_id)s, %(draft_id)s, %(voter)s)
+                """,
+                vars(self))
+
+    def save(self, cursor):
+        cursor.execute("""
+            UPDATE `s_votes`
+            SET
+                `approve` = %(approve)s
+            WHERE (`chain_id` = %(chain_id)s
+                AND `draft_id` = %(draft_id)s
+                AND `voter` = %(voter)s)
+            """,
+            vars(self))
+
 class UDC:
     def __init__(self, chain_id, udc_id, cursor):
         self.chain_id = chain_id
@@ -601,12 +687,34 @@ def burn(tx, cursor):
     udc_balance.save(cursor)
 
 def propose(tx, cursor):
-    #print(f'tx type ({tx.type}) (not implemented)')
-    pass
+    payload = json.loads(tx.payload)
+    payload['deposit'] = int(payload.get('deposit', '0'))
+
+    proposer = Account(tx.chain_id, tx.sender, cursor)
+    draft = Draft(tx.chain_id, payload['draft_id'], tx.sender, cursor)
+    draft.config = json.dumps(payload['config'])
+    draft.desc = payload['desc']
+    draft.open_count = 0
+    draft.close_count = 0
+    draft.apply_count = 0
+    draft.deposit = payload['deposit']
+    draft.tally_approve = 0
+    draft.tally_reject = 0
+
+    proposer.balance -= payload['deposit']
+
+    proposer.save(cursor)
+    draft.save(cursor)
 
 def vote(tx, cursor):
-    #print(f'tx type ({tx.type}) (not implemented)')
-    pass
+    payload = json.loads(tx.payload)
+
+    voter = Account(tx.chain_id, tx.sender, cursor)
+    draft = Draft(tx.chain_id, payload['draft_id'], None, cursor)
+    vote = Vote(tx.chain_id, draft.draft_id, voter.address, cursor)
+    vote.approve = payload['approve']
+
+    vote.save(cursor)
 
 processor = {
         'transfer': transfer,

@@ -71,6 +71,16 @@ class Builder:
             """, self._vars())
         cur.execute("""OPTIMIZE TABLE `s_storages`""")
         cur.fetchall()
+        cur.execute("""DELETE FROM `s_votes`
+            WHERE (`chain_id` = %(chain_id)s)
+            """, self._vars())
+        cur.execute("""OPTIMIZE TABLE `s_votes`""")
+        cur.fetchall()
+        cur.execute("""DELETE FROM `s_drafts`
+            WHERE (`chain_id` = %(chain_id)s)
+            """, self._vars())
+        cur.execute("""OPTIMIZE TABLE `s_drafts`""")
+        cur.fetchall()
         cur.execute("""DELETE FROM `s_accounts`
             WHERE (`chain_id` = %(chain_id)s)
             """, self._vars())
