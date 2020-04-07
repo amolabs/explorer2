@@ -19,9 +19,10 @@ router.use('/storages', storages);
 
 router.get('/', function(req, res) {
   const chain_id = res.locals.chain_id;
-  chain.getSummary(chain_id)
+  var non_empty = 'non_empty' in req.query;
+  var num_blks = req.query.num_blks || 0;
+  chain.getSummary(chain_id, non_empty, num_blks)
     .then((val) => {
-      //console.log('then', val);
       res.send(val);
     })
     .catch((err) => {

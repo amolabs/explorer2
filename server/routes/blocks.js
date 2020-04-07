@@ -3,21 +3,36 @@ var express = require('express');
 var router = express.Router();
 const block = require('../models/block');
 const tx = require('../models/tx');
+const stat = require('../models/stat');
 
 router.get('/', function(req, res) {
   const chain_id = res.locals.chain_id;
-  var from = req.query.from || 0;
-  var num = req.query.num || 20;
-  var order = req.query.order || 'desc';
-  block.getList(chain_id, from, num, order)
-    .then((rows) => {
-      res.status(200);
-      res.send(rows);
-    })
-    .catch((err) => {
-      res.status(500);
-      res.send(err);
-    });
+  if ('stat' in req.query) {
+    var non_empty = 'non_empty' in req.query;
+    var num_blks = req.query.num_blks || 0;
+    stat.getBlockStat(chain_id, non_empty, num_blks)
+      .then((rows) => {
+        res.status(200);
+        res.send(rows);
+      })
+      .catch((err) => {
+        res.status(500);
+        res.send(err);
+      });
+  } else {
+    var from = req.query.from || 0;
+    var num = req.query.num || 20;
+    var order = req.query.order || 'desc';
+    block.getList(chain_id, from, num, order)
+      .then((rows) => {
+        res.status(200);
+        res.send(rows);
+      })
+      .catch((err) => {
+        res.status(500);
+        res.send(err);
+      });
+  }
 });
 
 router.get('/:height([0-9]+)', function(req, res) {

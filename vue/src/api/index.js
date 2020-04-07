@@ -25,6 +25,20 @@ export default {
       });
   },
 
+  getBlockStat(statRange) {
+    return axios.get(`${server}/chain/${chain_id}/blocks?stat&num_blks=${statRange}`,
+      options)
+      .then(res => {
+        var stat = camelcaseKeys(res.data); 
+        if (!stat.lastHeight) stat.lastHeight = 0;
+        if (!stat.avgInterval) stat.Interval = 0;
+        if (!stat.avgIncentive) stat.avgIncentive = 0;
+        if (!stat.avgNumTxs) stat.avgNumTxs = 0;
+        if (!stat.avgTxBytes) stat.avgTxBytes = 0;
+        return Promise.resolve(stat);
+      });
+  },
+
   getBlock(height) {
     return axios.get(`${server}/chain/${chain_id}/blocks/${height}`,
       options)

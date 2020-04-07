@@ -117,7 +117,7 @@
   export default {
     data: () => ({
       blockStat: {
-        height: 0,
+        lastHeight: 0,
         avgInterval: 0,
         avgIncentive: 0,
         avgNumTxs: 0,
@@ -145,8 +145,8 @@
         console.log('[Blocks Page] 변경 된 network value', this.$store.state.network);
         this.getPageData()
       },
-      'blockStat.height'() {
-        this.blockTable.anchor = this.blockStat.height;
+      'blockStat.lastHeight'() {
+        this.blockTable.anchor = this.blockStat.lastHeight;
         this.reqBlockTableData();
       },
     },
@@ -169,7 +169,7 @@
     methods: {
       async getPageData(){
         try {
-          this.blockStat = await this.$api.getChainStat();
+          this.blockStat = await this.$api.getBlockStat(this.statRange);
         } catch (e) {
           console.log(e);
         }
@@ -190,8 +190,6 @@
         }
       },
       selectEvent(){
-        console.log('select statRange : ', this.statRange);
-        // 변경된 select 값으로 api 호출
         this.getPageData()
       }
     }
