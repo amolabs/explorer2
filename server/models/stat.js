@@ -11,8 +11,6 @@ async function getBlockStat(chain_id, non_empty, num_blks) {
     if (num_blks) {
       limit = `LIMIT ${num_blks}`;
     }
-    console.log('option', option);
-    console.log('limit', limit);
     var query_str = "SELECT \
         t.`chain_id`, MAX(t.`height`) last_height, \
         COUNT(t.`chain_id`) `num_blocks`, \
