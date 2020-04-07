@@ -1,3 +1,14 @@
+-- explorer.asset_stat definition
+
+CREATE TABLE `asset_stat` (
+  `chain_id` char(32) NOT NULL,
+  `active_coins` char(40) NOT NULL DEFAULT '0',
+  `stakes` char(40) NOT NULL DEFAULT '0',
+  `delegates` char(40) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`chain_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 -- explorer.c_blocks definition
 
 CREATE TABLE `c_blocks` (
@@ -8,7 +19,6 @@ CREATE TABLE `c_blocks` (
   `num_txs` int(11) NOT NULL DEFAULT 0,
   `interval` float NOT NULL DEFAULT 0,
   `proposer` char(40) NOT NULL,
-  `tx_bytes` int(11) NOT NULL DEFAULT 0,
   `num_txs_valid` int(11) NOT NULL DEFAULT 0,
   `num_txs_invalid` int(11) NOT NULL DEFAULT 0,
   `incentives` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`incentives`)),
@@ -64,17 +74,6 @@ CREATE TABLE `s_udcs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
--- explorer.asset_stat definition
-
-CREATE TABLE `asset_stat` (
-  `chain_id` char(32) NOT NULL,
-  `active_coins` char(40) NOT NULL DEFAULT '0',
-  `stakes` char(40) NOT NULL DEFAULT '0',
-  `delegates` char(40) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`chain_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-
 -- explorer.c_txs definition
 
 CREATE TABLE `c_txs` (
@@ -87,11 +86,32 @@ CREATE TABLE `c_txs` (
   `type` char(32) NOT NULL,
   `sender` char(40) NOT NULL,
   `fee` bigint(20) NOT NULL,
-  `payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`payload`)),
+  `payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
   `last_height` int(11) NOT NULL,
+  `tx_bytes` int(11) NOT NULL,
   PRIMARY KEY (`chain_id`,`height`,`index`),
   KEY `txs_hash` (`chain_id`,`hash`) USING BTREE,
   CONSTRAINT `block_FK` FOREIGN KEY (`chain_id`, `height`) REFERENCES `c_blocks` (`chain_id`, `height`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- explorer.s_drafts definition
+
+CREATE TABLE `s_drafts` (
+  `chain_id` char(32) NOT NULL,
+  `draft_id` int(11) NOT NULL,
+  `proposer` char(40) NOT NULL DEFAULT '',
+  `config` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '{}' CHECK (json_valid(`config`)),
+  `desc` varchar(100) NOT NULL DEFAULT '',
+  `open_count` int(11) NOT NULL DEFAULT 0,
+  `close_count` int(11) NOT NULL DEFAULT 0,
+  `apply_count` int(11) NOT NULL DEFAULT 0,
+  `deposit` char(40) NOT NULL DEFAULT '0',
+  `tally_approve` int(11) NOT NULL DEFAULT 0,
+  `tally_reject` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`chain_id`,`draft_id`),
+  KEY `s_storages_FK` (`chain_id`,`proposer`) USING BTREE,
+  CONSTRAINT `s_storages_FK_copy` FOREIGN KEY (`chain_id`, `proposer`) REFERENCES `s_accounts` (`chain_id`, `address`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -100,10 +120,10 @@ CREATE TABLE `c_txs` (
 CREATE TABLE `s_storages` (
   `chain_id` char(32) NOT NULL,
   `storage_id` int(11) NOT NULL,
-  `owner` char(40) NOT NULL DEFAULT '',
   `url` varchar(100) DEFAULT NULL,
   `registration_fee` char(40) NOT NULL DEFAULT '0',
   `hosting_fee` char(40) NOT NULL DEFAULT '0',
+  `owner` char(40) NOT NULL DEFAULT '',
   `active` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`chain_id`,`storage_id`),
   KEY `s_storages_FK` (`chain_id`,`owner`),
@@ -121,6 +141,20 @@ CREATE TABLE `s_udc_balances` (
   `balance_lock` char(40) NOT NULL DEFAULT '0',
   PRIMARY KEY (`chain_id`,`udc_id`,`address`),
   CONSTRAINT `s_udc_balances_FK` FOREIGN KEY (`chain_id`, `udc_id`) REFERENCES `s_udcs` (`chain_id`, `udc_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- explorer.s_votes definition
+
+CREATE TABLE `s_votes` (
+  `chain_id` char(32) NOT NULL,
+  `draft_id` int(11) NOT NULL,
+  `voter` char(40) NOT NULL,
+  `approve` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`chain_id`,`draft_id`,`voter`),
+  KEY `s_storages_FK` (`chain_id`,`voter`) USING BTREE,
+  CONSTRAINT `s_votes_FK` FOREIGN KEY (`chain_id`, `draft_id`) REFERENCES `s_drafts` (`chain_id`, `draft_id`),
+  CONSTRAINT `s_votes_FK_1` FOREIGN KEY (`chain_id`, `voter`) REFERENCES `s_accounts` (`chain_id`, `address`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
