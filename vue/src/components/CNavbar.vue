@@ -4,7 +4,7 @@
       <v-container class="pt-0 mt-1">
         <!-- Desktop version -->
         <v-row align="center" class="hidden-sm-and-down" style="cursor: pointer;">
-          <v-col cols="6">
+          <v-col cols="5">
             <v-row>
               <v-img
                 class="logo-img"
@@ -15,7 +15,7 @@
               </v-toolbar-title>
             </v-row>
           </v-col>
-          <v-col cols="2">
+          <v-col cols="3">
             <v-select
               @change="selectEvent"
               class="ml-3"
