@@ -23,7 +23,6 @@ async function getOne(chain_id, address) {
         console.log(err);
         return reject(err);
       }
-      console.log(rows);
       if (rows.length > 0) {
         val = rows[0];
         if (val['address'] == null) {
@@ -33,6 +32,9 @@ async function getOne(chain_id, address) {
         // NOTE: unfortunately, mariadb 10.4 does not support JSON_ARRAYAGG().
         if (val['delegators']) {
           val['delegators'] = JSON.parse('['+val['delegators']+']');
+          if (val['delegators'][0]['address'] == null) {
+            val['delegators'] = []; // XXX: this is also strange.
+          }
         } else {
           val['delegators'] = [];
         }
