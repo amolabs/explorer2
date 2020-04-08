@@ -100,7 +100,7 @@
               </template>
               <template #proposer="{item}">
                 <router-link class="d-inline-block text-truncate truncate-option"
-                             :to="{ path: '/inspect/account/' + item.proposer, params: {account : item.proposer }}">{{ item.proposer }}</router-link>
+                             :to="{ path: '/inspect/validator/' + item.proposer, params: {account : item.proposer }}">{{ item.proposer }}</router-link>
               </template>
               <template #ofTxs="{item}">
                 <span> {{item.ofTxs.toLocaleString()}}</span>

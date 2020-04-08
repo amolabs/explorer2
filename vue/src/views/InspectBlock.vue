@@ -52,7 +52,8 @@
                     <span> Proposer </span>
                   </v-col>
                   <v-col cols="12" md="8" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span class="truncate-option-box"> {{ block.proposer }}</span>
+                    <router-link class="truncate-option-box"
+                      :to="{ path: '/inspect/validator/' + block.proposer, params : {address: block.proposer } }">{{ block.proposer }}</router-link>
                   </v-col>
                 </v-row>
               </v-col>
