@@ -94,6 +94,7 @@ const routes = [
     icon: 'dashboard',
     component: Validators
   },
+  /*
   {
     path: '/governance',
     name: 'Governance',
@@ -112,5 +113,6 @@ const routes = [
     icon: 'dashboard',
     component: Parcels
   },
+  */
 ];
 export default routes;
