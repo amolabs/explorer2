@@ -52,7 +52,8 @@
                     <span> Voting power </span>
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span> {{ this.validator.power.toLocaleString() }} ( {{this.validator.powerRatio.toFixed(2).toLocaleString() }} %) </span>
+                    <span> {{ this.validator.power.toLocaleString() }} </span>
+                    <!-- span> {{ this.validator.power.toLocaleString() }} ( {{this.validator.powerRatio.toFixed(2).toLocaleString() }} %) </span -->
                   </v-col>
                 </v-row>
               </v-col>
@@ -67,6 +68,32 @@
                 </v-row>
               </v-col>
             </v-row>
+          </c-card>
+        </v-col>
+      </v-row>
+    </v-container>
+
+    <!-- Table -->
+    <v-container>
+      <v-row justify="center" >
+        <v-col cols="12">
+          <c-card class="text-center" title="Delegators" outlined>
+            <c-scroll-table
+              :headers="delTable.headers"
+              itemKey="name"
+              :items="delTable.delList"
+              height="500"
+              @loadMore="reqTableData"
+              :mobile-breakpoint="tableBreakpoint"
+            >
+              <template #address="{item}">
+                <router-link class="truncate-option"
+                             :to="{ path: '/inspect/account/' + item.address, params : {hash: item.address} }">{{ item.address }}</router-link>
+              </template>
+              <template #amount="{item}">
+                <span> {{ $amoHuman(item.amount) }} AMO</span>
+              </template>
+            </c-scroll-table>
           </c-card>
         </v-col>
       </v-row>
@@ -87,13 +114,28 @@
         powerRatio: 232.113,
         activity: 0,
       },
+      delTable: {
+        headers: [
+          { text: 'address',align: 'center',  value: 'address' },
+          { text: 'amount', align: 'center', value: 'amount' },
+        ],
+        delList: [],
+        anchor: 0,
+        bulkSize: 20,
+      },
     }),
     watch: {
       network() {
         if (this.network) this.getPageData()
+        this.delTable.anchor = 0;
+        this.delTable.delList = [];
+        //if (this.network) this.reqTableData();
       },
     },
     computed: {
+      tableBreakpoint(){
+        return this.$store.state.tableBreakpoint
+      },
       network() {
         return this.$store.state.network
       }
@@ -105,13 +147,19 @@
       async getPageData(){
         try {
           var res = await this.$api.getValidator(this.network, this.$route.params.address);
-          this.validator.address = res.valAddr;
-          this.validator.pubkey = res.valPubkey;
-          this.validator.power = res.valPower;
-          this.validator.owner = res.address;
-          this.validator.effStake = 0; // TODO
+          this.validator.address = res.address;
+          this.validator.pubkey = res.pubkey;
+          this.validator.power = res.power;
+          this.validator.owner = res.owner;
+          var effStake = Number(res.stake);
+
+          for (var i = 0; i < res.delegators.length; i++) {
+            effStake += Number(res.delegators[i].amount);
+          }
+          this.validator.effStake = effStake;
           this.validator.powerRatio = 0; // TODO
           this.validator.activity = 0; // TODO
+          this.delTable.delList = res.delegators || [];
         } catch(e) {
           console.debug(e);
           this.validator = {
@@ -123,7 +171,12 @@
             powerRatio: 0,
             activity: 0,
           };
+          this.delTable.delList = [];
         }
+      },
+      async reqTableData() {
+        //this.delTable.delList = this.delegators || [];
+        //this.delTable.anchor = this.delTable.delList.length;
       },
     }
   }
