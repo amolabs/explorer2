@@ -2,6 +2,7 @@
 var express = require('express');
 var router = express.Router();
 const account = require('../models/account');
+const validator = require('../models/validator');
 
 router.get('/', function(req, res) {
   const chain_id = res.locals.chain_id;
@@ -25,11 +26,11 @@ router.get('/', function(req, res) {
 
 router.get('/:address([a-fA-F0-9]+)', function(req, res) {
   const chain_id = res.locals.chain_id;
-  account.getOneByValidator(chain_id, req.params.address)
-    .then((rows) => {
-      if (rows.length > 0) {
+  validator.getOne(chain_id, req.params.address)
+    .then((row) => {
+      if (row) {
         res.status(200);
-        res.send(rows[0]);
+        res.send(row);
       } else {
         res.status(404);
         res.send('not found');
