@@ -18,13 +18,15 @@ import {
 } from "@material-ui/core"
 import {makeStyles, ThemeProvider} from "@material-ui/core/styles"
 import {useDispatch, useSelector} from "react-redux"
-import {UPDATE_BLOCKCHAIN} from "./reducer/blockchain"
+import {setNetwork, UPDATE_BLOCKCHAIN} from "./reducer/blockchain"
 import Blockchain from "./pages/Blockchain"
 import {Search} from "@material-ui/icons"
 import {Route, Switch} from "react-router-dom"
 import {replace} from "connected-react-router"
 import Transactions from "./pages/Transactions"
 import {RootState} from "./reducer"
+import {RESET_CURRENT_HEIGHT} from "./reducer/blocks"
+import Blocks from "./pages/Blocks"
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -64,12 +66,18 @@ const routers = {
 
 const urls = Object.keys(routers)
 
+const supportedNetworks = [
+  'amo-cherryblossom-01',
+  'amo-testnet-200330'
+]
+
 function App() {
   const classes = useStyles()
   const [tab, setTab] = useState<number>(0)
   const dispatch = useDispatch()
 
   const path = useSelector<RootState, string>(state => state.router.location.pathname)
+  const chainId = useSelector<RootState, string>(state => state.blockchain.chainId)
 
   const isDesktop = useMediaQuery('(min-width: 1280px)')
 
@@ -81,10 +89,10 @@ function App() {
       dispatch({
         type: UPDATE_BLOCKCHAIN
       })
-    }, 5000)
+    }, 2000)
 
     return () => clearInterval(handler)
-  }, [dispatch])
+  }, [dispatch, chainId])
 
   const handleTabChange = (event: any, newValue: any) => {
     dispatch(replace(urls[newValue]))
@@ -101,6 +109,13 @@ function App() {
 
     setTab(i)
   }, [path])
+
+  const onChangeNetwork = (e: React.ChangeEvent<{ name?: string; value: unknown }>,) => {
+    dispatch(setNetwork(e.target.value as string))
+    dispatch({
+      type: RESET_CURRENT_HEIGHT
+    })
+  }
 
   return (
     <div>
@@ -120,8 +135,13 @@ function App() {
               <InputLabel id="network-select-label">
                 Network
               </InputLabel>
-              <Select value={"amo-cherryblossom-01"} labelId="network-select-label" className={classes.mr2}>
-                <MenuItem value="amo-cherryblossom-01">mainnet</MenuItem>
+              <Select value={chainId} labelId="network-select-label" className={classes.mr2}
+                      onChange={onChangeNetwork}>
+                {
+                  supportedNetworks.map((v, i) => (
+                    <MenuItem value={v} key={i}>{v}</MenuItem>
+                  ))
+                }
               </Select>
               <TextField
                 placeholder={"block, account, transaction"}
@@ -180,6 +200,9 @@ function App() {
               </Route>
               <Route path="/transactions">
                 <Transactions/>
+              </Route>
+              <Route path="/blocks">
+                <Blocks/>
               </Route>
             </Switch>
           </Grid>

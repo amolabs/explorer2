@@ -62,6 +62,8 @@ export const NEW_BLOCKCHAIN = 'NEW_BLOCKCHAIN'
 
 export const NEW_RECENT_TXS = 'NEW_RECENT_TXS'
 
+export const SET_NETWORK = 'SET_NETWORK'
+
 export const newBlockchainState = (payload: BlockchainState) => ({
   type: NEW_BLOCKCHAIN,
   payload
@@ -69,6 +71,11 @@ export const newBlockchainState = (payload: BlockchainState) => ({
 
 export const newRecentTxs = (payload: TransactionSchema[]) => ({
   type: NEW_RECENT_TXS,
+  payload
+})
+
+export const setNetwork = (payload: string) => ({
+  type: SET_NETWORK,
   payload
 })
 
@@ -82,15 +89,25 @@ interface NewRecentTransactions extends Action {
   payload: TransactionSchema[]
 }
 
+interface SetNetwork extends Action {
+  type: typeof SET_NETWORK,
+  payload: string
+}
+
 type actions =
   NewBlockchainStateAction |
   NewRecentTransactions |
+  SetNetwork |
   Action<typeof UPDATE_BLOCKCHAIN> |
   Action<typeof UPDATE_RECENT_TXS>
 
 export default (state: BlockchainInitialState = initialState, action: actions) => {
   switch (action.type) {
     case NEW_BLOCKCHAIN:
+      if (action.payload.chain_id !== state.chainId) {
+        return state
+      }
+
       return {
         ...state,
         blockState: action.payload
@@ -99,6 +116,11 @@ export default (state: BlockchainInitialState = initialState, action: actions) =
       return {
         ...state,
         recentTxs: action.payload
+      }
+    case SET_NETWORK:
+      return {
+        ...state,
+        chainId: action.payload
       }
     default:
       return state

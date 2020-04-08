@@ -28,6 +28,8 @@ export const UPDATE_BLOCKS = 'UPDATE_BLOCKS'
 
 export const NEW_BLOCKS = 'NEW_BLOCKS'
 
+export const RESET_CURRENT_HEIGHT = 'RESET_CURRENT_HEIGHT'
+
 export const newBlocksAction = (payload: {
   blocks: BlockState[],
   currentHeight: number
@@ -46,7 +48,8 @@ interface NewRecentBlocks extends Action {
 
 type actions =
   NewRecentBlocks |
-  Action<typeof UPDATE_BLOCKS>
+  Action<typeof UPDATE_BLOCKS> |
+  Action<typeof RESET_CURRENT_HEIGHT>
 
 export default (state: BlocksInitialState = initialState, action: actions) => {
   switch (action.type) {
@@ -54,6 +57,11 @@ export default (state: BlocksInitialState = initialState, action: actions) => {
       return {
         ...state,
         ...action.payload
+      }
+    case RESET_CURRENT_HEIGHT:
+      return {
+        ...state,
+        currentHeight: 0
       }
     default:
       return state

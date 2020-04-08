@@ -41,19 +41,14 @@ const columns = [
 
 const RecentBlocks = () => {
   const height = useSelector<RootState, number>(state => state.blockchain.blockState.height)
-  const {blocks, currentHeight} = useSelector<RootState, any>(state => ({
-    blocks: state.blocks.blocks,
-    currentHeight: state.blocks.currentHeight
-  }))
+  const blocks = useSelector<RootState, BlockState[]>(state => state.blocks.blocks)
 
   const dispatch = useDispatch()
 
   useEffect(() => {
-    if (height !== currentHeight) {
-      dispatch({
-        type: UPDATE_BLOCKS
-      })
-    }
+    dispatch({
+      type: UPDATE_BLOCKS
+    })
   }, [height, dispatch])
 
   return (
@@ -139,7 +134,7 @@ const Blockchain = () => {
         title="Number of Transaction"
         color='#62D96B'
       >
-        {blockState.num_txs_valid}
+        {blockState.num_txs}
       </StatCard>
       <StatCard
         icon={<Receipt/>}

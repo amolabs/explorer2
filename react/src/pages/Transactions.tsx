@@ -76,10 +76,7 @@ const BlockStats = () => {
   } = useSelector<RootState, BlockchainState>(state => state.blockchain.blockState)
 
   return (
-    <Grid
-      container
-      spacing={2}
-    >
+    <>
       <StatCard
         icon={<Equalizer/>}
         title={"Average binding lag"}
@@ -107,7 +104,7 @@ const BlockStats = () => {
       >
         {0}
       </StatCard>
-    </Grid>
+    </>
   )
 }
 
@@ -115,13 +112,7 @@ const Transactions = () => {
 
   return (
     <>
-      <StatCard
-        icon={<Equalizer/>}
-        title={"Block stats"}
-        size="large"
-      >
-        <BlockStats/>
-      </StatCard>
+      <BlockStats/>
       <RecentTransaction/>
     </>
   )

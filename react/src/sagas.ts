@@ -15,7 +15,7 @@ const option: AxiosRequestConfig = {
 const fetchBlockchain = function* () {
   try {
     const chainId = yield select(state => state.blockchain.chainId)
-    const {data} = yield Axios.get(`${server}/chain/${chainId}`, option)
+    const {data} = yield Axios.get(`${server}/chain/${chainId}?num_blks=1000`, option)
 
     const stakes = Number(data.stakes)
     const delegates = Number(data.delegates)
