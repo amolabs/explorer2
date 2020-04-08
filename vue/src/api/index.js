@@ -158,10 +158,9 @@ export default {
   },
 
   getValidators(chainId, from, num) {
-    return axios.get(`${server}/chain/${chainId}/accounts?validators&from=${from}&num=${num}`,
+    return axios.get(`${server}/chain/${chainId}/validators?from=${from}&num=${num}`,
       options)
       .then(res => {
-        //var vals = camelcaseKeys(res.data);
         var vals = [];
         for (var i = 0; i < res.data.length; i++) {
           var val = camelcaseKeys(res.data[i]);
@@ -171,4 +170,13 @@ export default {
         return Promise.resolve(vals);
       });
   },
+
+  getValidator(chainId, address) {
+    return axios.get(`${server}/chain/${chainId}/validators/${address}`,
+      options)
+      .then(res => {
+        var val = camelcaseKeys(res.data);
+        return Promise.resolve(val);
+      });
+  }
 }

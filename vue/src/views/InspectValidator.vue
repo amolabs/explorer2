@@ -11,7 +11,7 @@
                     <span> Address </span>
                   </v-col>
                   <v-col cols="12" md="8" sm="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span class="truncate-option-box"> {{ this.param.address }} </span>
+                    <span class="truncate-option-box"> {{ this.validator.address }} </span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -21,7 +21,7 @@
                     <span> Public key </span>
                   </v-col>
                   <v-col cols="12" md="8" sm="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span class="truncate-option-box"> {{ this.value2 }} </span>
+                    <span class="truncate-option-box"> {{ this.validator.pubkey }} </span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -32,7 +32,7 @@
                   </v-col>
                   <v-col cols="12" md="8" sm="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <router-link class="truncate-option-box"
-                                 :to="{ path: '/inspect/account/' + this.value3 , params : {account: this.value3 } }">{{ this.value3 }}</router-link>
+                                 :to="{ path: '/inspect/account/' + this.validator.owner , params : {account: this.validator.owner } }">{{ this.validator.owner }}</router-link>
                   </v-col>
                 </v-row>
               </v-col>
@@ -42,7 +42,7 @@
                     <span> Effective stake </span>
                   </v-col>
                   <v-col cols="12" md="8" sm="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span> {{ this.$amoHuman(this.value4) }} AMO </span>
+                    <span> {{ this.$amoHuman(this.validator.effStake) }} AMO </span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -52,7 +52,7 @@
                     <span> Voting power </span>
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span> {{ this.value5_arg1.toLocaleString() }} ( {{this.value5_arg2.toFixed(2).toLocaleString() }} %) </span>
+                    <span> {{ this.validator.power.toLocaleString() }} ( {{this.validator.powerRatio.toFixed(2).toLocaleString() }} %) </span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -62,7 +62,7 @@
                     <span> Activity </span>
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span> {{ this.value6.toFixed(2).toLocaleString() }} % </span>
+                    <span> {{ this.validator.activity.toFixed(2).toLocaleString() }} % </span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -77,21 +77,20 @@
 
 <script>
   export default {
-    data() {
-      return {
-        param: this.$route.params,
-        value2: '66d6f6b107e14a335fd416e76749256fa81c146b4cff118049a177f0fe4161e1',
-        value3: '1169e6753ae9d6aa9f1f57bc4e0f1de5a3db436a',
-        value4: 1222223.3455,
-        value5_arg1 : 111,
-        value5_arg2: 232.113,
-        value6:645.3455
-      }
-    },
+    data: () => ({
+      validator: {
+        address: '-',
+        pubkey: '-',
+        power: 0,
+        owner: '-',
+        effStake: 0,
+        powerRatio: 232.113,
+        activity: 0,
+      },
+    }),
     watch: {
-      '$store.state.network'() {
-        console.log('[InspectValidator Page] 변경 된 network value', this.$store.state.network);
-        this.getPageData()
+      network() {
+        if (this.network) this.getPageData()
       },
     },
     computed: {
@@ -100,13 +99,31 @@
       }
     },
     mounted() {
-      this.getPageData();
+      if (this.network) this.getPageData();
     },
     methods: {
       async getPageData(){
-        // 데이터 바인딩
-        console.log(this.param.address);
-        console.log('network val',this.network);
+        try {
+          var res = await this.$api.getValidator(this.network, this.$route.params.address);
+          this.validator.address = res.valAddr;
+          this.validator.pubkey = res.valPubkey;
+          this.validator.power = res.valPower;
+          this.validator.owner = res.address;
+          this.validator.effStake = 0; // TODO
+          this.validator.powerRatio = 0; // TODO
+          this.validator.activity = 0; // TODO
+        } catch(e) {
+          console.debug(e);
+          this.validator = {
+            address: this.$route.params.address,
+            pubkey: '-',
+            power: 0,
+            owner: '-',
+            effStake: 0,
+            powerRatio: 0,
+            activity: 0,
+          };
+        }
       },
     }
   }

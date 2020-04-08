@@ -143,14 +143,13 @@
         } catch(err) {
           console.debug(err);
           this.account = {
-            address: '-',
+            address: this.$route.params.address,
             balance: 0,
             stake: 0,
             validator: '-',
             delegate: 0,
             delegatee: '-',
           };
-          this.account.address = this.$route.params.address;
         }
       },
       async reqTxTableData() {
