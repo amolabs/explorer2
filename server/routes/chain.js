@@ -7,6 +7,7 @@ var genesis = require('./genesis');
 var blocks = require('./blocks');
 var txs = require('./txs');
 var accounts = require('./accounts');
+var validators = require('./validators');
 var parcels = require('./parcels');
 var storages = require('./storages');
 
@@ -14,6 +15,7 @@ router.use('/genesis', genesis);
 router.use('/blocks', blocks);
 router.use('/txs', txs);
 router.use('/accounts', accounts);
+router.use('/validators', validators);
 router.use('/parcels', parcels);
 router.use('/storages', storages);
 

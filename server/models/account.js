@@ -17,6 +17,22 @@ async function getOne(chain_id, address) {
   });
 }
 
+async function getOneByValidator(chain_id, address) {
+  return new Promise(function(resolve, reject) {
+    var query_str;
+    var query_var;
+    query_str = "select * from s_accounts \
+      where (chain_id = ? and val_addr = ?)";
+    query_var = [chain_id, address];
+    db.query(query_str, query_var, function (err, rows, fields) {
+      if (err) {
+        return reject(err);
+      }
+      resolve(rows);
+    });
+  });
+}
+
 async function getList(chain_id, val_only, from, num) {
   return new Promise(function(resolve, reject) {
     from = Number(from);
@@ -46,6 +62,7 @@ async function getList(chain_id, val_only, from, num) {
 module.exports = {
   //getStat: getStat,
   getOne: getOne,
+  getOneByValidator: getOneByValidator,
   //getLast: getLast,
   getList: getList,
 }
