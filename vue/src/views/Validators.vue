@@ -25,7 +25,8 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <span> {{ Number(this.validatorStat.avgOnline.toFixed(2)).toLocaleString() }} %</span>
+                      <!--span> {{ Number(this.validatorStat.avgOnline.toFixed(2)).toLocaleString() }} %</span-->
+                      <span> - %</span>
                     </div>
                   </v-col>
                 </v-row>
@@ -37,7 +38,8 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <span> {{ this.$amoHuman(this.validatorStat.totalEffStakes) }} AMO </span>
+                      <!--span> {{ this.$amoHuman(this.validatorStat.totalEffStakes) }} AMO </span-->
+                      <span> - AMO </span>
                     </div>
                   </v-col>
                 </v-row>
@@ -49,7 +51,8 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <span> {{ this.$amoHuman(this.validatorStat.avgEffStake) }} AMO / validators </span>
+                      <!--span> {{ this.$amoHuman(this.validatorStat.avgEffStake) }} AMO / validators </span-->
+                      <span> - AMO / validators </span>
                     </div>
                   </v-col>
                 </v-row>

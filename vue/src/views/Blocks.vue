@@ -40,7 +40,8 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <span> {{ this.$amoHuman(this.blockStat.avgIncentive)  }} AMO / blk</span>
+                      <!--span> {{ this.$amoHuman(this.blockStat.avgIncentive)  }} AMO / blk</span-->
+                      <span> - AMO / blk</span>
                     </div>
                   </v-col>
                 </v-row>
@@ -64,7 +65,7 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <span> {{ this.$byteHuman(this.blockStat.avgTxBytes) + 'B' }} / blk</span>
+                      <span> {{ this.$byteHuman(this.blockStat.avgBlkTxBytes) + 'B' }} / blk</span>
                     </div>
                   </v-col>
                 </v-row>
@@ -121,7 +122,7 @@
         avgInterval: 0,
         avgIncentive: 0,
         avgNumTxs: 0,
-        avgTxBytes: 0,
+        avgBlkTxBytes: 0,
       },
       statRange:100,
       blockTable: {

@@ -45,7 +45,7 @@ export default {
         if (!stat.avgInterval) stat.Interval = 0;
         if (!stat.avgIncentive) stat.avgIncentive = 0;
         if (!stat.avgNumTxs) stat.avgNumTxs = 0;
-        if (!stat.avgTxBytes) stat.avgTxBytes = 0;
+        if (!stat.avgBlkTxBytes) stat.avgBlkTxBytes = 0;
         return Promise.resolve(stat);
       });
   },
@@ -132,15 +132,15 @@ export default {
   },
 
   getValidatorStat(chainId) {
-    return axios.get(`${server}/chain/${chainId}`,
+    return axios.get(`${server}/chain/${chainId}/validators?stat`,
       options)
       .then(res => {
-        var chain = camelcaseKeys(res.data); 
-        if (!chain.num) chain.num = 0;
-        if (!chain.avgOnline) chain.avgOnline = 0;
-        if (!chain.totalEffStakes) chain.totalEffStakes = 0;
-        if (!chain.avgEffStake) chain.avgEffStake = 0;
-        return Promise.resolve(chain);
+        var stat = camelcaseKeys(res.data); 
+        if (!stat.num) stat.num = 0;
+        stat.avgOnline = 0;
+        if (!stat.totalEffStakes) stat.totalEffStakes = 0;
+        if (!stat.avgEffStake) stat.avgEffStake = 0;
+        return Promise.resolve(stat);
       });
   },
 

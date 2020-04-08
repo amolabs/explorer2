@@ -180,7 +180,7 @@
                   </v-col>
                   <v-col class="py-0 px-lg-12 text-left subtitle-2 mobile-content" cols="12" sm="6">
                     <router-link :to="{path: '`' + this.governanceOverview.value14_arg1, params: {draftId: this.governanceOverview.value14_arg1}}">
-                      # {{this.governanceOverview.value14_arg1.toLocaleString() }} (
+                      #{{this.governanceOverview.value14_arg1.toLocaleString() }} (
                       {{this.governanceOverview.value14_arg2}}, {{
                       Number(this.governanceOverview.value14_arg3.toFixed(2)).toLocaleString()}} % approval)
                     </router-link>
@@ -203,10 +203,15 @@
                     <span>Current voting config</span>
                   </v-col>
                   <v-col class="py-0 px-lg-12 text-left subtitle-2 mobile-content" cols="12" sm="6">
-                    <span>
+                    <!--span>
                       {{this.governanceOverview.value16_arg1.toLocaleString()}} waiting <br>
                       {{this.governanceOverview.value16_arg2.toLocaleString()}} voting <br>
                       {{this.governanceOverview.value16_arg3.toLocaleString()}} grace period
+                    </span-->
+                    <span>
+                      waiting period: -<br/>
+                      voting period: -<br/>
+                      grace period: -<br/>
                     </span>
                   </v-col>
                 </v-row>
@@ -222,20 +227,22 @@
               <v-col cols="12" class="pb-0 pt-3">
                 <v-row align="start">
                   <v-col class="py-0 px-lg-12 text-right mobile-title"  cols="12" sm="6" md="6">
-                    <span>NO. of storage services</span>
+                    <span># of storage services</span>
                   </v-col>
                   <v-col class="py-0 px-lg-12  text-left subtitle-2 mobile-content" cols="12" sm="6" md="6">
-                    <router-link :to="{path: '/storages'}"> {{this.dataTradeOverview.value17.toLocaleString()}}</router-link>
+                    <!--router-link :to="{path: '/storages'}"> {{this.dataTradeOverview.value17.toLocaleString()}}</router-link-->
+                    <span> -</span>
                   </v-col>
                 </v-row>
               </v-col>
               <v-col cols="12" class="pb-0 pt-3">
                 <v-row align="start">
                   <v-col class="py-0 px-lg-12 text-right mobile-title" cols="12" sm="6">
-                    <span>NO. of Parcels</span>
+                    <span># of Parcels</span>
                   </v-col>
                   <v-col class="py-0 px-lg-12 text-left subtitle-2 mobile-content" cols="12" sm="6">
-                    <router-link :to="{path: '/parcels'}"> {{this.dataTradeOverview.value18.toLocaleString()}}</router-link>
+                    <!--router-link :to="{path: '/parcels'}"> {{this.dataTradeOverview.value18.toLocaleString()}}</router-link-->
+                    <span> -</span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -245,7 +252,8 @@
                     <span>Trade value in 1 month</span>
                   </v-col>
                   <v-col class="py-0 px-lg-12 text-left subtitle-2 mobile-content" cols="12" sm="6">
-                    <span> {{ this.$amoHuman(this.dataTradeOverview.value19) }}  AMO </span>
+                    <!--span> {{ this.$amoHuman(this.dataTradeOverview.value19) }}  AMO </span-->
+                    <span> -  AMO </span>
                   </v-col>
                 </v-row>
               </v-col>
