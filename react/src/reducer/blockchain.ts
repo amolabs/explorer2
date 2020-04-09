@@ -40,8 +40,9 @@ const initialTransactions = {
 }
 
 const initialState = {
-  height: 0,
   chainId: 'amo-cherryblossom-01',
+  height: 1,
+  updated: false,
   blockState: initialBlockState,
   recentTxs: [initialTransactions],
 }
@@ -110,7 +111,9 @@ export default (state: BlockchainInitialState = initialState, action: actions) =
 
       return {
         ...state,
-        blockState: action.payload
+        blockState: action.payload,
+        height: action.payload.height,
+        updated: true
       }
     case NEW_RECENT_TXS:
       return {
@@ -120,7 +123,9 @@ export default (state: BlockchainInitialState = initialState, action: actions) =
     case SET_NETWORK:
       return {
         ...state,
-        chainId: action.payload
+        chainId: action.payload,
+        height: 1,
+        updated: false
       }
     default:
       return state

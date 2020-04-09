@@ -1,33 +1,20 @@
-import React, {useCallback, useEffect, useState} from 'react'
-import {AutoSizer, List, WindowScroller} from "react-virtualized"
-import {makeStyles} from "@material-ui/styles"
+import React, {useEffect, useState} from 'react'
 import {BlockState} from "../reducer/blocks"
 import {useSelector} from "react-redux"
 import {RootState} from "../reducer"
-import Axios from "axios"
-import {BlockchainState} from "../reducer/blockchain"
-import {Grow, Snackbar} from "@material-ui/core"
-import {ListRowProps} from "react-virtualized/dist/es/List"
-
-const useInfinityScrollStyle = makeStyles(() => ({
-  wrapper: {
-    flex: '1 1 auto'
-  },
-  row: {
-    display: 'flex',
-    flexDirection: 'row',
-    borderBottom: '1px solid #e0e0e0',
-    padding: '0 25px',
-    alignItems: 'center'
-  }
-}))
+import {BlockchainInitialState} from "../reducer/blockchain"
+import {Grid, Snackbar} from "@material-ui/core"
+import InfinityTable from "../component/InfinityTable"
+import Api from '../Api'
+import MuiAlert from "@material-ui/lab/Alert"
 
 type Loading = 'ready' | 'fetch' | 'done'
 
-function useScrollUpdate<T>(fetcher: () => Promise<T[]>, threshold: number = 200): [
+function useScrollUpdate<T>(fetcher: (size: number) => Promise<T[]>, threshold: number = 200): [
   T[],
   (list: T[]) => void,
   boolean,
+  (loading: Loading) => void,
   (params: { scrollTop: number }) => void
 ] {
   const [list, setList] = useState<T[]>([])
@@ -37,87 +24,101 @@ function useScrollUpdate<T>(fetcher: () => Promise<T[]>, threshold: number = 200
     const height = document.documentElement.clientHeight + params.scrollTop + threshold
     if ((height >= document.body.scrollHeight) && loading === 'ready') {
       setLoading('fetch')
-      fetcher()
+      fetcher(list.length)
         .then((data) => {
-          console.log(data)
           setList([...list, ...data])
           setTimeout(() => {
             setLoading('ready')
-          }, 500)
+          }, 600)
         })
     }
   }
 
-  return [list, setList, loading === 'fetch', onScroll]
+  return [list, setList, loading === 'fetch', setLoading, onScroll]
 }
 
+const columns = [
+  {
+    key: 'height',
+    label: 'Height',
+    width: 100,
+    flexGrow: 1
+  },
+  {
+    key: 'time',
+    label: 'Time',
+    width: 100,
+    flexGrow: 2
+  },
+  {
+    key: 'proposer',
+    label: 'Proposer',
+    width: 100,
+    flexGrow: 2
+  },
+  {
+    key: 'num_txs',
+    label: "# of Txs",
+    width: 100,
+    flexGrow: 1
+  }
+]
+
 const Blocks = () => {
-  const [ref, setRef] = useState()
+  const {height: blockHeight, chainId, updated} = useSelector<RootState, BlockchainInitialState>(state => state.blockchain)
+  const [maxHeight, setMaxHeight] = useState(1)
 
-  const classes = useInfinityScrollStyle()
+  const [blocks, setBlocks, open, setLoading, onScroll] = useScrollUpdate<BlockState>(async (size) => {
+    const nextHeight = maxHeight - size
 
-  const {height: blockHeight, chain_id} = useSelector<RootState, BlockchainState>(state => state.blockchain.blockState)
+    if (nextHeight <= 0) {
+      setLoading('done')
+      return []
+    }
 
-  const [loadedHeight, setLoadedHeight] = useState(0)
-  const [blocks, setBlocks, open, onScroll] = useScrollUpdate<BlockState>(async () => {
-    const {data} = await Axios.get(`http://explorer.amolabs.io/api/chain/${chain_id}/blocks?from=${blockHeight - 20}&num=20&order=desc`)
+    const {data} = await Api.FetchBlocks(chainId, maxHeight - size)
     return data
   })
 
   useEffect(() => {
-    Axios
-      .get(`http://explorer.amolabs.io/api/chain/${chain_id}/blocks?from=${blockHeight}&num=20&order=desc`)
-      .then(({data}) => {
-        setBlocks(data)
-      })
-  }, [blockHeight])
-
-  const renderRow = useCallback((props: ListRowProps) => {
-    return (
-      <div className={classes.row} key={props.key} style={props.style}>
-        {blocks[props.index].hash}
-      </div>
-    )
-  }, [blocks])
+    if (updated) {
+      setMaxHeight(blockHeight)
+      Api
+        .FetchBlocks(chainId, blockHeight)
+        .then(({data}) => {
+          setBlocks(data)
+          window.scrollTo({
+            top: 0
+          })
+        })
+    }
+  }, [updated])
 
   return (
     <>
-      <WindowScroller
-        ref={setRef}
-        scrollElement={window}
-        onScroll={onScroll}
+      <Grid
+        item
+        lg={12}
+        md={12}
+        sm={12}
+        xs={12}
       >
-        {({height, isScrolling, registerChild, onChildScroll, scrollTop}) => (
-          <div className={classes.wrapper}>
-            <AutoSizer
-              disableHeight
-            >
-              {({width}) => (
-                <div ref={registerChild}>
-                  <List
-                    autoHeight
-                    height={height}
-                    rowCount={blocks.length}
-                    overscanColumnCount={2}
-                    rowHeight={100}
-                    rowRenderer={renderRow}
-                    onScroll={onChildScroll}
-                    isScrolling={isScrolling}
-                    scrollTop={scrollTop}
-                    width={width}
-                  />
-                </div>
-              )}
-            </AutoSizer>
-          </div>
-        )}
-      </WindowScroller>
+        <InfinityTable<BlockState>
+          onScroll={onScroll}
+          columns={columns}
+          rowKey={'hash'}
+          data={blocks}
+        />
+      </Grid>
       <Snackbar
-        message="Loading blocks..."
         open={open}
         anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
-        TransitionComponent={Grow}
-      />
+        autoHideDuration={2000}
+      >
+        <MuiAlert elevation={6} variant="filled" severity="success">
+          Loading complete
+        </MuiAlert>
+      </Snackbar>
     </>
   )
 }

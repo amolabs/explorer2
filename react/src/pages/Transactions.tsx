@@ -6,7 +6,6 @@ import {BlockchainState, TransactionSchema} from "../reducer/blockchain"
 import Axios from "axios"
 import StatCard from "../component/StatCard"
 import {Equalizer} from "@material-ui/icons"
-import {Grid} from "@material-ui/core"
 
 type PageContext = {
   chainId: string,
@@ -70,7 +69,6 @@ const RecentTransaction = () => {
 const BlockStats = () => {
   const {
     avg_binding_lag,
-    max_binding_lag,
     num_txs_invalid,
     num_txs
   } = useSelector<RootState, BlockchainState>(state => state.blockchain.blockState)

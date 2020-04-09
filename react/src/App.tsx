@@ -21,8 +21,8 @@ import {useDispatch, useSelector} from "react-redux"
 import {setNetwork, UPDATE_BLOCKCHAIN} from "./reducer/blockchain"
 import Blockchain from "./pages/Blockchain"
 import {Search} from "@material-ui/icons"
-import {Route, Switch} from "react-router-dom"
-import {replace} from "connected-react-router"
+import {Redirect, Route, Switch, useRouteMatch} from "react-router-dom"
+import {push} from "connected-react-router"
 import Transactions from "./pages/Transactions"
 import {RootState} from "./reducer"
 import {RESET_CURRENT_HEIGHT} from "./reducer/blocks"
@@ -66,10 +66,40 @@ const routers = {
 
 const urls = Object.keys(routers)
 
+const tabList = [
+  'blockchain',
+  'inspect',
+  'blocks',
+  'transaction',
+  'validators',
+  'governance',
+  'storages',
+  'parcels'
+]
+
 const supportedNetworks = [
   'amo-cherryblossom-01',
   'amo-testnet-200330'
 ]
+
+const SwitchRender = () => {
+
+  const {url} = useRouteMatch()
+
+  return (
+    <>
+      <Route path={`${url}/`} exact={true}>
+        <Blockchain/>
+      </Route>
+      <Route path={`${url}/transactions`}>
+        <Transactions/>
+      </Route>
+      <Route path={`${url}/blocks`}>
+        <Blocks/>
+      </Route>
+    </>
+  )
+}
 
 function App() {
   const classes = useStyles()
@@ -89,37 +119,41 @@ function App() {
       dispatch({
         type: UPDATE_BLOCKCHAIN
       })
-    }, 2000)
+    }, 3000)
 
     return () => clearInterval(handler)
   }, [dispatch, chainId])
 
   const handleTabChange = (event: any, newValue: any) => {
-    dispatch(replace(urls[newValue]))
+    dispatch(push(`/${chainId}${urls[newValue]}`))
     setTab(newValue)
   }
 
   useEffect(() => {
+    const [_, chainId, page] = path.split("/")
     let i = 0
     for (; i < urls.length; i++) {
-      if (urls[i] === path) {
+      if (urls[i] === "/" + page) {
         break
       }
     }
+
+    dispatch(setNetwork(chainId))
+    dispatch({
+      type: RESET_CURRENT_HEIGHT
+    })
 
     setTab(i)
   }, [path])
 
   const onChangeNetwork = (e: React.ChangeEvent<{ name?: string; value: unknown }>,) => {
-    dispatch(setNetwork(e.target.value as string))
-    dispatch({
-      type: RESET_CURRENT_HEIGHT
-    })
+    const target = "/" + path.split("/")[2]
+    dispatch(push(`/${e.target.value}${target}`))
   }
 
   return (
     <div>
-      <AppBar position="static">
+      <AppBar position="fixed">
         <Toolbar>
           <img src={require('./assets/amo_white.png')} alt="logo" style={{
             height: '36px',
@@ -165,21 +199,18 @@ function App() {
           scrollButtons="on"
           centered={isDesktop}
         >
-          <Tab label="blockchain"/>
-          <Tab label="inspect"/>
-          <Tab label="blocks"/>
-          <Tab label="transaction" onClick={(e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-            e.preventDefault()
-          }}/>
-          <Tab label="validators"/>
-          <Tab label="governance"/>
-          <Tab label="storages"/>
-          <Tab label="parcels"/>
+          {tabList.map((t, i) => (
+            <Tab
+              key={i}
+              label={t}
+            />
+          ))}
         </Tabs>
       </AppBar>
       <div style={{
         paddingLeft: '1rem',
-        paddingRight: '1rem'
+        paddingRight: '1rem',
+        marginTop: '112px'
       }}>
         <div style={{
           padding: '24px',
@@ -187,22 +218,17 @@ function App() {
           display: 'flex'
         }}>
           <Grid
-            style={{
-              width: 'calc(100% + 30px)',
-              margin: '0 -15px'
-            }}
             container
             spacing={2}
           >
             <Switch>
-              <Route path="/" exact={true}>
-                <Blockchain/>
+              <Route path="/:networkId">
+                <Switch>
+                  <SwitchRender/>
+                </Switch>
               </Route>
-              <Route path="/transactions">
-                <Transactions/>
-              </Route>
-              <Route path="/blocks">
-                <Blocks/>
+              <Route path="/">
+                <Redirect to="/amo-cherryblossom-01/"/>
               </Route>
             </Switch>
           </Grid>
