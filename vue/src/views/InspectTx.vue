@@ -142,6 +142,11 @@
       },
     }),
     watch: {
+      $route(to, from) {
+        if (to != from) {
+          if (this.network) this.getPageData()
+        }
+      },
       network() {
         if (this.network) this.getPageData()
       },

@@ -31,7 +31,7 @@
           </v-col>
           <v-col cols="4">
             <v-text-field
-              label="block, account, tx, validator, draftId"
+              label="block, account, tx, validator"
               single-line outlined rounded hide-details dense dark clearable
               prepend-inner-icon="search"
               v-model="search"
@@ -78,7 +78,7 @@
             </v-row>
             <v-text-field
               single-line outlined rounded hide-details search dark
-              label="block, account, tx, validator, draftId"
+              label="block, account, tx, validator"
               prepend-inner-icon="search"
               v-model="search"
               @keyup.enter="searchByKeyword"
@@ -146,14 +146,11 @@
         if(newVal === 'b') {
           this.search = 'block:'
         }
-        if(newVal === 'd') {
-          this.search = 'draftId:'
-        }
         if(newVal === 't') {
           this.search = 'tx:'
         }
         if(newVal === 'v') {
-          this.search = 'validator/:'
+          this.search = 'validator:'
         }
       }
 
@@ -170,10 +167,8 @@
         this.$store.commit('network', this.network);
       },
       searchByKeyword(evt) {
-          //엔터키
           if(evt.keyCode === 13){
-            console.debug('searchbox in Nav:', this.search);
-            //  TODO: api call
+            this.$router.push(this.$resolveSearch(this.search));
           }
 
       },

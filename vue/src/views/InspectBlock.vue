@@ -130,10 +130,18 @@
       },
     }),
     watch: {
+      $route(to, from) {
+        if (to != from) {
+          this.txTable.anchor = 0;
+          this.txTable.txList = [];
+          if (this.network) this.getPageData()
+          if (this.network) this.reqTxTableData();
+        }
+      },
       network() {
-        if (this.network) this.getPageData()
         this.txTable.anchor = 0;
         this.txTable.txList = [];
+        if (this.network) this.getPageData()
         if (this.network) this.reqTxTableData();
       },
       'block.height'() {

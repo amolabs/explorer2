@@ -48,6 +48,26 @@ globalMethods.install = function (Vue, options) {
     }
     return Number(data.toFixed(2)).toLocaleString() + '' +  units[idx];
   };
+
+  Vue.prototype.$resolveSearch = (search) => {
+    console.log('resolve search: ', search);
+    var prefix;
+    var key;
+    prefix = search.split(':')[0];
+    key = search.split(':')[1];
+    switch (prefix) {
+      case 'block':
+        return {name: 'InspectBlock', params: { height: key } };
+      case 'account':
+        return {name: 'InspectAccount', params: { address: key } };
+      case 'tx':
+        return {name: 'InspectTx', params: { hash: key } };
+      case 'validator':
+        return {name: 'InspectValidator', params: { address: key } };
+      default:
+        return {name: 'Inspect' };
+    }
+  };
 };
 
 export default globalMethods;

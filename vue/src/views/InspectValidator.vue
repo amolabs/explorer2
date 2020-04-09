@@ -125,10 +125,17 @@
       },
     }),
     watch: {
+      $route(to, from) {
+        if (to != from) {
+          this.delTable.anchor = 0;
+          this.delTable.delList = [];
+          if (this.network) this.getPageData()
+        }
+      },
       network() {
-        if (this.network) this.getPageData()
         this.delTable.anchor = 0;
         this.delTable.delList = [];
+        if (this.network) this.getPageData()
         //if (this.network) this.reqTableData();
       },
     },
