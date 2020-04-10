@@ -16,20 +16,28 @@ import LinearGraph from "../component/LinearGraph"
 import CollapseTable from "../component/CollapseTable"
 import {BlockState, UPDATE_BLOCKS} from "../reducer/blocks"
 import moment from 'moment'
+import {Link} from "react-router-dom"
 
 const columns = [
   {
-    key: 'height'
+    key: 'height',
+    format: (height: number) => {
+      return (
+        <Link to={`/amo-cherryblossom-01/inspect/block/${height}`}>
+          {height}
+        </Link>
+      )
+    }
   },
   {
-    key: 'hash'
+    key: 'hash',
   },
   {
     key: 'num_txs',
     header: '# of TXs'
   },
   {
-    key: 'proposer'
+    key: 'proposer',
   },
   {
     key: 'time',

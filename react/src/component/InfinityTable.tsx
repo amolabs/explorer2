@@ -1,6 +1,8 @@
-import React from 'react'
+import React, {useCallback, useMemo, useState} from 'react'
 import {
   AutoSizer,
+  CellMeasurer,
+  CellMeasurerCache,
   Column as TableColumn,
   Index,
   Table,
@@ -51,12 +53,13 @@ const useInfinityScrollStyle = makeStyles(() => ({
   flexContainer: {
     display: 'flex',
     alignItems: 'center',
-    boxSizing: 'border-box'
+    boxSizing: 'border-box',
+    justifyContent: 'center'
   },
   table: {
     '& .ReactVirtualized__Table__row, & .ReactVirtualized__Table__headerRow': {
       display: 'flex'
-    },
+    }
   }
 }))
 
@@ -65,7 +68,9 @@ type Column = {
   label: string
   width: number
   flexGrow?: number
-  format?: (v: any) => React.ReactNode
+  columnData?: {
+    format?: (v: any) => React.ReactNode
+  }
 }
 
 interface Props<T> {
@@ -79,47 +84,64 @@ function InfinityTable<T>(props: Props<T>) {
   const classes = useInfinityScrollStyle()
 
   const breakMD = useMediaQuery('(max-width: 960px)')
+  const [recentWidth, setRecentWidth] = useState<number | undefined>(undefined)
+  const cache = useMemo(() => {
+    return new CellMeasurerCache({
+      fixedWidth: true,
+      defaultHeight: breakMD ? 150 : 60
+    })
+  }, [])
 
-  const cellRenderer: TableCellRenderer = ({cellData, columnIndex}) => {
+  const cellRenderer: TableCellRenderer = ({cellData, columnIndex, columnData, parent}) => {
+    const format = columnData ? columnData['format'] : undefined
+
     return (
-      <TableCell
-        component="div"
-        variant="body"
-        className={clsx(classes.tableCell, classes.flexContainer)}
-        style={{height: `70px`}}
+      <CellMeasurer
+        cache={cache}
+        parent={parent}
       >
-        {cellData}
-      </TableCell>
+        <TableCell
+          component="div"
+          variant="body"
+          className={clsx(classes.tableCell, classes.flexContainer)}
+          style={{height: `60px`}}
+        >
+          {format ? format(cellData) : cellData}
+        </TableCell>
+      </CellMeasurer>
     )
   }
 
-  const collapsedCellRender: TableCellRenderer = ({rowData}) => {
-    console.log(rowData)
-
+  const collapsedCellRender: TableCellRenderer = ({rowData, parent}) => {
     return (
-      <TableCell
-        component="div"
-        variant="body"
-        className={clsx(classes.tableCell, classes.flexContainer)}
-        style={{height: `150px`}}
+      <CellMeasurer
+        cache={cache}
+        parent={parent}
       >
-        <div className={classes.collapsedCell}>
-          {props.columns.map((c, i) => (
-            <div key={i} className={classes.collapsedCellWrapper}>
-              <div className={classes.collapsedCellHeader}>
-                {c.label}
+        <TableCell
+          component="div"
+          variant="body"
+          className={clsx(classes.tableCell, classes.flexContainer)}
+          style={{height: `150px`}}
+        >
+          <div className={classes.collapsedCell}>
+            {props.columns.map((c, i) => (
+              <div key={i} className={classes.collapsedCellWrapper}>
+                <div className={classes.collapsedCellHeader}>
+                  {c.label}
+                </div>
+                <div className={classes.collapsedCellBody}>
+                  {rowData[c.key]}
+                </div>
               </div>
-              <div className={classes.collapsedCellBody}>
-                {rowData[c.key]}
-              </div>
-            </div>
-          ))}
-        </div>
-      </TableCell>
+            ))}
+          </div>
+        </TableCell>
+      </CellMeasurer>
     )
   }
 
-  const headerRenderer = ({label, columnIndex}: TableHeaderProps & { columnIndex: number }) => {
+  const headerRenderer = ({label}: TableHeaderProps & { columnIndex: number }) => {
     return (
       <TableCell
         component="div"
@@ -143,60 +165,67 @@ function InfinityTable<T>(props: Props<T>) {
     >
       {({height, isScrolling, registerChild, onChildScroll, scrollTop}) => (
         <div className={classes.wrapper}>
-          <AutoSizer
-            disableHeight
-          >
-            {({width}) => (
-              <div ref={registerChild}>
-                <Table
-                  autoHeight
-                  height={height}
-                  rowCount={props.data.length}
-                  rowHeight={breakMD ? 150 : 70}
-                  headerHeight={breakMD ? 0 : 50}
-                  onScroll={onChildScroll}
-                  isScrolling={isScrolling}
-                  scrollTop={scrollTop}
-                  width={width}
-                  rowGetter={rowGetter}
-                  gridStyle={{
-                    direction: 'inherit'
-                  }}
-                  className={classes.table}
+          <AutoSizer disableHeight>
+            {({width}) => {
+              if (width !== recentWidth) {
+                setRecentWidth(width)
+                cache.clearAll()
+              }
+
+              return (
+                <div
+                  ref={registerChild}
                 >
-                  {breakMD ? (
-                    <TableColumn
-                      width={100}
-                      flexGrow={1}
-                      key={'hash'}
-                      dataKey={'hash'}
-                      cellRenderer={collapsedCellRender}
-                      className={classes.flexContainer}
-                      headerRenderer={(headerProps) => headerRenderer({
-                        ...headerProps,
-                        columnIndex: 0
-                      })}
-                    />
-                  ) : (
-                    props.columns.map(({key, ...other}, index) => {
-                      return (
-                        <TableColumn
-                          key={key}
-                          dataKey={key}
-                          cellRenderer={cellRenderer}
-                          className={classes.flexContainer}
-                          headerRenderer={(headerProps) => headerRenderer({
-                            ...headerProps,
-                            columnIndex: index
-                          })}
-                          {...other}
-                        />
-                      )
-                    })
-                  )}
-                </Table>
-              </div>
-            )}
+                  <Table
+                    autoHeight
+                    height={height}
+                    rowCount={props.data.length}
+                    rowHeight={breakMD ? 150 : 60}
+                    headerHeight={breakMD ? 0 : 50}
+                    onScroll={onChildScroll}
+                    isScrolling={isScrolling}
+                    scrollTop={scrollTop}
+                    width={width}
+                    rowGetter={rowGetter}
+                    gridStyle={{
+                      direction: 'inherit'
+                    }}
+                    className={classes.table}
+                  >
+                    {breakMD ? (
+                      <TableColumn
+                        width={100}
+                        flexGrow={1}
+                        key={'hash'}
+                        dataKey={'hash'}
+                        cellRenderer={collapsedCellRender}
+                        className={classes.flexContainer}
+                        headerRenderer={(headerProps) => headerRenderer({
+                          ...headerProps,
+                          columnIndex: 0
+                        })}
+                      />
+                    ) : (
+                      props.columns.map(({key, ...other}, index) => {
+                        return (
+                          <TableColumn
+                            key={key}
+                            dataKey={key}
+                            cellRenderer={cellRenderer}
+                            className={classes.flexContainer}
+                            headerRenderer={(headerProps) => headerRenderer({
+                              ...headerProps,
+                              columnIndex: index
+                            })}
+                            {...other}
+                          />
+                        )
+                      })
+                    )}
+                  </Table>
+                </div>
+              )
+            }}
           </AutoSizer>
         </div>
       )}
@@ -205,3 +234,32 @@ function InfinityTable<T>(props: Props<T>) {
 }
 
 export default InfinityTable
+
+type Loading = 'ready' | 'fetch' | 'done'
+
+export function useScrollUpdate<T>(fetcher: (size: number) => Promise<T[]>, threshold: number = 200): [
+  T[],
+  (list: T[]) => void,
+  Loading,
+  (loading: Loading) => void,
+  (params: { scrollTop: number }) => void
+] {
+  const [list, setList] = useState<T[]>([])
+  const [loading, setLoading] = useState<Loading>('ready')
+
+  const onScroll = useCallback((params: { scrollTop: number }) => {
+    const height = document.documentElement.clientHeight + params.scrollTop + threshold
+    if ((height >= document.body.scrollHeight) && loading === 'ready') {
+      setLoading('fetch')
+      fetcher(list.length)
+        .then((data) => {
+          setList([...list, ...data])
+          setTimeout(() => {
+            setLoading('ready')
+          }, 400)
+        })
+    }
+  }, [list, loading, threshold])
+
+  return [list, setList, loading, setLoading, onScroll]
+}

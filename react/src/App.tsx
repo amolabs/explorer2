@@ -27,6 +27,7 @@ import Transactions from "./pages/Transactions"
 import {RootState} from "./reducer"
 import {RESET_CURRENT_HEIGHT} from "./reducer/blocks"
 import Blocks from "./pages/Blocks"
+import Inspect from "./pages/Inspect"
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -88,15 +89,10 @@ const SwitchRender = () => {
 
   return (
     <>
-      <Route path={`${url}/`} exact={true}>
-        <Blockchain/>
-      </Route>
-      <Route path={`${url}/transactions`}>
-        <Transactions/>
-      </Route>
-      <Route path={`${url}/blocks`}>
-        <Blocks/>
-      </Route>
+      <Route path={`${url}/`} exact={true} component={Blockchain} />
+      <Route path={`${url}/transactions`} component={Transactions}/>
+      <Route path={`${url}/blocks`} component={Blocks}/>
+      <Route path={`${url}/inspect`} component={Inspect}/>
     </>
   )
 }

@@ -1,4 +1,4 @@
-import React, {PropsWithChildren} from 'react'
+import React, {createRef, MutableRefObject, PropsWithChildren, PropsWithRef, RefObject} from 'react'
 import {Grid} from "@material-ui/core"
 import {makeStyles} from "@material-ui/core/styles"
 import {Breakpoint} from "@material-ui/core/styles/createBreakpoints"
@@ -64,6 +64,7 @@ type Props = {
   suffix?: string
   color?: string
   size?: 'small' | 'medium' | 'large'
+  setRef?: (instance?: HTMLDivElement) => void
 }
 
 const cardSize: { [k: string]: Partial<Record<Breakpoint, boolean | GridSize>> } = {
@@ -90,9 +91,7 @@ const cardSize: { [k: string]: Partial<Record<Breakpoint, boolean | GridSize>> }
 const StatCard = (props: PropsWithChildren<Props>) => {
   const classes = useStyles()
   const size = props.size || 'small'
-
   const color = props.color || '#42a5f5'
-
   const iconTheme: React.CSSProperties = {
     boxShadow: `0 4px 20px 0 rgba(0, 0, 0, .14), 0 7px 10px -5px ${color}`,
     background: `${color}`,
@@ -106,12 +105,21 @@ const StatCard = (props: PropsWithChildren<Props>) => {
         padding: '0 15px !important'
       }}
       {...cardSize[size]}
+      ref={(node) => {
+        if (node) {
+          props.setRef && props.setRef(node)
+        }
+      }}
     >
       <div className={classes.root}>
         <div className={classes.header}>
-          <div className={classes.icon} style={iconTheme}>
-            {props.icon}
-          </div>
+          {
+            props.size !== 'large' && (
+              <div className={classes.icon} style={iconTheme}>
+                {props.icon}
+              </div>
+            )
+          }
           <p className={classes.title} style={{
             fontSize: size === 'small' ? '14px' : '26px'
           }}>
@@ -119,7 +127,7 @@ const StatCard = (props: PropsWithChildren<Props>) => {
           </p>
           <h1 className={classes.stat}>
             {props.children}
-            {props.suffix && <small>{props.suffix}</small>}
+            {props.suffix && <small>&nbsp;{props.suffix}</small>}
           </h1>
         </div>
       </div>

@@ -1,48 +1,30 @@
 import React, {useEffect, useState} from 'react'
-import {BlockState} from "../reducer/blocks"
+import blocks, {BlockState} from "../reducer/blocks"
 import {useSelector} from "react-redux"
-import {RootState} from "../reducer"
-import {BlockchainInitialState} from "../reducer/blockchain"
-import {Grid, Snackbar} from "@material-ui/core"
-import InfinityTable from "../component/InfinityTable"
-import Api from '../Api'
+import {RootState, useUpdateState} from "../reducer"
+import {Grid, MenuItem, Select, Snackbar} from "@material-ui/core"
+import InfinityTable, {useScrollUpdate} from "../component/InfinityTable"
+import Api, {BlocksStat} from '../Api'
 import MuiAlert from "@material-ui/lab/Alert"
-
-type Loading = 'ready' | 'fetch' | 'done'
-
-function useScrollUpdate<T>(fetcher: (size: number) => Promise<T[]>, threshold: number = 200): [
-  T[],
-  (list: T[]) => void,
-  boolean,
-  (loading: Loading) => void,
-  (params: { scrollTop: number }) => void
-] {
-  const [list, setList] = useState<T[]>([])
-  const [loading, setLoading] = useState<Loading>('ready')
-
-  const onScroll = (params: { scrollTop: number }) => {
-    const height = document.documentElement.clientHeight + params.scrollTop + threshold
-    if ((height >= document.body.scrollHeight) && loading === 'ready') {
-      setLoading('fetch')
-      fetcher(list.length)
-        .then((data) => {
-          setList([...list, ...data])
-          setTimeout(() => {
-            setLoading('ready')
-          }, 600)
-        })
-    }
-  }
-
-  return [list, setList, loading === 'fetch', setLoading, onScroll]
-}
+import {Link} from "react-router-dom"
+import StatCard from "../component/StatCard"
+import {AcUnit, History, Timeline, TrendingUp, ViewModule} from "@material-ui/icons"
 
 const columns = [
   {
     key: 'height',
     label: 'Height',
     width: 100,
-    flexGrow: 1
+    flexGrow: 1,
+    columnData: {
+      format: (height: number) => {
+        return (
+          <Link to={`/amo-cherryblossom-01/inspect/block/${height}`}>
+            {height}
+          </Link>
+        )
+      }
+    }
   },
   {
     key: 'time',
@@ -64,11 +46,114 @@ const columns = [
   }
 ]
 
-const Blocks = () => {
-  const {height: blockHeight, chainId, updated} = useSelector<RootState, BlockchainInitialState>(state => state.blockchain)
-  const [maxHeight, setMaxHeight] = useState(1)
+type BlocksStatProps = {
+  setRef: (instance?: HTMLDivElement) => void
+}
 
-  const [blocks, setBlocks, open, setLoading, onScroll] = useScrollUpdate<BlockState>(async (size) => {
+const LastBlocksOptions = [
+  100, 1_000, 10_000
+]
+
+const BlocksStatView = (props: BlocksStatProps) => {
+  const [lastBlocks, setLastBlocks] = useState(100)
+  const [blocksStat, setBlocksStat] = useState<BlocksStat>({
+    chain_id: 'amo-cherrryblossom-01',
+    last_height: 1,
+    num_blocks: 1,
+    num_txs: 0,
+    avg_num_txs: 0,
+    avg_blk_tx_bytes: 0,
+    avg_interval: 0
+  })
+  const {chainId} = useUpdateState()
+
+  useEffect(() => {
+    Api
+      .FetchBlocksStats(chainId, lastBlocks)
+      .then(({data}) => {
+        setBlocksStat(data)
+      })
+  }, [lastBlocks, chainId])
+
+  const BlockTitle = () => {
+
+    const onChange = (e: React.ChangeEvent<{ name?: string, value: unknown }>) => {
+      setLastBlocks(e.target.value as number)
+    }
+
+    return (
+      <span>
+        Block stat in last
+        &nbsp;
+        <Select value={lastBlocks} onChange={onChange}>
+          {LastBlocksOptions.map((v, i) => (
+            <MenuItem value={v} key={i}>{v}</MenuItem>
+          ))}
+        </Select>
+        &nbsp;
+        blocks
+      </span>
+    )
+  }
+
+  return (
+    <>
+      <StatCard
+        icon={<AcUnit/>}
+        title={<BlockTitle/>}
+        size="large"
+        setRef={props.setRef}
+      >
+        <Grid
+          container
+          spacing={2}
+        >
+          <StatCard
+            icon={<History/>}
+            title="Average interval"
+            suffix="s / blk"
+            color="#FF6E4A"
+          >
+            {blocksStat.avg_interval.toFixed(2)}
+          </StatCard>
+          <StatCard
+            icon={<TrendingUp/>}
+            title="Average incentive"
+            suffix="AMO / blk"
+            color="#9179F2"
+          >
+            -
+          </StatCard>
+          <StatCard
+            icon={<Timeline/>}
+            title="Average # of txs"
+            suffix="txs / blk"
+            color="#62D96B"
+          >
+            {blocksStat.avg_num_txs.toFixed(2)}
+          </StatCard>
+          <StatCard
+            icon={<ViewModule/>}
+            title="Average tx bytes"
+            suffix="B / blk"
+          >
+            {blocksStat.avg_blk_tx_bytes}
+          </StatCard>
+        </Grid>
+      </StatCard>
+    </>
+  )
+}
+
+const Blocks = () => {
+  const chainId = useSelector<RootState, string>(state => state.blockchain.chainId)
+  const updated = useSelector<RootState, boolean>(state => state.blockchain.updated)
+  const blockHeight = useSelector<RootState, number>(state => state.blockchain.height)
+
+  const [maxHeight, setMaxHeight] = useState(1)
+  const [ref, setRef] = useState<HTMLDivElement | undefined>(undefined)
+
+  const [blocks, setBlocks, loading, setLoading, onScroll] = useScrollUpdate<BlockState>(async (size) => {
     const nextHeight = maxHeight - size
 
     if (nextHeight <= 0) {
@@ -78,7 +163,7 @@ const Blocks = () => {
 
     const {data} = await Api.FetchBlocks(chainId, maxHeight - size)
     return data
-  })
+  }, 200 + (ref ? ref.clientHeight : 0))
 
   useEffect(() => {
     if (updated) {
@@ -96,6 +181,9 @@ const Blocks = () => {
 
   return (
     <>
+      <BlocksStatView
+        setRef={setRef}
+      />
       <Grid
         item
         lg={12}
@@ -111,12 +199,11 @@ const Blocks = () => {
         />
       </Grid>
       <Snackbar
-        open={open}
+        open={loading === 'fetch'}
         anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
-        autoHideDuration={2000}
       >
-        <MuiAlert elevation={6} variant="filled" severity="success">
-          Loading complete
+        <MuiAlert elevation={6} variant="filled" severity="info">
+          Loading...
         </MuiAlert>
       </Snackbar>
     </>
