@@ -40,6 +40,7 @@ const LinearGraph = (props: Props) => {
         item
         className={classes.progress}
         lg={9}
+        md={9}
         xs={6}
       >
         <div className={classes.title}>
@@ -54,6 +55,7 @@ const LinearGraph = (props: Props) => {
         item
         className={classes.value}
         lg={3}
+        md={3}
         xs={6}
       >
         {props.value}

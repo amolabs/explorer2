@@ -3,7 +3,7 @@ import blockchain from './blockchain'
 import blocks from "./blocks"
 import {connectRouter} from 'connected-react-router'
 import {History} from 'history'
-import {useSelector} from "react-redux"
+import {shallowEqual, useSelector} from "react-redux"
 
 const rootReducer = (history: History<History.LocationState>) => combineReducers({
   blockchain,
@@ -24,5 +24,5 @@ export const useUpdateState = () => {
   return useSelector<RootState, UpdateState>(state => ({
     updated: state.blockchain.updated,
     chainId: state.blockchain.chainId
-  }))
+  }), shallowEqual)
 }

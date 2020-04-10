@@ -9,7 +9,7 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TablePagination, TablePaginationProps,
+  TablePagination,
   TableRow,
   useMediaQuery
 } from "@material-ui/core"
@@ -85,7 +85,8 @@ function CollapseTable<T extends Map>(props: Props<T>) {
     <TablePagination
       {...pagination!}
       rowsPerPageOptions={[pagination!.rowsPerPage]}
-      onChangeRowsPerPage={() => {}}
+      onChangeRowsPerPage={() => {
+      }}
       component="div"
     />
   )
@@ -103,7 +104,9 @@ function CollapseTable<T extends Map>(props: Props<T>) {
         <TableContainer style={containerStyle}>
           <Table stickyHeader={true}>
             <Hidden only={['xs']}>
-              <TableHead>
+              <TableHead
+                component={"thead"}
+              >
                 {
                   columns.map((c, i) => (
                     <TableCell key={i} align="center">
@@ -123,11 +126,11 @@ function CollapseTable<T extends Map>(props: Props<T>) {
                     style={{transformOrigin: 'top'}}
                   >
                     <TableRow className={isMobile ? classes.mobileTableRow : ''}>
-                      {columns.map((c, i) => {
+                      {columns.map((c) => {
                         const value = c.format ? c.format(v[c.key]) : v[c.key]
 
                         return (
-                          <TableCell key={i} align="center" className={isMobile ? classes.mobileTableCell : ''}>
+                          <TableCell key={c.key} align="center" className={isMobile ? classes.mobileTableCell : ''}>
                             <Hidden only={['xs']}>
                               {value}
                             </Hidden>

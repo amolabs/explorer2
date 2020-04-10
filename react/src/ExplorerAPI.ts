@@ -1,5 +1,6 @@
 import Axios, {AxiosResponse} from "axios"
 import {BlockState} from "./reducer/blocks"
+import {TransactionSchema} from "./reducer/blockchain"
 
 const defaultURL = "http://explorer.amolabs.io/api"
 
@@ -9,7 +10,7 @@ const client = Axios.create({
 
 type Result<T> = Promise<AxiosResponse<T>>
 
-const FetchBlocks = (chainId: string, blockHeight: number, size: number = 20): Result<BlockState[]> => {
+const fetchBlocks = (chainId: string, blockHeight: number, size: number = 20): Result<BlockState[]> => {
   return client
     .get(`/chain/${chainId}/blocks?from=${blockHeight}&num=${size}&order=desc`)
 }
@@ -24,12 +25,18 @@ export type BlocksStat = {
   avg_interval: number
 }
 
-const FetchBlocksStats = (chainId: string, blocks: number = 100): Result<BlocksStat> => {
+const fetchBlocksStats = (chainId: string, blocks: number = 100): Result<BlocksStat> => {
   return client
     .get(`/chain/${chainId}/blocks?stat&num_blks=${blocks}`)
 }
 
+const fetchTransactions = (chainId: string, top: number, from: number, size: number = 20): Result<TransactionSchema[]> => {
+  return client
+    .get(`/chain/${chainId}/txs?top=${top}&from=${from}&num=${size}`)
+}
+
 export default {
-  FetchBlocks,
-  FetchBlocksStats
+  fetchBlocks,
+  fetchBlocksStats,
+  fetchTransactions
 }

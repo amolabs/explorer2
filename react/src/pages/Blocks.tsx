@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from 'react'
-import blocks, {BlockState} from "../reducer/blocks"
+import {BlockState} from "../reducer/blocks"
 import {useSelector} from "react-redux"
 import {RootState, useUpdateState} from "../reducer"
 import {Grid, MenuItem, Select, Snackbar} from "@material-ui/core"
 import InfinityTable, {useScrollUpdate} from "../component/InfinityTable"
-import Api, {BlocksStat} from '../Api'
+import ExplorerAPI, {BlocksStat} from '../ExplorerAPI'
 import MuiAlert from "@material-ui/lab/Alert"
 import {Link} from "react-router-dom"
 import StatCard from "../component/StatCard"
@@ -68,8 +68,8 @@ const BlocksStatView = (props: BlocksStatProps) => {
   const {chainId} = useUpdateState()
 
   useEffect(() => {
-    Api
-      .FetchBlocksStats(chainId, lastBlocks)
+    ExplorerAPI
+      .fetchBlocksStats(chainId, lastBlocks)
       .then(({data}) => {
         setBlocksStat(data)
       })
@@ -160,15 +160,15 @@ const Blocks = () => {
       return []
     }
 
-    const {data} = await Api.FetchBlocks(chainId, maxHeight - size)
+    const {data} = await ExplorerAPI.fetchBlocks(chainId, maxHeight - size)
     return data
   }, 200 + (ref ? ref.clientHeight : 0))
 
   useEffect(() => {
     if (updated) {
       setMaxHeight(blockHeight)
-      Api
-        .FetchBlocks(chainId, blockHeight)
+      ExplorerAPI
+        .fetchBlocks(chainId, blockHeight)
         .then(({data}) => {
           setBlocks(data)
           window.scrollTo({
@@ -183,20 +183,12 @@ const Blocks = () => {
       <BlocksStatView
         setRef={setRef}
       />
-      <Grid
-        item
-        lg={12}
-        md={12}
-        sm={12}
-        xs={12}
-      >
-        <InfinityTable<BlockState>
-          onScroll={onScroll}
-          columns={columns}
-          rowKey={'hash'}
-          data={blocks}
-        />
-      </Grid>
+      <InfinityTable<BlockState>
+        onScroll={onScroll}
+        columns={columns}
+        rowKey={'hash'}
+        data={blocks}
+      />
       <Snackbar
         open={loading === 'fetch'}
         anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}

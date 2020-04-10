@@ -11,7 +11,7 @@ import {
   WindowScroller
 } from "react-virtualized"
 import {makeStyles} from "@material-ui/styles"
-import {TableCell, useMediaQuery} from "@material-ui/core"
+import {Grid, TableCell, useMediaQuery} from "@material-ui/core"
 import clsx from "clsx"
 
 const useInfinityScrollStyle = makeStyles(() => ({
@@ -88,7 +88,7 @@ function InfinityTable<T>(props: Props<T>) {
   const cache = useMemo(() => {
     return new CellMeasurerCache({
       fixedWidth: true,
-      defaultHeight: breakMD ? 150 : 60
+      defaultHeight: 60
     })
   }, [])
 
@@ -159,77 +159,88 @@ function InfinityTable<T>(props: Props<T>) {
   }
 
   return (
-    <WindowScroller
-      scrollElement={window}
-      onScroll={props.onScroll}
+    <Grid
+      item
+      lg={12}
+      md={12}
+      sm={12}
+      xs={12}
     >
-      {({height, isScrolling, registerChild, onChildScroll, scrollTop}) => (
-        <div className={classes.wrapper}>
-          <AutoSizer disableHeight>
-            {({width}) => {
-              if (width !== recentWidth) {
-                setRecentWidth(width)
-                cache.clearAll()
-              }
+      <WindowScroller
+        scrollElement={window}
+        onScroll={props.onScroll}
+      >
+        {({height, isScrolling, registerChild, onChildScroll, scrollTop}) => (
+          <div className={classes.wrapper}>
+            <AutoSizer disableHeight>
+              {({width}) => {
+                if (width !== recentWidth) {
+                  // FIXME Do not use setState in this scope
+                  // This logic prevents wrong rendering after width of window changed
+                  // https://codesandbox.io/s/qlqkx2mrz4?file=/window-scroller.js:725-959
+                  setRecentWidth(width)
+                  cache.clearAll()
+                }
 
-              return (
-                <div
-                  ref={registerChild}
-                >
-                  <Table
-                    autoHeight
-                    height={height}
-                    rowCount={props.data.length}
-                    rowHeight={breakMD ? 150 : 60}
-                    headerHeight={breakMD ? 0 : 50}
-                    onScroll={onChildScroll}
-                    isScrolling={isScrolling}
-                    scrollTop={scrollTop}
-                    width={width}
-                    rowGetter={rowGetter}
-                    gridStyle={{
-                      direction: 'inherit'
-                    }}
-                    className={classes.table}
+                return (
+                  <div
+                    ref={registerChild}
                   >
-                    {breakMD ? (
-                      <TableColumn
-                        width={100}
-                        flexGrow={1}
-                        key={'hash'}
-                        dataKey={'hash'}
-                        cellRenderer={collapsedCellRender}
-                        className={classes.flexContainer}
-                        headerRenderer={(headerProps) => headerRenderer({
-                          ...headerProps,
-                          columnIndex: 0
-                        })}
-                      />
-                    ) : (
-                      props.columns.map(({key, ...other}, index) => {
-                        return (
-                          <TableColumn
-                            key={key}
-                            dataKey={key}
-                            cellRenderer={cellRenderer}
-                            className={classes.flexContainer}
-                            headerRenderer={(headerProps) => headerRenderer({
-                              ...headerProps,
-                              columnIndex: index
-                            })}
-                            {...other}
-                          />
-                        )
-                      })
-                    )}
-                  </Table>
-                </div>
-              )
-            }}
-          </AutoSizer>
-        </div>
-      )}
-    </WindowScroller>
+                    <Table
+                      autoHeight
+                      height={height}
+                      rowCount={props.data.length}
+                      rowHeight={breakMD ? 150 : 60}
+                      headerHeight={breakMD ? 0 : 50}
+                      onScroll={onChildScroll}
+                      isScrolling={isScrolling}
+                      scrollTop={scrollTop}
+                      width={width}
+                      rowGetter={rowGetter}
+                      gridStyle={{
+                        direction: 'inherit'
+                      }}
+                      className={classes.table}
+                    >
+                      {breakMD ? (
+                        <TableColumn
+                          width={100}
+                          flexGrow={1}
+                          key={'hash'}
+                          dataKey={'hash'}
+                          cellRenderer={collapsedCellRender}
+                          className={classes.flexContainer}
+                          headerRenderer={(headerProps) => headerRenderer({
+                            ...headerProps,
+                            columnIndex: 0
+                          })}
+                        />
+                      ) : (
+                        props.columns.map(({key, ...other}, index) => {
+                          return (
+                            <TableColumn
+                              key={key}
+                              dataKey={key}
+                              cellRenderer={cellRenderer}
+                              className={classes.flexContainer}
+                              headerRenderer={(headerProps) => headerRenderer({
+                                ...headerProps,
+                                columnIndex: index
+                              })}
+                              {...other}
+                            />
+                          )
+                        })
+                      )}
+                    </Table>
+                  </div>
+                )
+              }}
+            </AutoSizer>
+          </div>
+        )}
+      </WindowScroller>
+    </Grid>
   )
 }
 

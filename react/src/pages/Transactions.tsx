@@ -1,72 +1,50 @@
 import React, {useEffect, useState} from 'react'
-import CollapseTable from "../component/CollapseTable"
 import {useSelector} from "react-redux"
-import {RootState} from "../reducer"
+import {RootState, useUpdateState} from "../reducer"
 import {BlockchainState, TransactionSchema} from "../reducer/blockchain"
-import Axios from "axios"
 import StatCard from "../component/StatCard"
 import {Equalizer} from "@material-ui/icons"
-
-type PageContext = {
-  chainId: string,
-  totalTxn: number
-}
+import InfinityTable, {useScrollUpdate} from "../component/InfinityTable"
+import ExplorerAPI from "../ExplorerAPI"
 
 const columns = [
   {
-    key: 'height'
+    key: 'height',
+    label: 'Height',
+    width: 100,
+    flexGrow: 1
   },
   {
-    key: 'index'
+    key: 'index',
+    label: 'Index',
+    width: 100,
+    flexGrow: 1
   },
   {
-    key: 'hash'
+    key: 'hash',
+    label: 'Hash',
+    width: 100,
+    flexGrow: 3
   },
   {
-    key: 'sender'
+    key: 'sender',
+    label: 'Sender',
+    width: 100,
+    flexGrow: 2
   },
   {
-    key: 'type'
+    key: 'type',
+    label: 'Type',
+    width: 100,
+    flexGrow: 1
   },
 ]
 
-const RecentTransaction = () => {
-
-  const context = useSelector<RootState, PageContext>(state => ({
-    chainId: state.blockchain.blockState.chain_id,
-    totalTxn: state.blockchain.blockState.num_txs_valid
-  }))
-
-  const [page, setPage] = useState(0)
-  const [tx, setTx] = useState<TransactionSchema[]>([])
-
-  useEffect(() => {
-    Axios
-      .get(`http://explorer.amolabs.io/api/chain/${context.chainId}/txs?top=${context.totalTxn}&from=${page * 20}&num=20`)
-      .then(({data}) => {
-        setTx(data)
-      })
-  }, [page])
-
-  return (
-    <CollapseTable<TransactionSchema>
-      dataSource={tx}
-      columns={columns}
-      rowKey="hash"
-      maxHeight="680px"
-      pagination={{
-        count: context.totalTxn,
-        rowsPerPage: 20,
-        page,
-        onChangePage: (event, newPage) => {
-          setPage(newPage)
-        },
-      }}
-    />
-  )
+type TransactionStatsProps = {
+  setRef: (instance?: HTMLDivElement) => void
 }
 
-const BlockStats = () => {
+const BlockStats = (props: TransactionStatsProps) => {
   const {
     avg_binding_lag,
     num_txs_invalid,
@@ -79,6 +57,7 @@ const BlockStats = () => {
         icon={<Equalizer/>}
         title={"Average binding lag"}
         suffix={`blks`}
+        setRef={props.setRef}
       >
         {avg_binding_lag.toFixed(2)}
       </StatCard>
@@ -107,11 +86,37 @@ const BlockStats = () => {
 }
 
 const Transactions = () => {
+  const [ref, setRef] = useState<HTMLDivElement | undefined>(undefined)
+
+  const {chainId, updated} = useUpdateState()
+  const totalTransactionSize = useSelector<RootState, number>(state => state.blockchain.blockState.num_txs)
+
+  const [list, setList, loading, setLoading, onScroll] = useScrollUpdate<TransactionSchema>(async (size: number) => {
+    const {data} = await ExplorerAPI
+      .fetchTransactions(chainId, totalTransactionSize, size)
+
+    return data
+  }, 200 + (ref ? ref.clientHeight : 0))
+
+  useEffect(() => {
+    if (updated) {
+      ExplorerAPI
+        .fetchTransactions(chainId, totalTransactionSize, 0)
+        .then(({data}) => {
+          setList(data)
+        })
+    }
+  }, [updated])
 
   return (
     <>
-      <BlockStats/>
-      <RecentTransaction/>
+      <BlockStats setRef={setRef}/>
+      <InfinityTable
+        onScroll={onScroll}
+        columns={columns}
+        rowKey="hash"
+        data={list}
+      />
     </>
   )
 }
