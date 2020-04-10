@@ -16,9 +16,9 @@ const useStyles = makeStyles((theme) => ({
     wordWrap: 'break-word',
     background: theme.palette.background.paper,
     boxShadow: '0 1px 4px 0 rgba(0, 0, 0, 0.14)',
-    marginTop: '30px',
+    marginTop: theme.spacing(2),
+    marginBottom: theme.spacing(2),
     borderRadius: '6px',
-    marginBottom: '30px',
     flexDirection: 'column'
   },
   header: {
@@ -102,7 +102,7 @@ const StatCard = (props: PropsWithChildren<Props>) => {
     <Grid
       item
       style={{
-        padding: '0 15px !important'
+        padding: '0 5px !important'
       }}
       {...cardSize[size]}
       ref={(node) => {

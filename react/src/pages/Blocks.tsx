@@ -146,8 +146,7 @@ const BlocksStatView = (props: BlocksStatProps) => {
 }
 
 const Blocks = () => {
-  const chainId = useSelector<RootState, string>(state => state.blockchain.chainId)
-  const updated = useSelector<RootState, boolean>(state => state.blockchain.updated)
+  const {chainId, updated} = useUpdateState()
   const blockHeight = useSelector<RootState, number>(state => state.blockchain.height)
 
   const [maxHeight, setMaxHeight] = useState(1)
