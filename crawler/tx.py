@@ -28,72 +28,75 @@ def stake(tx, cursor):
     payload['amount'] = int(payload['amount'])
 
     sender = models.Account(tx.chain_id, tx.sender, cursor)
-
     sender.stake += payload['amount']
+    sender.eff_stake += payload['amount']
     sender.balance -= payload['amount']
     sender.val_pubkey = payload['validator']
     b = bytearray.fromhex(sender.val_pubkey)
     sender.val_addr = sha256(b).hexdigest()[:40].upper()
+    sender.save(cursor)
 
     asset_stat = stats.Asset(tx.chain_id, cursor)
     asset_stat.active_coins -= payload['amount']
     asset_stat.stakes += payload['amount']
     asset_stat.save(cursor)
 
-    sender.save(cursor)
-
 def withdraw(tx, cursor):
     payload = json.loads(tx.payload)
     payload['amount'] = int(payload['amount'])
 
     sender = models.Account(tx.chain_id, tx.sender, cursor)
-
     sender.stake -= payload['amount']
+    sender.eff_stake -= payload['amount']
     sender.balance += payload['amount']
     if sender.stake == 0:
         sender.val_addr = None
+    sender.save(cursor)
 
     asset_stat = stats.Asset(tx.chain_id, cursor)
     asset_stat.active_coins += payload['amount']
     asset_stat.stakes -= payload['amount']
     asset_stat.save(cursor)
 
-    sender.save(cursor)
-
 def delegate(tx, cursor):
     payload = json.loads(tx.payload)
     payload['amount'] = int(payload['amount'])
 
     sender = models.Account(tx.chain_id, tx.sender, cursor)
-
     sender.delegate += payload['amount']
     sender.balance -= payload['amount']
     sender.del_addr = payload['to']
+    sender.save(cursor)
+
+    delegatee = models.Account(tx.chain_id, sender.del_addr, cursor)
+    delegatee.eff_stake += payload['amount']
+    delegatee.save(cursor)
 
     asset_stat = stats.Asset(tx.chain_id, cursor)
     asset_stat.active_coins -= payload['amount']
     asset_stat.delegates += payload['amount']
     asset_stat.save(cursor)
 
-    sender.save(cursor)
-
 def retract(tx, cursor):
     payload = json.loads(tx.payload)
     payload['amount'] = int(payload['amount'])
 
     sender = models.Account(tx.chain_id, tx.sender, cursor)
-
     sender.delegate -= payload['amount']
     sender.balance += payload['amount']
+    del_addr = sender.del_addr
     if sender.delegate == 0:
         sender.del_addr = None
+    sender.save(cursor)
+
+    delegatee = models.Account(tx.chain_id, del_addr, cursor)
+    delegatee.eff_stake -= payload['amount']
+    delegatee.save(cursor)
 
     asset_stat = stats.Asset(tx.chain_id, cursor)
     asset_stat.active_coins += payload['amount']
     asset_stat.delegates -= payload['amount']
     asset_stat.save(cursor)
-
-    sender.save(cursor)
 
 def setup(tx, cursor):
     payload = json.loads(tx.payload)

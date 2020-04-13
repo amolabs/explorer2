@@ -57,6 +57,7 @@ CREATE TABLE `s_accounts` (
   `del_addr` char(40) DEFAULT NULL,
   `val_pubkey` char(64) DEFAULT NULL,
   `val_power` char(40) NOT NULL DEFAULT '0',
+  `eff_stake` char(40) NOT NULL DEFAULT '0',
   PRIMARY KEY (`chain_id`,`address`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
