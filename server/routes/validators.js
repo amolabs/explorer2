@@ -55,4 +55,24 @@ router.get('/:address([a-fA-F0-9]+)', function(req, res) {
     });
 });
 
+router.get('/:address([a-fA-F0-9]+)/delegators', function(req, res) {
+  const chain_id = res.locals.chain_id;
+  var from = req.query.from || 0;
+  var num = req.query.num || 20;
+  validator.getDelegators(chain_id, req.params.address, from, num)
+    .then((rows) => {
+      if (rows) {
+        res.status(200);
+        res.send(rows);
+      } else {
+        res.status(404);
+        res.send('not found');
+      }
+    })
+    .catch((err) => {
+      res.status(500);
+      res.send(err);
+    });
+});
+
 module.exports = router;
