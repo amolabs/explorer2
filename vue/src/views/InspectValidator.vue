@@ -90,8 +90,8 @@
                 <router-link class="truncate-option"
                              :to="{ path: '/inspect/account/' + item.address, params : {hash: item.address} }">{{ item.address }}</router-link>
               </template>
-              <template #amount="{item}">
-                <span> {{ $amoHuman(item.amount) }} AMO</span>
+              <template #delegate="{item}">
+                <span> {{ $amoHuman(item.delegate) }} AMO</span>
               </template>
             </c-scroll-table>
           </c-card>
@@ -111,13 +111,13 @@
         power: 0,
         owner: '-',
         effStake: 0,
-        powerRatio: 232.113,
+        powerRatio: 0,
         activity: 0,
       },
       delTable: {
         headers: [
           { text: 'address',align: 'center',  value: 'address' },
-          { text: 'amount', align: 'center', value: 'amount' },
+          { text: 'amount', align: 'center', value: 'delegate' },
         ],
         delList: [],
         anchor: 0,
@@ -130,13 +130,14 @@
           this.delTable.anchor = 0;
           this.delTable.delList = [];
           if (this.network) this.getPageData()
+          if (this.network) this.reqTableData();
         }
       },
       network() {
         this.delTable.anchor = 0;
         this.delTable.delList = [];
         if (this.network) this.getPageData()
-        //if (this.network) this.reqTableData();
+        if (this.network) this.reqTableData();
       },
     },
     computed: {
@@ -149,6 +150,7 @@
     },
     mounted() {
       if (this.network) this.getPageData();
+      if (this.network) this.reqTableData();
     },
     methods: {
       async getPageData(){
@@ -158,15 +160,9 @@
           this.validator.pubkey = res.pubkey;
           this.validator.power = res.power;
           this.validator.owner = res.owner;
-          var effStake = Number(res.stake);
-
-          for (var i = 0; i < res.delegators.length; i++) {
-            effStake += Number(res.delegators[i].amount);
-          }
-          this.validator.effStake = effStake;
+          this.validator.effStake = res.effStake;
           this.validator.powerRatio = 0; // TODO
           this.validator.activity = 0; // TODO
-          this.delTable.delList = res.delegators || [];
         } catch(e) {
           console.debug(e);
           this.validator = {
@@ -178,12 +174,18 @@
             powerRatio: 0,
             activity: 0,
           };
-          this.delTable.delList = [];
         }
       },
       async reqTableData() {
-        //this.delTable.delList = this.delegators || [];
-        //this.delTable.anchor = this.delTable.delList.length;
+        try {
+          const res = await this.$api.getDelegators(this.network,
+            this.$route.params.address,
+            this.delTable.anchor, this.delTable.bulkSize);
+          this.delTable.delList = this.delTable.delList.concat(res);
+          this.delTable.anchor = this.delTable.delList.length;
+        } catch (e) {
+          console.log(e);
+        }
       },
     }
   }

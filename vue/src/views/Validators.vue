@@ -80,8 +80,8 @@
                 <router-link class="truncate-option"
                              :to="{ path: '/inspect/validator/' + item.valAddr, params : {address: item.valAddr } }">{{ item.valAddr }}</router-link>
               </template>
-              <template #stake="{item}">
-                <span> {{ $amoHuman(item.stake) }}  AMO</span>
+              <template #effStake="{item}">
+                <span> {{ $amoHuman(item.effStake) }}  AMO</span>
               </template>
               <template #valPower="{item}">
                 <span>{{ Number(item.valPower).toPrecision(5) }} </span>
@@ -117,7 +117,7 @@
       validatorTable: {
         headers: [
           { text: 'address', align: 'center', value: 'valAddr'},
-          { text: 'stake', align: 'center', value: 'stake'},
+          { text: 'eff stake', align: 'center', value: 'effStake'},
           { text: 'power', align: 'center', value: 'valPower'},
           { text: 'activity', align: 'center', value: 'activity'},
         ],

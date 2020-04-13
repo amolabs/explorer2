@@ -119,7 +119,7 @@ export default {
     return axios.get(`${server}/chain/${chainId}/accounts/${address}`,
       options)
       .then(res => {
-        return Promise.resolve(res.data);
+        return Promise.resolve(camelcaseKeys(res.data));
       });
   },
 
@@ -177,6 +177,14 @@ export default {
       .then(res => {
         var val = camelcaseKeys(res.data);
         return Promise.resolve(val);
+      });
+  },
+
+  getDelegators(chainId, address, from, num) {
+    return axios.get(`${server}/chain/${chainId}/validators/${address}/delegators`,
+      options)
+      .then(res => {
+        return Promise.resolve(res.data);
       });
   }
 }

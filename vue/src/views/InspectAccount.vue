@@ -25,23 +25,29 @@
                   </v-col>
                 </v-row>
               </v-col>
-              <v-col cols="12" md="6" v-if="this.account.stake">
+              <v-col cols="12" md="12" v-if="this.account.valAddr">
                 <v-row align="center">
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                  <v-col cols="12" md="2" class="py-0 px-lg-12 text-left">
                     <span> Stake </span>
                   </v-col>
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span> {{ this.$amoHuman(this.account.stake)}} AMO for validator <br>{{ this.account.validator }}</span>
+                  <v-col cols="12" md="10" class="py-0 px-lg-12 text-left subtitle-2">
+                    <span> {{ this.$amoHuman(this.account.stake)}} AMO for validator <br/>
+                      <router-link :to="{name: 'InspectValidator', params: { address: this.account.valAddr}}">{{ this.account.valAddr }}
+                      </router-link>
+                    </span>
                   </v-col>
                 </v-row>
               </v-col>
-              <v-col cols="12" md="6" v-if="this.account.delegate">
+              <v-col cols="12" md="12" v-if="this.account.delAddr">
                 <v-row align="center">
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                  <v-col cols="12" md="2" class="py-0 px-lg-12 text-left">
                     <span> Delegate </span>
                   </v-col>
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span> {{this.$amoHuman(this.account.delegate)}}AMO for account <br> {{this.account.delegatee}}</span>
+                  <v-col cols="12" md="10" class="py-0 px-lg-12 text-left subtitle-2">
+                    <span> {{this.$amoHuman(this.account.delegate)}} AMO for account <br/>
+                      <router-link :to="{name: 'InspectAccount', params: { address: this.account.delAddr}}">{{ this.account.delAddr }}
+                      </router-link>
+                    </span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -55,7 +61,7 @@
     <v-container>
       <v-row justify="center" >
         <v-col cols="12">
-          <c-card class="text-center" title="Related txs" outlined>
+          <c-card class="text-center" title="Transmitted txs" outlined>
             <c-scroll-table
               :headers="txTable.headers"
               itemKey="name"
@@ -88,9 +94,9 @@
         address: '-',
         balance: 0,
         stake: 0,
-        validator: '-',
+        valAddr: '-',
         delegate: 0,
-        delegatee: '-',
+        delAddr: '-',
       },
       txTable: {
         headers: [
@@ -143,7 +149,7 @@
       async getPageData(){
         try {
           this.account = await this.$api.getAccount(this.network, this.$route.params.address);
-          var stat = await this.$api.getTxStat(this.network);
+          var stat = await this.$api.getTxStat(this.network, 100);
           this.txTable.topHeight = stat.txHeight;
         } catch(err) {
           console.debug(err);
@@ -151,9 +157,9 @@
             address: this.$route.params.address,
             balance: 0,
             stake: 0,
-            validator: '-',
+            valAddr: None,
             delegate: 0,
-            delegatee: '-',
+            delAddr: '-',
           };
         }
       },
