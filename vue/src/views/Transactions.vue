@@ -20,7 +20,7 @@
                   @change="selectEvent"
                 ></v-select>
               </span>
-              blocks
+              txs
             </div>
 
             <!-- stat -->
@@ -68,7 +68,7 @@
                   </v-col>
                   <v-col cols="12" md="8" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <span> {{ this.txStat.numTxsInvalid.toLocaleString()}} / {{ this.txStat.numTxs.toLocaleString() }} ( {{ Number(this.txStat.ratioInvalid.toFixed(2)).toLocaleString() }} % ) </span>
+                      <span> {{ this.txStat.numTxsInvalid.toLocaleString()}} / {{ this.txStat.numTxs.toLocaleString() }} ( {{ this.txStat.ratioInvalid.toFixed(2) }} % ) </span>
                     </div>
                   </v-col>
                 </v-row>
@@ -162,9 +162,6 @@
       network() {
         return this.$store.state.network
       },
-      'txStat.ratioInvalid'() {
-        return this.txStat.numTxsInvalid / this.txStat.numTxs;
-      },
     },
     mounted() {
       if (this.network) this.getPageData()
@@ -172,7 +169,9 @@
     methods: {
       async getPageData(){
         try {
-          this.txStat = await this.$api.getTxStat(this.network);
+          this.txStat = await this.$api.getTxStat(this.network, this.statRange);
+          this.txStat.ratioInvalid = 100 *
+            Number(this.txStat.numTxsInvalid) / Number(this.txStat.numTxs);
           this.txTable.topHeight = this.txStat.txHeight;
         } catch (e) {
           console.log(e);

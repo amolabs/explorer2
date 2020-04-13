@@ -71,22 +71,22 @@ export default {
       });
   },
 
-  getTxStat(chainId) { // TODO: statRange
-    return axios.get(`${server}/chain/${chainId}`,
+  getTxStat(chainId, statRange) { // TODO: statRange
+    return axios.get(`${server}/chain/${chainId}/txs?stat&num_txs=${statRange}`,
       options)
       .then(res => {
-        var chain = camelcaseKeys(res.data); 
-        if (!chain.height) chain.height = 0;
-        if (!chain.txHeight) chain.txHeight = 0;
-        if (!chain.txIndex) chain.txIndex = 0;
-        if (!chain.avgTxBytes) chain.avgTxBytes  = 0;
-        if (!chain.avgTxFee) chain.avgTxFee  = 0;
-        if (!chain.avgBindingLag) chain.avgBindingLag = 0;
-        if (!chain.maxBindingLag) chain.maxBindingLag = 0;
-        if (!chain.numTxsInvalid) chain.numTxsInvalid = 0;
-        if (!chain.numTxs) chain.numTxs = 0;
-        if (!chain.ratioInvalid) chain.ratioInvalid = 0;
-        return Promise.resolve(chain);
+        var stat = camelcaseKeys(res.data); 
+        if (!stat.height) stat.height = 0;
+        if (!stat.txHeight) stat.txHeight = 0;
+        if (!stat.txIndex) stat.txIndex = 0;
+        if (!stat.avgTxBytes) stat.avgTxBytes  = 0;
+        if (!stat.avgTxFee) stat.avgTxFee  = 0;
+        if (!stat.avgBindingLag) stat.avgBindingLag = 0;
+        if (!stat.maxBindingLag) stat.maxBindingLag = 0;
+        if (!stat.numTxsInvalid) stat.numTxsInvalid = 0;
+        if (!stat.numTxs) stat.numTxs = 0;
+        if (!stat.ratioInvalid) stat.ratioInvalid = 0;
+        return Promise.resolve(stat);
       });
   },
 
