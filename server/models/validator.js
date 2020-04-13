@@ -27,20 +27,29 @@ async function getOne(chain_id, address) {
         val = rows[0];
         if (val['address'] == null) {
           // XXX: this is strange.
-          resolve(null);
+          return resolve(null);
         }
-        // NOTE: unfortunately, mariadb 10.4 does not support JSON_ARRAYAGG().
+        // XXX: we cannot use aggregate function such as SUM or AVG in SQL
+        // query, since the stake and delegate amount are all big integers and
+        // the DBMS does not support them. So, we need the following dirty
+        // codes.
+        eff_stake = BigInt(val['stake']);
         if (val['delegators']) {
+          // NOTE: unfortunately, mariadb 10.4 does not support JSON_ARRAYAGG().
           val['delegators'] = JSON.parse('['+val['delegators']+']');
           if (val['delegators'][0]['address'] == null) {
             val['delegators'] = []; // XXX: this is also strange.
           }
+          for (const d of val['delegators']) {
+            eff_stake += BigInt(d['amount']);
+          }
         } else {
           val['delegators'] = [];
         }
-        resolve(val);
+        val['eff_stake'] = eff_stake.toString();
+        return resolve(val);
       } else {
-        reject('not found');
+        return reject(null);
       }
     });
   });
