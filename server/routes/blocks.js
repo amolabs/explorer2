@@ -11,9 +11,9 @@ router.get('/', function(req, res) {
     var non_empty = 'non_empty' in req.query;
     var num_blks = req.query.num_blks || 0;
     stat.getBlockStat(chain_id, non_empty, num_blks)
-      .then((rows) => {
+      .then((ret) => {
         res.status(200);
-        res.send(rows);
+        res.send(ret);
       })
       .catch((err) => {
         res.status(500);

@@ -12,7 +12,8 @@ async function getBlockStat(chain_id, non_empty, num_blks) {
       limit = `LIMIT ${num_blks}`;
     }
     var query_str = "SELECT \
-        t.`chain_id`, MAX(t.`height`) last_height, \
+        t.`chain_id` AS `chain_id`, \
+        MAX(t.`height`) `last_height`, \
         COUNT(t.`chain_id`) `num_blocks`, \
         SUM(t.`num_txs`) `num_txs`, AVG(t.`num_txs`) `avg_num_txs`, \
         AVG(IFNULL(t.`blk_tx_bytes`, 0)) `avg_blk_tx_bytes`, \
@@ -39,12 +40,17 @@ async function getBlockStat(chain_id, non_empty, num_blks) {
   });
 }
 
-async function getTxStat(chain_id) {
+async function getTxStat(chain_id, num_txs) {
   return new Promise(function(resolve, reject) {
     // TODO: change fee to tx_fee in DB schema
     // TODO: change avg_fee to avg_tx_fee in field name
+    var limit = '';
+    if (num_txs) {
+      limit = `LIMIT ${num_txs}`;
+    }
     var query_str = "SELECT \
         `t`.`chain_id` AS `chain_id`, \
+        MAX(t.`height`) `tx_height`, \
         COUNT(`hash`) AS `num_txs`, \
         SUM(IF(`t`.`code` = 0, 1, 0)) AS `num_txs_valid`, \
         SUM(IF(`t`.`code` > 0, 1, 0)) AS `num_txs_invalid`, \
@@ -55,7 +61,7 @@ async function getTxStat(chain_id) {
       FROM ( \
         SELECT * FROM `explorer`.`c_txs` \
         WHERE `chain_id` = ? \
-        ORDER BY `height` DESC, `index` DESC LIMIT 1000 \
+        ORDER BY `height` DESC, `index` DESC " + limit + " \
       ) t";
     var query_var = [chain_id];
     db.query(query_str, query_var, function (err, rows, fields) {
