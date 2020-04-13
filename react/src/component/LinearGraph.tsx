@@ -39,8 +39,9 @@ const LinearGraph = (props: Props) => {
       <Grid
         item
         className={classes.progress}
-        lg={9}
+        lg={7}
         md={9}
+        sm={8}
         xs={6}
       >
         <div className={classes.title}>
@@ -54,8 +55,9 @@ const LinearGraph = (props: Props) => {
       <Grid
         item
         className={classes.value}
-        lg={3}
+        lg={5}
         md={3}
+        sm={4}
         xs={6}
       >
         {props.value}

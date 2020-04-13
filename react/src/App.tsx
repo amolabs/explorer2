@@ -113,7 +113,10 @@ function App() {
   }, [dispatch, chainId])
 
   const handleTabChange = (event: any, newValue: any) => {
-    dispatch(push(`/${chainId}${urls[newValue]}`))
+    const newPath = `${urls[newValue]}/${path.split('/').slice(3).join('/')}`
+    console.log(newPath)
+
+    dispatch(push(`/${chainId}${newPath}`))
     setTab(newValue)
   }
 
@@ -147,8 +150,8 @@ function App() {
   }, [path])
 
   const onChangeNetwork = (e: React.ChangeEvent<{ name?: string; value: unknown }>,) => {
-    const target = "/" + path.split("/")[2]
-    dispatch(push(`/${e.target.value}${target}`))
+    const newPath = `/${path.split('/').slice(2).join('/')}`
+    dispatch(push(`/${e.target.value}${newPath}`))
   }
 
   return (
@@ -216,9 +219,7 @@ function App() {
         </Tabs>
       </AppBar>
       <div style={{
-        paddingLeft: '1rem',
-        paddingRight: '1rem',
-        marginTop: '112px'
+        marginTop: '140px'
       }}>
         <div style={{
           padding: '24px',
@@ -227,18 +228,30 @@ function App() {
         }}>
           <Grid
             container
-            spacing={2}
+            justify="center"
           >
-            <Switch>
-              <Route path={`/:chainId`} exact={true} component={Blockchain}/>
-              <Route path={`/:chainId/`} exact={true} component={Blockchain}/>
-              <Route path={`/:chainId/transactions`} component={Transactions}/>
-              <Route path={`/:chainId/blocks`} component={Blocks}/>
-              <Route path={`/:chainId/inspect`} component={Inspect}/>
-              <Route path="/">
-                <Redirect to="/amo-cherryblossom-01/"/>
-              </Route>
-            </Switch>
+            <Grid
+              item
+              lg={10}
+              md={11}
+              sm={12}
+            >
+              <Grid
+                container
+                spacing={2}
+              >
+                <Switch>
+                  <Route path={`/:chainId`} exact={true} component={Blockchain}/>
+                  <Route path={`/:chainId/`} exact={true} component={Blockchain}/>
+                  <Route path={`/:chainId/transactions`} component={Transactions}/>
+                  <Route path={`/:chainId/blocks`} component={Blocks}/>
+                  <Route path={`/:chainId/inspect`} component={Inspect}/>
+                  <Route path="/">
+                    <Redirect to="/amo-cherryblossom-01/"/>
+                  </Route>
+                </Switch>
+              </Grid>
+            </Grid>
           </Grid>
         </div>
       </div>

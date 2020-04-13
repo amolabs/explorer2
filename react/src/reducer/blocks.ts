@@ -1,6 +1,6 @@
 import {Action} from "redux"
 
-const initialBlock = {
+export const initialBlock = {
   chain_id: "amo-cherryblossom-01",
   height: 1,
   time: "2020-03-31T05:00:00.000Z",

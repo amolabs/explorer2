@@ -35,8 +35,20 @@ const fetchTransactions = (chainId: string, top: number, from: number, size: num
     .get(`/chain/${chainId}/txs?top=${top}&from=${from}&num=${size}`)
 }
 
+const fetchBlock = (chainId: string, height: number): Result<BlockState> => {
+  return client
+    .get(`/chain/${chainId}/blocks/${height}`)
+}
+
+const fetchBlockTransaction = (chainId: string, height: number, from: number, size: number = 20): Result<TransactionSchema[]> => {
+  return client
+    .get(`/chain/${chainId}/blocks/${height}/txs?from=${from}&num=${size}`)
+}
+
 export default {
   fetchBlocks,
   fetchBlocksStats,
-  fetchTransactions
+  fetchTransactions,
+  fetchBlock,
+  fetchBlockTransaction
 }

@@ -92,7 +92,7 @@ function InfinityTable<T>(props: Props<T>) {
     })
   }, [])
 
-  const cellRenderer: TableCellRenderer = ({cellData, columnIndex, columnData, parent}) => {
+  const cellRenderer: TableCellRenderer = useCallback(({cellData, columnIndex, columnData, parent}) => {
     const format = columnData ? columnData['format'] : undefined
 
     return (
@@ -110,9 +110,9 @@ function InfinityTable<T>(props: Props<T>) {
         </TableCell>
       </CellMeasurer>
     )
-  }
+  }, [cache])
 
-  const collapsedCellRender: TableCellRenderer = ({rowData, parent}) => {
+  const collapsedCellRender: TableCellRenderer = useCallback(({rowData, parent}) => {
     return (
       <CellMeasurer
         cache={cache}
@@ -139,7 +139,7 @@ function InfinityTable<T>(props: Props<T>) {
         </TableCell>
       </CellMeasurer>
     )
-  }
+  }, [cache, classes])
 
   const headerRenderer = ({label}: TableHeaderProps & { columnIndex: number }) => {
     return (
@@ -260,13 +260,16 @@ export function useScrollUpdate<T>(fetcher: (size: number) => Promise<T[]>, thre
 
   const onScroll = useCallback((params: { scrollTop: number }) => {
     const height = document.documentElement.clientHeight + params.scrollTop + threshold
+    console.log(list.length, loading)
     if ((height >= document.body.scrollHeight) && loading === 'ready') {
       setLoading('fetch')
       fetcher(list.length)
         .then((data) => {
           setList([...list, ...data])
           setTimeout(() => {
-            setLoading('ready')
+            if (data.length !== 0) {
+              setLoading('ready')
+            }
           }, 400)
         })
     }

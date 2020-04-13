@@ -44,17 +44,15 @@ const useStyle = makeStyles({
   }
 })
 
-type Map = { [k: string]: any }
-
-type Column = {
+export type CollapsedTableColumn = {
   key: string,
   header?: React.ReactNode,
   format?: (v: any) => React.ReactNode
 }
 
-type Props<T extends Map> = {
+type Props<T extends StringMap> = {
   dataSource: T[],
-  columns: Column[]
+  columns: CollapsedTableColumn[]
   rowKey: keyof T
   maxHeight?: string
   pagination?: {
@@ -65,7 +63,7 @@ type Props<T extends Map> = {
   }
 }
 
-function CollapseTable<T extends Map>(props: Props<T>) {
+function CollapseTable<T extends StringMap>(props: Props<T>) {
   const classes = useStyle()
   const isMobile = useMediaQuery('(max-width: 600px)')
 

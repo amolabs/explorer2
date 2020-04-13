@@ -1,8 +1,9 @@
-import React, {createRef, MutableRefObject, PropsWithChildren, PropsWithRef, RefObject} from 'react'
+import React, {PropsWithChildren} from 'react'
 import {Grid} from "@material-ui/core"
 import {makeStyles} from "@material-ui/core/styles"
 import {Breakpoint} from "@material-ui/core/styles/createBreakpoints"
 import {GridSize} from "@material-ui/core/Grid/Grid"
+import {SvgIconComponent} from "@material-ui/icons"
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -22,7 +23,6 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: 'column'
   },
   header: {
-    textAlign: 'right',
     background: 'transparent',
     boxShadow: 'none',
     color: theme.palette.text.primary,
@@ -59,19 +59,20 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 type Props = {
-  icon: React.ReactNode
+  icon?: SvgIconComponent
   title: React.ReactNode
   suffix?: string
   color?: string
   size?: 'small' | 'medium' | 'large'
   setRef?: (instance?: HTMLDivElement) => void
+  alignLeft?: boolean
 }
 
 const cardSize: { [k: string]: Partial<Record<Breakpoint, boolean | GridSize>> } = {
   'small': {
     lg: 3,
     md: 6,
-    sm: 12,
+    sm: 6,
     xs: 12
   },
   'medium': {
@@ -97,6 +98,9 @@ const StatCard = (props: PropsWithChildren<Props>) => {
     background: `${color}`,
     color: "white"
   }
+  const textAlign = props.alignLeft ? 'left' : 'right'
+
+  const Icon = props.icon
 
   return (
     <Grid
@@ -112,11 +116,14 @@ const StatCard = (props: PropsWithChildren<Props>) => {
       }}
     >
       <div className={classes.root}>
-        <div className={classes.header}>
+        <div
+          className={classes.header}
+          style={{textAlign}}
+        >
           {
-            props.size !== 'large' && (
+            Icon && (
               <div className={classes.icon} style={iconTheme}>
-                {props.icon}
+                <Icon/>
               </div>
             )
           }

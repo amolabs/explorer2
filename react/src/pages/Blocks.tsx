@@ -2,13 +2,14 @@ import React, {useEffect, useState} from 'react'
 import {BlockState} from "../reducer/blocks"
 import {useSelector} from "react-redux"
 import {RootState, useUpdateState} from "../reducer"
-import {Grid, MenuItem, Select, Snackbar} from "@material-ui/core"
+import {Grid, Snackbar} from "@material-ui/core"
 import InfinityTable, {useScrollUpdate} from "../component/InfinityTable"
 import ExplorerAPI, {BlocksStat} from '../ExplorerAPI'
 import MuiAlert from "@material-ui/lab/Alert"
 import {Link} from "react-router-dom"
 import StatCard from "../component/StatCard"
-import {AcUnit, History, Timeline, TrendingUp, ViewModule} from "@material-ui/icons"
+import {History, Timeline, TrendingUp, ViewModule} from "@material-ui/icons"
+import SizeTitle, {LastOptions} from "../component/SizeTitle"
 
 const columns = [
   {
@@ -30,13 +31,13 @@ const columns = [
     key: 'time',
     label: 'Time',
     width: 100,
-    flexGrow: 2
+    flexGrow: 5
   },
   {
     key: 'proposer',
     label: 'Proposer',
     width: 100,
-    flexGrow: 2
+    flexGrow: 10
   },
   {
     key: 'num_txs',
@@ -50,12 +51,7 @@ type BlocksStatProps = {
   setRef: (instance?: HTMLDivElement) => void
 }
 
-const LastBlocksOptions = [
-  100, 1_000, 10_000
-]
-
 const BlocksStatView = (props: BlocksStatProps) => {
-  const [lastBlocks, setLastBlocks] = useState(100)
   const [blocksStat, setBlocksStat] = useState<BlocksStat>({
     chain_id: 'amo-cherrryblossom-01',
     last_height: 1,
@@ -67,40 +63,22 @@ const BlocksStatView = (props: BlocksStatProps) => {
   })
   const {chainId} = useUpdateState()
 
-  useEffect(() => {
+  const onSizeChange = (lastBlocks: number) => {
     ExplorerAPI
       .fetchBlocksStats(chainId, lastBlocks)
       .then(({data}) => {
         setBlocksStat(data)
       })
-  }, [lastBlocks, chainId])
-
-  const BlockTitle = () => {
-
-    const onChange = (e: React.ChangeEvent<{ name?: string, value: unknown }>) => {
-      setLastBlocks(e.target.value as number)
-    }
-
-    return (
-      <span>
-        Block stat in last
-        &nbsp;
-        <Select value={lastBlocks} onChange={onChange}>
-          {LastBlocksOptions.map((v, i) => (
-            <MenuItem value={v} key={i}>{v}</MenuItem>
-          ))}
-        </Select>
-        &nbsp;
-        blocks
-      </span>
-    )
   }
+
+  useEffect(() => {
+    onSizeChange(100)
+  }, [])
 
   return (
     <>
       <StatCard
-        icon={<AcUnit/>}
-        title={<BlockTitle/>}
+        title={<SizeTitle target="Block" values={LastOptions} onSizeChange={onSizeChange}/>}
         size="large"
         setRef={props.setRef}
       >
@@ -109,7 +87,7 @@ const BlocksStatView = (props: BlocksStatProps) => {
           spacing={2}
         >
           <StatCard
-            icon={<History/>}
+            icon={History}
             title="Average interval"
             suffix="s / blk"
             color="#FF6E4A"
@@ -117,7 +95,7 @@ const BlocksStatView = (props: BlocksStatProps) => {
             {blocksStat.avg_interval.toFixed(2)}
           </StatCard>
           <StatCard
-            icon={<TrendingUp/>}
+            icon={TrendingUp}
             title="Average incentive"
             suffix="AMO / blk"
             color="#9179F2"
@@ -125,7 +103,7 @@ const BlocksStatView = (props: BlocksStatProps) => {
             -
           </StatCard>
           <StatCard
-            icon={<Timeline/>}
+            icon={Timeline}
             title="Average # of txs"
             suffix="txs / blk"
             color="#62D96B"
@@ -133,7 +111,7 @@ const BlocksStatView = (props: BlocksStatProps) => {
             {blocksStat.avg_num_txs.toFixed(2)}
           </StatCard>
           <StatCard
-            icon={<ViewModule/>}
+            icon={ViewModule}
             title="Average tx bytes"
             suffix="B / blk"
           >

@@ -3,16 +3,29 @@ import {useSelector} from "react-redux"
 import {RootState, useUpdateState} from "../reducer"
 import {BlockchainState, TransactionSchema} from "../reducer/blockchain"
 import StatCard from "../component/StatCard"
-import {Equalizer} from "@material-ui/icons"
+import {Equalizer, HighlightOff, Speed, Timelapse} from "@material-ui/icons"
 import InfinityTable, {useScrollUpdate} from "../component/InfinityTable"
 import ExplorerAPI from "../ExplorerAPI"
+import {Grid, Snackbar} from "@material-ui/core"
+import SizeTitle, {LastOptions} from "../component/SizeTitle"
+import MuiAlert from "@material-ui/lab/Alert"
+import {Link} from "react-router-dom"
 
 const columns = [
   {
     key: 'height',
     label: 'Height',
     width: 100,
-    flexGrow: 1
+    flexGrow: 1,
+    columnData: {
+      format: (height: number) => {
+        return (
+          <Link to={`/amo-cherryblossom-01/inspect/block/${height}`}>
+            {height}
+          </Link>
+        )
+      }
+    }
   },
   {
     key: 'index',
@@ -54,32 +67,47 @@ const BlockStats = (props: TransactionStatsProps) => {
   return (
     <>
       <StatCard
-        icon={<Equalizer/>}
-        title={"Average binding lag"}
-        suffix={`blks`}
+        title={<SizeTitle target="TX" values={LastOptions} onSizeChange={() => {
+        }}/>}
+        size="large"
         setRef={props.setRef}
       >
-        {avg_binding_lag.toFixed(2)}
-      </StatCard>
-      <StatCard
-        icon={<Equalizer/>}
-        title={"Invalid Transaction ratio"}
-        suffix={`/${num_txs}`}
-      >
-        {num_txs_invalid}
-      </StatCard>
-      <StatCard
-        icon={<Equalizer/>}
-        title={"Average Tx bytes"}
-        suffix={`B`}>
-        {0}
-      </StatCard>
-      <StatCard
-        icon={<Equalizer/>}
-        title={"Average fee"}
-        suffix={`/ tx`}
-      >
-        {0}
+        <Grid
+          container
+          spacing={2}
+        >
+          <StatCard
+            icon={Speed}
+            title={"Average binding lag"}
+            suffix={`blks`}
+            color="#FF6E4A"
+          >
+            {avg_binding_lag.toFixed(2)}
+          </StatCard>
+          <StatCard
+            icon={HighlightOff}
+            title={"Invalid Transaction ratio"}
+            suffix={`/${num_txs}`}
+            color="#9179F2"
+          >
+            {num_txs_invalid}
+          </StatCard>
+          <StatCard
+            icon={Timelapse}
+            title={"Average Tx bytes"}
+            suffix={`B`}
+            color="#62D96B"
+          >
+            {0}
+          </StatCard>
+          <StatCard
+            icon={Equalizer}
+            title={"Average fee"}
+            suffix={`/ tx`}
+          >
+            {0}
+          </StatCard>
+        </Grid>
       </StatCard>
     </>
   )
@@ -89,11 +117,15 @@ const Transactions = () => {
   const [ref, setRef] = useState<HTMLDivElement | undefined>(undefined)
 
   const {chainId, updated} = useUpdateState()
-  const totalTransactionSize = useSelector<RootState, number>(state => state.blockchain.blockState.num_txs)
+  const height = useSelector<RootState, number>(state => state.blockchain.height)
 
   const [list, setList, loading, setLoading, onScroll] = useScrollUpdate<TransactionSchema>(async (size: number) => {
     const {data} = await ExplorerAPI
-      .fetchTransactions(chainId, totalTransactionSize, size)
+      .fetchTransactions(chainId, height, size)
+
+    if (data.length === 0) {
+      setLoading('done')
+    }
 
     return data
   }, 200 + (ref ? ref.clientHeight : 0))
@@ -101,9 +133,12 @@ const Transactions = () => {
   useEffect(() => {
     if (updated) {
       ExplorerAPI
-        .fetchTransactions(chainId, totalTransactionSize, 0)
+        .fetchTransactions(chainId, height, 0)
         .then(({data}) => {
           setList(data)
+          window.scrollTo({
+            top: 0
+          })
         })
     }
   }, [updated])
@@ -117,6 +152,14 @@ const Transactions = () => {
         rowKey="hash"
         data={list}
       />
+      <Snackbar
+        open={loading === 'fetch'}
+        anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
+      >
+        <MuiAlert elevation={6} variant="filled" severity="info">
+          Loading...
+        </MuiAlert>
+      </Snackbar>
     </>
   )
 }

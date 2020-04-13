@@ -124,13 +124,13 @@ const Blockchain = () => {
   return (
     <>
       <StatCard
-        icon={<ViewHeadline/>}
+        icon={ViewHeadline}
         title="Block height"
       >
         {blockState.height}
       </StatCard>
       <StatCard
-        icon={<History/>}
+        icon={History}
         title="Average interval"
         suffix='s'
         color='#FF6E4A'
@@ -138,14 +138,14 @@ const Blockchain = () => {
         {blockState.avg_interval.toPrecision(3)}
       </StatCard>
       <StatCard
-        icon={<Timeline/>}
+        icon={Timeline}
         title="Number of Transaction"
         color='#62D96B'
       >
         {blockState.num_txs}
       </StatCard>
       <StatCard
-        icon={<Receipt/>}
+        icon={Receipt}
         title="Transaction per Block"
         suffix='/blk'
         color='#FFC940'
@@ -153,7 +153,7 @@ const Blockchain = () => {
         {(blockState.num_txs / blockState.height).toPrecision(3)}
       </StatCard>
       <StatCard
-        icon={<AccountBalance/>}
+        icon={AccountBalance}
         title="Validators"
         size='medium'
         color='#634DBF'
@@ -161,7 +161,7 @@ const Blockchain = () => {
         <ValidatorStats/>
       </StatCard>
       <StatCard
-        icon={<AccountBalanceWallet/>}
+        icon={AccountBalanceWallet}
         title="Coins and Stakes"
         size='medium'
         color='#F55656'
@@ -169,7 +169,7 @@ const Blockchain = () => {
         <CoinStats/>
       </StatCard>
       <StatCard
-        icon={<ViewCarousel/>}
+        icon={ViewCarousel}
         title="Last blocks"
         size='large'
       >
