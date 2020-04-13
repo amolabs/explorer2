@@ -7,7 +7,7 @@ from datetime import timezone
 from dateutil.parser import parse as dateparse
 import hashlib
 
-import state
+import tx
 
 class Block:
     """form a block"""
@@ -141,7 +141,7 @@ class Tx:
         if self.code is not 0:
             #print('tx code is non-zero (invalid)')
             return
-        state.processor.get(self.type, state.unknown)(self, cursor)
+        tx.processor.get(self.type, tx.unknown)(self, cursor)
 
     """Save to DB
 

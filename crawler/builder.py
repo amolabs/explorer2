@@ -6,8 +6,8 @@ import base64
 from hashlib import sha256
 
 import amo
-import state
 import stats
+import models
 
 class Builder:
     def __init__(self, chain_id, db):
@@ -132,7 +132,7 @@ class Builder:
         if row:
             genesis = json.loads(row[0])['app_state']
             for item in genesis['balances']:
-                acc = state.Account(self.chain_id, item['owner'], cur)
+                acc = models.Account(self.chain_id, item['owner'], cur)
                 acc.balance = int(item['amount'])
                 asset_stat.active_coins += int(item['amount'])
                 acc.save(cur)
@@ -193,7 +193,7 @@ class Builder:
         if row:
             incentives = json.loads(row[0])
             for inc in incentives:
-                recp = state.Account(self.chain_id, inc['address'], cursor)
+                recp = models.Account(self.chain_id, inc['address'], cursor)
                 recp.balance += int(inc['amount'])
                 asset_stat.active_coins += int(inc['amount'])
                 recp.save(cursor)
