@@ -73,9 +73,6 @@ const tabList = [
   'blocks',
   'transaction',
   'validators',
-  'governance',
-  'storages',
-  'parcels'
 ]
 
 const supportedNetworks = [
@@ -121,7 +118,7 @@ function App() {
   }
 
   useEffect(() => {
-    const [_, chainId, page] = path.split("/")
+    const [, chainId, page] = path.split("/")
 
     if (!networkMap[chainId]) {
       dispatch(replace(`/${supportedNetworks[0]}`))
@@ -136,7 +133,7 @@ function App() {
       }
     }
 
-    if (i == urls.length) {
+    if (i === urls.length) {
       dispatch(replace(`/${supportedNetworks[0]}`))
       return
     }
@@ -147,7 +144,7 @@ function App() {
     })
 
     setTab(i)
-  }, [path])
+  }, [path, dispatch])
 
   const onChangeNetwork = (e: React.ChangeEvent<{ name?: string; value: unknown }>,) => {
     const newPath = `/${path.split('/').slice(2).join('/')}`

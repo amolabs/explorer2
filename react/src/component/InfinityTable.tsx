@@ -13,6 +13,7 @@ import {
 import {makeStyles} from "@material-ui/styles"
 import {Grid, TableCell, useMediaQuery} from "@material-ui/core"
 import clsx from "clsx"
+import {useUpdateState} from "../reducer"
 
 const useInfinityScrollStyle = makeStyles(() => ({
   wrapper: {
@@ -69,7 +70,7 @@ type Column = {
   width: number
   flexGrow?: number
   columnData?: {
-    format?: (v: any) => React.ReactNode
+    format?: (v: any, chainId: string) => React.ReactNode
   }
 }
 
@@ -85,6 +86,8 @@ function InfinityTable<T>(props: Props<T>) {
 
   const breakMD = useMediaQuery('(max-width: 960px)')
   const [recentWidth, setRecentWidth] = useState<number | undefined>(undefined)
+  const {chainId} = useUpdateState()
+
   const cache = useMemo(() => {
     return new CellMeasurerCache({
       fixedWidth: true,
@@ -106,11 +109,11 @@ function InfinityTable<T>(props: Props<T>) {
           className={clsx(classes.tableCell, classes.flexContainer)}
           style={{height: `60px`}}
         >
-          {format ? format(cellData) : cellData}
+          {format ? format(cellData, chainId) : cellData}
         </TableCell>
       </CellMeasurer>
     )
-  }, [cache])
+  }, [cache, chainId, classes])
 
   const collapsedCellRender: TableCellRenderer = useCallback(({rowData, parent}) => {
     return (
@@ -139,7 +142,7 @@ function InfinityTable<T>(props: Props<T>) {
         </TableCell>
       </CellMeasurer>
     )
-  }, [cache, classes])
+  }, [cache, classes, props.columns])
 
   const headerRenderer = ({label}: TableHeaderProps & { columnIndex: number }) => {
     return (
@@ -273,7 +276,7 @@ export function useScrollUpdate<T>(fetcher: (size: number) => Promise<T[]>, thre
           }, 400)
         })
     }
-  }, [list, loading, threshold])
+  }, [list, loading, threshold, fetcher])
 
   return [list, setList, loading, setLoading, onScroll]
 }

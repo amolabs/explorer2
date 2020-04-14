@@ -14,6 +14,7 @@ import {
   useMediaQuery
 } from "@material-ui/core"
 import {makeStyles} from "@material-ui/core/styles"
+import {useUpdateState} from "../reducer"
 
 const useStyle = makeStyles({
   mobileTableCell: {
@@ -47,7 +48,7 @@ const useStyle = makeStyles({
 export type CollapsedTableColumn = {
   key: string,
   header?: React.ReactNode,
-  format?: (v: any) => React.ReactNode
+  format?: (v: any, chainId: string) => React.ReactNode
 }
 
 type Props<T extends StringMap> = {
@@ -66,6 +67,7 @@ type Props<T extends StringMap> = {
 function CollapseTable<T extends StringMap>(props: Props<T>) {
   const classes = useStyle()
   const isMobile = useMediaQuery('(max-width: 600px)')
+  const {chainId} = useUpdateState()
 
   const {
     dataSource,
@@ -125,7 +127,7 @@ function CollapseTable<T extends StringMap>(props: Props<T>) {
                   >
                     <TableRow className={isMobile ? classes.mobileTableRow : ''}>
                       {columns.map((c) => {
-                        const value = c.format ? c.format(v[c.key]) : v[c.key]
+                        const value = c.format ? c.format(v[c.key], chainId) : v[c.key]
 
                         return (
                           <TableCell key={c.key} align="center" className={isMobile ? classes.mobileTableCell : ''}>

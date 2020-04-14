@@ -6,6 +6,7 @@ import ExplorerAPI from "../../ExplorerAPI"
 import InformationCard from "../../component/InformationCard"
 import CollapseTable from "../../component/CollapseTable"
 import {TransactionSchema} from "../../reducer/blockchain"
+import moment from 'moment'
 
 const columns = [
   {
@@ -22,7 +23,10 @@ const columns = [
   },
   {
     key: 'time',
-    header: 'Time'
+    header: 'Time',
+    format: (time: string) => {
+      return `${moment(time).fromNow()} (${time})`
+    }
   },
   {
     key: 'num_txs',

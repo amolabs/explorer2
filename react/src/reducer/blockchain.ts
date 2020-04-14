@@ -25,18 +25,18 @@ const initialBlockState = {
   validatorStats: [graphState, graphState, graphState]
 }
 
-const initialTransactions = {
+export const initialTransactions = {
   chain_id: "amo-cherryblossom-01",
-  height: 75318,
-  index: 3,
-  hash: "B8A5B386D7551BC59570D1484B13EC9D37ABDEEE4F90AC77E942B79F0C16850A",
+  height: 1,
+  index: 0,
+  hash: "",
   code: 0,
   info: "ok",
-  type: "register",
-  sender: "D6F449D721048052E771164A12BE618AC1282F44",
+  type: "transfer",
+  sender: "",
   fee: 0,
   payload: "{}",
-  last_height: 75316,
+  last_height: 0,
 }
 
 const initialState = {

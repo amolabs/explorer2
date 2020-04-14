@@ -45,10 +45,16 @@ const fetchBlockTransaction = (chainId: string, height: number, from: number, si
     .get(`/chain/${chainId}/blocks/${height}/txs?from=${from}&num=${size}`)
 }
 
+const fetchTransaction = (chainId: string, hash: string): Result<TransactionSchema[]> => {
+  return client
+    .get(`/chain/${chainId}/txs/${hash}`)
+}
+
 export default {
   fetchBlocks,
   fetchBlocksStats,
   fetchTransactions,
   fetchBlock,
-  fetchBlockTransaction
+  fetchBlockTransaction,
+  fetchTransaction
 }

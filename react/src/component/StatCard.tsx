@@ -1,5 +1,5 @@
 import React, {PropsWithChildren} from 'react'
-import {Grid} from "@material-ui/core"
+import {Divider, Grid} from "@material-ui/core"
 import {makeStyles} from "@material-ui/core/styles"
 import {Breakpoint} from "@material-ui/core/styles/createBreakpoints"
 import {GridSize} from "@material-ui/core/Grid/Grid"
@@ -17,8 +17,8 @@ const useStyles = makeStyles((theme) => ({
     wordWrap: 'break-word',
     background: theme.palette.background.paper,
     boxShadow: '0 1px 4px 0 rgba(0, 0, 0, 0.14)',
-    marginTop: theme.spacing(2),
-    marginBottom: theme.spacing(2),
+    marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(1),
     borderRadius: '6px',
     flexDirection: 'column'
   },
@@ -60,12 +60,14 @@ const useStyles = makeStyles((theme) => ({
 
 type Props = {
   icon?: SvgIconComponent
-  title: React.ReactNode
+  title?: React.ReactNode
   suffix?: string
   color?: string
   size?: 'small' | 'medium' | 'large'
   setRef?: (instance?: HTMLDivElement) => void
-  alignLeft?: boolean
+  titleAlign?: 'left' | 'right' | 'center',
+  bodyAlign?: 'left' | 'right' | 'center'
+  divider?: boolean
 }
 
 const cardSize: { [k: string]: Partial<Record<Breakpoint, boolean | GridSize>> } = {
@@ -98,9 +100,14 @@ const StatCard = (props: PropsWithChildren<Props>) => {
     background: `${color}`,
     color: "white"
   }
-  const textAlign = props.alignLeft ? 'left' : 'right'
 
-  const Icon = props.icon
+  const {
+    icon: Icon,
+    titleAlign,
+    bodyAlign,
+    divider,
+    title
+  } = props
 
   return (
     <Grid
@@ -118,7 +125,6 @@ const StatCard = (props: PropsWithChildren<Props>) => {
       <div className={classes.root}>
         <div
           className={classes.header}
-          style={{textAlign}}
         >
           {
             Icon && (
@@ -127,12 +133,22 @@ const StatCard = (props: PropsWithChildren<Props>) => {
               </div>
             )
           }
-          <p className={classes.title} style={{
-            fontSize: size === 'small' ? '14px' : '26px'
-          }}>
-            {props.title}
-          </p>
-          <h1 className={classes.stat}>
+          {
+            title && (
+              <p className={classes.title} style={{
+                fontSize: size === 'small' ? '14px' : '26px',
+                textAlign: titleAlign || 'right'
+              }}>
+                {props.title}
+              </p>
+            )
+          }
+          {
+            divider && (
+              <Divider style={{marginTop: '5px'}}/>
+            )
+          }
+          <h1 className={classes.stat} style={{textAlign: bodyAlign || 'right'}}>
             {props.children}
             {props.suffix && <small>&nbsp;{props.suffix}</small>}
           </h1>

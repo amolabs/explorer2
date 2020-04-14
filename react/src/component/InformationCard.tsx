@@ -2,6 +2,7 @@ import React from 'react'
 import StatCard from "./StatCard"
 import {CollapsedTableColumn} from "./CollapseTable"
 import {makeStyles, Theme} from "@material-ui/core/styles"
+import {useUpdateState} from "../reducer"
 
 const useStyle = makeStyles((theme: Theme) => ({
   wrapper: {
@@ -9,10 +10,14 @@ const useStyle = makeStyles((theme: Theme) => ({
     alignItems: 'flex-start',
     marginBottom: '10px',
     fontSize: '14px',
-    wordBreak: 'break-all'
+    wordBreak: 'break-all',
+    [theme.breakpoints.down('lg')]: {
+      flexDirection: 'column'
+    }
   },
   header: {
-    width: '240px'
+    width: '240px',
+    fontWeight: 600
   },
   body: {
     flex: '1 1 auto'
@@ -20,32 +25,37 @@ const useStyle = makeStyles((theme: Theme) => ({
 }))
 
 type InformationCardProps<T extends StringMap> = {
-  title: React.ReactNode,
+  title?: React.ReactNode,
+  divider?: boolean
   columns: CollapsedTableColumn[],
   data: T
 }
 
 const InformationCard = function <T extends StringMap>(props: InformationCardProps<T>) {
   const classes = useStyle()
+  const {chainId} = useUpdateState()
 
   const {
     title,
     columns,
-    data
+    data,
+    divider
   } = props
 
   return (
     <StatCard
       title={title}
       size="large"
-      alignLeft
+      titleAlign="left"
+      bodyAlign="left"
+      divider={divider}
     >
       {
         columns.map((c, i) => {
-          const value = c.format ? c.format(data[c.key]) : data[c.key]
+          const value = c.format ? c.format(data[c.key], chainId) : data[c.key]
 
           return (
-            <div className={classes.wrapper}>
+            <div className={classes.wrapper} key={c.key}>
               <div className={classes.header}>
                 {c.header}
               </div>

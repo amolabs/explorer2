@@ -18,9 +18,9 @@ const columns = [
     width: 100,
     flexGrow: 1,
     columnData: {
-      format: (height: number) => {
+      format: (height: number, chainId: string) => {
         return (
-          <Link to={`/amo-cherryblossom-01/inspect/block/${height}`}>
+          <Link to={`/${chainId}/inspect/block/${height}`}>
             {height}
           </Link>
         )
@@ -73,6 +73,7 @@ const BlocksStatView = (props: BlocksStatProps) => {
 
   useEffect(() => {
     onSizeChange(100)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
@@ -154,6 +155,7 @@ const Blocks = () => {
           })
         })
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [updated])
 
   return (

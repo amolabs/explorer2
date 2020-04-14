@@ -18,9 +18,9 @@ const columns = [
     width: 100,
     flexGrow: 1,
     columnData: {
-      format: (height: number) => {
+      format: (height: number, chainId: string) => {
         return (
-          <Link to={`/amo-cherryblossom-01/inspect/block/${height}`}>
+          <Link to={`/${chainId}/inspect/block/${height}`}>
             {height}
           </Link>
         )
@@ -37,13 +37,22 @@ const columns = [
     key: 'hash',
     label: 'Hash',
     width: 100,
-    flexGrow: 3
+    flexGrow: 10,
+    columnData: {
+      format: (hash: string, chainId: string) => {
+        return (
+          <Link to={`/${chainId}/inspect/tx/${hash}`}>
+            {hash}
+          </Link>
+        )
+      }
+    }
   },
   {
     key: 'sender',
     label: 'Sender',
     width: 100,
-    flexGrow: 2
+    flexGrow: 5
   },
   {
     key: 'type',
@@ -141,6 +150,7 @@ const Transactions = () => {
           })
         })
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [updated])
 
   return (
