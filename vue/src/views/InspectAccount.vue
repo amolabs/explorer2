@@ -21,7 +21,7 @@
                     <span> AMO balance </span>
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span> {{this.$amoHuman(this.account.balance)}} AMO</span>
+                    <span> {{this.$amoLong(this.account.balance)}} AMO</span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -31,7 +31,7 @@
                     <span> Stake </span>
                   </v-col>
                   <v-col cols="12" md="10" class="py-0 px-lg-12 text-left subtitle-2">
-                    <span> {{ this.$amoHuman(this.account.stake)}} AMO for validator <br/>
+                    <span> {{ this.$amoLong(this.account.stake)}} AMO for validator <br/>
                       <router-link :to="{name: 'InspectValidator', params: { address: this.account.valAddr}}">{{ this.account.valAddr }}
                       </router-link>
                     </span>
@@ -44,7 +44,7 @@
                     <span> Delegate </span>
                   </v-col>
                   <v-col cols="12" md="10" class="py-0 px-lg-12 text-left subtitle-2">
-                    <span> {{this.$amoHuman(this.account.delegate)}} AMO for account <br/>
+                    <span> {{this.$amoLong(this.account.delegate)}} AMO for account <br/>
                       <router-link :to="{name: 'InspectAccount', params: { address: this.account.delAddr}}">{{ this.account.delAddr }}
                       </router-link>
                     </span>

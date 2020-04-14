@@ -33,26 +33,24 @@
               </v-col>
               <v-col cols="12" md="6">
                 <v-row align="start">
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
+                  <v-col cols="12" md="5" class="py-0 px-lg-12 text-left">
                     <span> Total effective stakes </span>
                   </v-col>
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                  <v-col cols="12" md="7" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <!--span> {{ this.$amoHuman(this.validatorStat.totalEffStakes) }} AMO </span-->
-                      <span> - AMO </span>
+                      <span> {{ this.$amoLong(this.validatorStat.totalEffStakes) }} AMO </span>
                     </div>
                   </v-col>
                 </v-row>
               </v-col>
               <v-col cols="12" md="6">
                 <v-row align="start">
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-left">
-                    <span> Average effective stake </span>
+                  <v-col cols="12" md="5" class="py-0 px-lg-12 text-left">
+                    <span> Average effective stake per validator</span>
                   </v-col>
-                  <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
+                  <v-col cols="12" md="7" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <!--span> {{ this.$amoHuman(this.validatorStat.avgEffStake) }} AMO / validators </span-->
-                      <span> - AMO / validators </span>
+                      <span> {{ this.$amoLong(this.validatorStat.avgEffStake) }} AMO </span>
                     </div>
                   </v-col>
                 </v-row>
@@ -81,7 +79,7 @@
                              :to="{ path: '/inspect/validator/' + item.valAddr, params : {address: item.valAddr } }">{{ item.valAddr }}</router-link>
               </template>
               <template #effStake="{item}">
-                <span> {{ $amoHuman(item.effStake) }}  AMO</span>
+                <span> {{ $amoShort(item.effStake) }}  AMO</span>
               </template>
               <template #valPower="{item}">
                 <span>{{ Number(item.valPower).toPrecision(5) }} </span>

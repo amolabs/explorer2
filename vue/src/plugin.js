@@ -16,7 +16,17 @@ globalMethods.install = function (Vue, options) {
     return Number(data.toFixed(2)).toLocaleString() + ' ' +  units[idx];
   };
 
-  Vue.prototype.$amoHuman = (param) => {
+  Vue.prototype.$amoLong = (param) => {
+    let data = param;
+    if (data === undefined) {
+      data = 0;
+    }
+    data /= 1000000000000000000; // mote to amo
+
+    return Number(data.toFixed(2)).toLocaleString();
+  };
+
+  Vue.prototype.$amoShort = (param) => {
     //console.log('byte calc', param);
     let data = param;
     if (data === undefined) {

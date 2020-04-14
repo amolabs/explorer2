@@ -42,7 +42,7 @@
                     <span> Effective stake </span>
                   </v-col>
                   <v-col cols="12" md="8" sm="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span> {{ this.$amoHuman(this.validator.effStake) }} AMO </span>
+                    <span> {{ this.$amoLong(this.validator.effStake) }} AMO </span>
                   </v-col>
                 </v-row>
               </v-col>
@@ -91,7 +91,7 @@
                              :to="{ path: '/inspect/account/' + item.address, params : {hash: item.address} }">{{ item.address }}</router-link>
               </template>
               <template #delegate="{item}">
-                <span> {{ $amoHuman(item.delegate) }} AMO</span>
+                <span> {{ $amoShort(item.delegate) }} AMO</span>
               </template>
             </c-scroll-table>
           </c-card>

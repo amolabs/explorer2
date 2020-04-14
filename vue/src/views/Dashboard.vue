@@ -52,7 +52,7 @@
                     </div>
                     <div >
                       <span> transaction fee : </span>
-                      <span class="ml-3">  {{ this.$amoHuman(this.networkOverview.avgTxFee) }} AMO</span>
+                      <span class="ml-3">  {{ this.$amoLong(this.networkOverview.avgTxFee) }} AMO</span>
                     </div>
                   </v-col>
                 </v-row>
@@ -81,7 +81,7 @@
                 </c-progress-line>
               </v-col>
               <v-col cols="4" class="pl-0 py-0">
-                <router-link :to="{path: '/validators'}"> {{this.$amoHuman(this.validators.effStakes)}} AMO (100%)</router-link>
+                <router-link :to="{path: '/validators'}"> {{this.$amoShort(this.validators.effStakes)}} AMO (100%)</router-link>
                 <span>
                   <!-- TODO 증감표시가 필요한 모든 영역에는 v-icon 태그 적용이 필요-->
                   <v-icon small> {{this.validators.effStakes_change}}</v-icon>
@@ -98,7 +98,7 @@
                 </c-progress-line>
               </v-col>
               <v-col cols="4" class="pl-0 py-0">
-                <router-link :to="{path: '/validators'}">{{this.$amoHuman(this.validators.stakeOnline)}} AMO ({{this.validators.stakeOnline_ratio.toFixed(2)}}%)</router-link>
+                <router-link :to="{path: '/validators'}">{{this.$amoShort(this.validators.stakeOnline)}} AMO ({{this.validators.stakeOnline_ratio.toFixed(2)}}%)</router-link>
               </v-col>
               <v-col cols="8" class="pl-lg-12 py-0">
                 <c-progress-line
@@ -112,7 +112,7 @@
               </v-col>
               <v-col cols="4" class="pl-0 py-0">
                 <router-link :to="{path:'/validators'}">
-                  {{this.$amoHuman(this.validators.stakeOffline)}} AMO ({{this.validators.stakeOffline_ratio.toFixed(2)}}%)</router-link>
+                  {{this.$amoShort(this.validators.stakeOffline)}} AMO ({{this.validators.stakeOffline_ratio.toFixed(2)}}%)</router-link>
               </v-col>
             </v-row>
           </c-card>
@@ -133,7 +133,7 @@
                 </c-progress-line>
               </v-col>
               <v-col cols="4" class="pl-0 py-0">
-                <span> {{this.$amoHuman(this.coinsAndStakes.coinTotal)}} AMO (100%)</span>
+                <span> {{this.$amoShort(this.coinsAndStakes.coinTotal)}} AMO (100%)</span>
                 <span>
                   <!-- arrow_upward / arrow_downward-->
                   <!--<v-icon>remove</v-icon>-->
@@ -150,7 +150,7 @@
                 </c-progress-line>
               </v-col>
               <v-col cols="4" class="pl-0 py-0">
-                <span>  {{this.$amoHuman(this.coinsAndStakes.stakes)}} AMO ({{this.coinsAndStakes.stakes_percentage.toFixed(2)}}%)</span>
+                <span>  {{this.$amoShort(this.coinsAndStakes.stakes)}} AMO ({{this.coinsAndStakes.stakes_percentage.toFixed(2)}}%)</span>
               </v-col>
               <v-col cols="8" class="pl-lg-12 py-0">
                 <c-progress-line
@@ -163,7 +163,7 @@
                 </c-progress-line>
               </v-col>
               <v-col cols="4" class="pl-0 py-0">
-                <span> {{this.$amoHuman(this.coinsAndStakes.delegates)}} AMO ({{this.coinsAndStakes.delegates_percentage.toFixed(2)}}%)</span>
+                <span> {{this.$amoShort(this.coinsAndStakes.delegates)}} AMO ({{this.coinsAndStakes.delegates_percentage.toFixed(2)}}%)</span>
               </v-col>
             </v-row>
           </c-card>
@@ -252,7 +252,7 @@
                     <span>Trade value in 1 month</span>
                   </v-col>
                   <v-col class="py-0 px-lg-12 text-left subtitle-2 mobile-content" cols="12" sm="6">
-                    <!--span> {{ this.$amoHuman(this.dataTradeOverview.value19) }}  AMO </span-->
+                    <!--span> {{ this.$amoShort(this.dataTradeOverview.value19) }}  AMO </span-->
                     <span> -  AMO </span>
                   </v-col>
                 </v-row>

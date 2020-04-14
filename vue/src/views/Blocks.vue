@@ -40,7 +40,7 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <!--span> {{ this.$amoHuman(this.blockStat.avgIncentive)  }} AMO / blk</span-->
+                      <!--span> {{ this.$amoLong(this.blockStat.avgIncentive)  }} AMO / blk</span-->
                       <span> - AMO / blk</span>
                     </div>
                   </v-col>

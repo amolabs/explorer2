@@ -51,7 +51,7 @@
                     <span> fee </span>
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
-                    <span> {{this.$amoHuman(this.tx.fee)}} AMO </span>
+                    <span> {{this.$amoLong(this.tx.fee)}} AMO </span>
                   </v-col>
                 </v-row>
               </v-col>
