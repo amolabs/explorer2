@@ -19,7 +19,14 @@ const columns = [
   },
   {
     key: 'proposer',
-    header: 'Proposer'
+    header: 'Proposer',
+    format: (validator: string, chainId: string) => {
+      return (
+        <Link to={`/${chainId}/inspect/validator/${validator}`}>
+          {validator}
+        </Link>
+      )
+    }
   },
   {
     key: 'time',
@@ -56,7 +63,14 @@ const transactionColumns = [
   },
   {
     key: 'sender',
-    header: 'Sender'
+    header: 'Sender',
+    format: (sender: string, chainId: string) => {
+      return (
+        <Link to={`/${chainId}/inspect/account/${sender}`}>
+          {sender}
+        </Link>
+      )
+    }
   },
   {
     key: 'type',
@@ -102,6 +116,7 @@ const Block = () => {
         dataSource={transactions}
         columns={transactionColumns}
         rowKey='hash'
+        fallbackText="There is no transaction in block"
       />
     </>
   )

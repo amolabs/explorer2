@@ -20,5 +20,5 @@ export function AMO(mote: number) {
 
 export function ActualAMO(mote: number) {
   const [amo, idx] = convert(mote)
-  return `${Number(amo).toLocaleString()}${UNITS[idx]} AMO`
+  return `${Number(amo).toFixed(18)}${UNITS[idx]} AMO`
 }

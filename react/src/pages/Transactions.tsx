@@ -6,9 +6,8 @@ import StatCard from "../component/StatCard"
 import {Equalizer, HighlightOff, Speed, Timelapse} from "@material-ui/icons"
 import InfinityTable, {useScrollUpdate} from "../component/InfinityTable"
 import ExplorerAPI from "../ExplorerAPI"
-import {Grid, Snackbar} from "@material-ui/core"
+import {Grid} from "@material-ui/core"
 import SizeTitle, {LastOptions} from "../component/SizeTitle"
-import MuiAlert from "@material-ui/lab/Alert"
 import {Link} from "react-router-dom"
 
 const columns = [
@@ -52,7 +51,16 @@ const columns = [
     key: 'sender',
     label: 'Sender',
     width: 100,
-    flexGrow: 5
+    flexGrow: 5,
+    columnData: {
+      format: (sender: string, chainId: string) => {
+        return (
+          <Link to={`/${chainId}/inspect/account/${sender}`}>
+            {sender}
+          </Link>
+        )
+      }
+    }
   },
   {
     key: 'type',
@@ -76,7 +84,7 @@ const BlockStats = (props: TransactionStatsProps) => {
   return (
     <>
       <StatCard
-        title={<SizeTitle target="TX" values={LastOptions} onSizeChange={() => {
+        title={<SizeTitle target="Tx" values={LastOptions} onSizeChange={() => {
         }}/>}
         size="large"
         setRef={props.setRef}
@@ -161,15 +169,8 @@ const Transactions = () => {
         columns={columns}
         rowKey="hash"
         data={list}
+        loading={loading}
       />
-      <Snackbar
-        open={loading === 'fetch'}
-        anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
-      >
-        <MuiAlert elevation={6} variant="filled" severity="info">
-          Loading...
-        </MuiAlert>
-      </Snackbar>
     </>
   )
 }

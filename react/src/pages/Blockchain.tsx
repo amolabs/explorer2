@@ -21,9 +21,9 @@ import {Link} from "react-router-dom"
 const columns = [
   {
     key: 'height',
-    format: (height: number) => {
+    format: (height: number, chainId: string) => {
       return (
-        <Link to={`/amo-cherryblossom-01/inspect/block/${height}`}>
+        <Link to={`/${chainId}/inspect/block/${height}`}>
           {height}
         </Link>
       )
@@ -38,6 +38,13 @@ const columns = [
   },
   {
     key: 'proposer',
+    format: (validator: string, chainId: string) => {
+      return (
+        <Link to={`/${chainId}/inspect/validator/${validator}`}>
+          {validator}
+        </Link>
+      )
+    }
   },
   {
     key: 'time',
@@ -64,6 +71,7 @@ const RecentBlocks = () => {
       dataSource={blocks}
       columns={columns}
       rowKey='height'
+      fallbackText="Ready"
     />
   )
 }

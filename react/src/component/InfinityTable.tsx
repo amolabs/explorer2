@@ -11,11 +11,11 @@ import {
   WindowScroller
 } from "react-virtualized"
 import {makeStyles} from "@material-ui/styles"
-import {Grid, TableCell, useMediaQuery} from "@material-ui/core"
+import {Backdrop, CircularProgress, Grid, Paper, TableCell, Theme, useMediaQuery} from "@material-ui/core"
 import clsx from "clsx"
 import {useUpdateState} from "../reducer"
 
-const useInfinityScrollStyle = makeStyles(() => ({
+const useInfinityScrollStyle = makeStyles((theme: Theme) => ({
   wrapper: {
     flex: '1 1 auto'
   },
@@ -59,9 +59,24 @@ const useInfinityScrollStyle = makeStyles(() => ({
   },
   table: {
     '& .ReactVirtualized__Table__row, & .ReactVirtualized__Table__headerRow': {
-      display: 'flex'
+      display: 'flex',
+    },
+    '& .ReactVirtualized__Table__headerRow': {
+      fontWeight: 500,
+      background: '#fafafa'
     }
-  }
+  },
+  loading: {
+    display: 'flex',
+    flex: '1 1 auto',
+    height: '300px',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  backdrop: {
+    zIndex: theme.zIndex.drawer + 1,
+    color: '#fff',
+  },
 }))
 
 type Column = {
@@ -78,7 +93,8 @@ interface Props<T> {
   onScroll: (params: { scrollLeft: number, scrollTop: number }) => void
   columns: Column[]
   rowKey: string
-  data: T[]
+  data: T[],
+  loading: Loading
 }
 
 function InfinityTable<T>(props: Props<T>) {
@@ -115,9 +131,7 @@ function InfinityTable<T>(props: Props<T>) {
     )
   }, [cache, chainId, classes])
 
-  const collapsedCellRender: TableCellRenderer = useCallback(({rowData, parent, columnData}) => {
-    const format = columnData ? columnData['format'] : undefined
-
+  const collapsedCellRender: TableCellRenderer = useCallback(({rowData, parent}) => {
     return (
       <CellMeasurer
         cache={cache}
@@ -144,7 +158,7 @@ function InfinityTable<T>(props: Props<T>) {
         </TableCell>
       </CellMeasurer>
     )
-  }, [cache, classes, props.columns])
+  }, [cache, chainId, classes, props.columns])
 
   const headerRenderer = ({label}: TableHeaderProps & { columnIndex: number }) => {
     return (
@@ -171,80 +185,92 @@ function InfinityTable<T>(props: Props<T>) {
       sm={12}
       xs={12}
     >
-      <WindowScroller
-        scrollElement={window}
-        onScroll={props.onScroll}
-      >
-        {({height, isScrolling, registerChild, onChildScroll, scrollTop}) => (
-          <div className={classes.wrapper}>
-            <AutoSizer disableHeight>
-              {({width}) => {
-                if (width !== recentWidth) {
-                  // FIXME Do not use setState in this scope
-                  // This logic prevents wrong rendering after width of window changed
-                  // https://codesandbox.io/s/qlqkx2mrz4?file=/window-scroller.js:725-959
-                  setRecentWidth(width)
-                  cache.clearAll()
-                }
+      <Paper elevation={6}>
+        <WindowScroller
+          scrollElement={window}
+          onScroll={props.onScroll}
+        >
+          {({height, isScrolling, registerChild, onChildScroll, scrollTop}) => (
+            <div className={classes.wrapper}>
+              <AutoSizer disableHeight>
+                {({width}) => {
+                  if (width !== recentWidth) {
+                    // FIXME Do not use setState in this scope
+                    // This logic prevents wrong rendering after width of window changed
+                    // https://codesandbox.io/s/qlqkx2mrz4?file=/window-scroller.js:725-959
+                    setRecentWidth(width)
+                    cache.clearAll()
+                  }
 
-                return (
-                  <div
-                    ref={registerChild}
-                  >
-                    <Table
-                      autoHeight
-                      height={height}
-                      rowCount={props.data.length}
-                      rowHeight={breakMD ? 150 : 60}
-                      headerHeight={breakMD ? 0 : 50}
-                      onScroll={onChildScroll}
-                      isScrolling={isScrolling}
-                      scrollTop={scrollTop}
-                      width={width}
-                      rowGetter={rowGetter}
-                      gridStyle={{
-                        direction: 'inherit'
-                      }}
-                      className={classes.table}
+                  return (
+                    <div
+                      ref={registerChild}
                     >
-                      {breakMD ? (
-                        <TableColumn
-                          width={100}
-                          flexGrow={1}
-                          key={'hash'}
-                          dataKey={'hash'}
-                          cellRenderer={collapsedCellRender}
-                          className={classes.flexContainer}
-                          headerRenderer={(headerProps) => headerRenderer({
-                            ...headerProps,
-                            columnIndex: 0
-                          })}
-                        />
-                      ) : (
-                        props.columns.map(({key, ...other}, index) => {
-                          return (
-                            <TableColumn
-                              key={key}
-                              dataKey={key}
-                              cellRenderer={cellRenderer}
-                              className={classes.flexContainer}
-                              headerRenderer={(headerProps) => headerRenderer({
-                                ...headerProps,
-                                columnIndex: index
-                              })}
-                              {...other}
-                            />
-                          )
-                        })
-                      )}
-                    </Table>
+                      <Table
+                        autoHeight
+                        height={height}
+                        rowCount={props.data.length}
+                        rowHeight={breakMD ? 150 : 60}
+                        headerHeight={breakMD ? 0 : 50}
+                        onScroll={onChildScroll}
+                        isScrolling={isScrolling}
+                        scrollTop={scrollTop}
+                        width={width}
+                        rowGetter={rowGetter}
+                        gridStyle={{
+                          direction: 'inherit'
+                        }}
+                        className={classes.table}
+                      >
+                        {breakMD ? (
+                          <TableColumn
+                            width={100}
+                            flexGrow={1}
+                            key={'hash'}
+                            dataKey={'hash'}
+                            cellRenderer={collapsedCellRender}
+                            className={classes.flexContainer}
+                            headerRenderer={(headerProps) => headerRenderer({
+                              ...headerProps,
+                              columnIndex: 0
+                            })}
+                          />
+                        ) : (
+                          props.columns.map(({key, ...other}, index) => {
+                            return (
+                              <TableColumn
+                                key={key}
+                                dataKey={key}
+                                cellRenderer={cellRenderer}
+                                className={classes.flexContainer}
+                                headerRenderer={(headerProps) => headerRenderer({
+                                  ...headerProps,
+                                  columnIndex: index
+                                })}
+                                {...other}
+                              />
+                            )
+                          })
+                        )}
+                      </Table>
+                    </div>
+                  )
+                }}
+              </AutoSizer>
+              <Backdrop open={props.loading === 'fetch'} className={classes.backdrop}>
+                <CircularProgress color="inherit"/>
+              </Backdrop>
+              {
+                (props.loading === 'ready' && props.data.length === 0) && (
+                  <div className={classes.loading}>
+                    <CircularProgress/>
                   </div>
                 )
-              }}
-            </AutoSizer>
-          </div>
-        )}
-      </WindowScroller>
+              }
+            </div>
+          )}
+        </WindowScroller>
+      </Paper>
     </Grid>
   )
 }
@@ -275,7 +301,7 @@ export function useScrollUpdate<T>(fetcher: (size: number) => Promise<T[]>, thre
             if (data.length !== 0) {
               setLoading('ready')
             }
-          }, 400)
+          }, 300)
         })
     }
   }, [list, loading, threshold, fetcher])

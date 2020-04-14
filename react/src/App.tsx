@@ -28,6 +28,7 @@ import {RootState} from "./reducer"
 import {RESET_CURRENT_HEIGHT} from "./reducer/blocks"
 import Blocks from "./pages/Blocks"
 import Inspect from "./pages/Inspect"
+import Validators from "./pages/Validators"
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -110,10 +111,7 @@ function App() {
   }, [dispatch, chainId])
 
   const handleTabChange = (event: any, newValue: any) => {
-    const newPath = `${urls[newValue]}/${path.split('/').slice(3).join('/')}`
-    console.log(newPath)
-
-    dispatch(push(`/${chainId}${newPath}`))
+    dispatch(push(`/${chainId}${urls[newValue]}`))
     setTab(newValue)
   }
 
@@ -243,6 +241,7 @@ function App() {
                   <Route path={`/:chainId/transactions`} component={Transactions}/>
                   <Route path={`/:chainId/blocks`} component={Blocks}/>
                   <Route path={`/:chainId/inspect`} component={Inspect}/>
+                  <Route path={`/:chainId/validators`} component={Validators}/>
                   <Route path="/">
                     <Redirect to="/amo-cherryblossom-01/"/>
                   </Route>

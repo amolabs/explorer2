@@ -1,5 +1,6 @@
 import React from 'react'
 import {
+  CircularProgress,
   Grid,
   Grow,
   Hidden,
@@ -31,7 +32,7 @@ const useStyle = makeStyles({
     fontWeight: 600,
   },
   mobileTableCellBody: {
-    maxWidth: '240px',
+    maxWidth: '55vw',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
@@ -67,7 +68,9 @@ type Props<T extends StringMap> = {
     page: number,
     rowsPerPage: number,
     onChangePage: (event: React.MouseEvent<HTMLButtonElement> | null, page: number) => void
-  }
+  },
+  fallbackText: string,
+  loading?: boolean
 }
 
 function CollapseTable<T extends StringMap>(props: Props<T>) {
@@ -81,6 +84,7 @@ function CollapseTable<T extends StringMap>(props: Props<T>) {
     rowKey,
     maxHeight,
     pagination,
+    fallbackText
   } = props
 
   const containerStyle = {
@@ -162,9 +166,15 @@ function CollapseTable<T extends StringMap>(props: Props<T>) {
                   <TableRow>
                     <TableCell colSpan={columns.length}>
                       <div className={classes.emptyCell}>
-                        <h3>
-                          No data are available
-                        </h3>
+                        {
+                          props.loading ? (
+                            <CircularProgress/>
+                          ) : (
+                            <h3>
+                              {fallbackText}
+                            </h3>
+                          )
+                        }
                       </div>
                     </TableCell>
                   </TableRow>

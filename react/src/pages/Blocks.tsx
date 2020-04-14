@@ -2,10 +2,9 @@ import React, {useEffect, useState} from 'react'
 import {BlockState} from "../reducer/blocks"
 import {useSelector} from "react-redux"
 import {RootState, useUpdateState} from "../reducer"
-import {Grid, Snackbar} from "@material-ui/core"
+import {Grid} from "@material-ui/core"
 import InfinityTable, {useScrollUpdate} from "../component/InfinityTable"
 import ExplorerAPI, {BlocksStat} from '../ExplorerAPI'
-import MuiAlert from "@material-ui/lab/Alert"
 import {Link} from "react-router-dom"
 import StatCard from "../component/StatCard"
 import {History, Timeline, TrendingUp, ViewModule} from "@material-ui/icons"
@@ -37,7 +36,16 @@ const columns = [
     key: 'proposer',
     label: 'Proposer',
     width: 100,
-    flexGrow: 10
+    flexGrow: 10,
+    columnData: {
+      format: (validator: string, chainId: string) => {
+        return (
+          <Link to={`/${chainId}/inspect/validator/${validator}`}>
+            {validator}
+          </Link>
+        )
+      }
+    }
   },
   {
     key: 'num_txs',
@@ -168,15 +176,8 @@ const Blocks = () => {
         columns={columns}
         rowKey={'hash'}
         data={blocks}
+        loading={loading}
       />
-      <Snackbar
-        open={loading === 'fetch'}
-        anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
-      >
-        <MuiAlert elevation={6} variant="filled" severity="info">
-          Loading...
-        </MuiAlert>
-      </Snackbar>
     </>
   )
 }

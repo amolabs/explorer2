@@ -7,11 +7,6 @@ import {useUpdateState} from "../../reducer"
 import {ActualAMO, AMO} from "../../util"
 import {Grid} from "@material-ui/core"
 
-type RegisterTx = {
-  target: string,
-  custody: string
-}
-
 const payloadColumns: StringMap = {
   transfer: [
     {
@@ -48,6 +43,36 @@ const payloadColumns: StringMap = {
         return `${Number(amount).toLocaleString()} mote (${ActualAMO(Number(amount))})`
       }
     }
+  ],
+  issue: [
+    {
+      key: 'udc',
+      header: 'UDC'
+    },
+    {
+      key: 'desc',
+      header: 'Description'
+    },
+    {
+      key: 'amount',
+      header: 'Amount',
+      format: (amount: string) => {
+        return Number(amount).toLocaleString()
+      }
+    }
+  ],
+  delegate: [
+    {
+      key: 'to',
+      header: 'Validator'
+    },
+    {
+      key: 'amount',
+      header: 'Amount',
+      format: (amount: string) => {
+        return AMO(Number(amount))
+      }
+    }
   ]
 }
 
@@ -66,7 +91,14 @@ const columns = [
   },
   {
     key: 'sender',
-    header: 'Sender'
+    header: 'Sender',
+    format: (sender: string, chainId: string) => {
+      return (
+        <Link to={`/${chainId}/inspect/account/${sender}`}>
+          {sender}
+        </Link>
+      )
+    }
   },
   {
     key: 'height',
