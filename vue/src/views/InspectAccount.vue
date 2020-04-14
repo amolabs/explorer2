@@ -91,12 +91,12 @@
   export default {
     data: () => ({
       account: {
-        address: '-',
+        address: null,
         balance: 0,
         stake: 0,
-        valAddr: '-',
+        valAddr: null,
         delegate: 0,
-        delAddr: '-',
+        delAddr: null,
       },
       txTable: {
         headers: [
@@ -157,9 +157,9 @@
             address: this.$route.params.address,
             balance: 0,
             stake: 0,
-            valAddr: None,
+            valAddr: null,
             delegate: 0,
-            delAddr: '-',
+            delAddr: null,
           };
         }
       },

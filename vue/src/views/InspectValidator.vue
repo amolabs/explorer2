@@ -106,10 +106,10 @@
   export default {
     data: () => ({
       validator: {
-        address: '-',
-        pubkey: '-',
+        address: null,
+        pubkey: null,
         power: 0,
-        owner: '-',
+        owner: null,
         effStake: 0,
         powerRatio: 0,
         activity: 0,
@@ -167,9 +167,9 @@
           console.debug(e);
           this.validator = {
             address: this.$route.params.address,
-            pubkey: '-',
+            pubkey: null,
             power: 0,
-            owner: '-',
+            owner: null,
             effStake: 0,
             powerRatio: 0,
             activity: 0,
