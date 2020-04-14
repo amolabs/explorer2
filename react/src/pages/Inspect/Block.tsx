@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react'
-import {useParams} from 'react-router-dom'
+import {Link, useParams} from 'react-router-dom'
 import {BlockState, initialBlock} from "../../reducer/blocks"
 import {useUpdateState} from "../../reducer"
 import ExplorerAPI from "../../ExplorerAPI"
@@ -15,7 +15,7 @@ const columns = [
   },
   {
     key: 'hash',
-    header: 'Hash'
+    header: 'Hash',
   },
   {
     key: 'proposer',
@@ -45,7 +45,14 @@ const transactionColumns = [
   },
   {
     key: 'hash',
-    header: 'Hash'
+    header: 'Hash',
+    format: (hash: string, chainId: string) => {
+      return (
+        <Link to={`/${chainId}/inspect/tx/${hash}`}>
+          {hash}
+        </Link>
+      )
+    }
   },
   {
     key: 'sender',

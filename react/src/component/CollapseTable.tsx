@@ -31,7 +31,7 @@ const useStyle = makeStyles({
     fontWeight: 600,
   },
   mobileTableCellBody: {
-    maxWidth: '150px',
+    maxWidth: '240px',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
@@ -42,6 +42,12 @@ const useStyle = makeStyles({
       borderBottom: '1px solid rgba(224, 224, 224, 1)'
     },
     display: 'inline'
+  },
+  emptyCell: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '200px',
   }
 })
 
@@ -66,7 +72,7 @@ type Props<T extends StringMap> = {
 
 function CollapseTable<T extends StringMap>(props: Props<T>) {
   const classes = useStyle()
-  const isMobile = useMediaQuery('(max-width: 600px)')
+  const isMobile = useMediaQuery('(max-width: 960px)')
   const {chainId} = useUpdateState()
 
   const {
@@ -99,21 +105,23 @@ function CollapseTable<T extends StringMap>(props: Props<T>) {
       md={12}
       lg={12}
     >
-      <Paper>
+      <Paper elevation={6}>
         {Pagination}
         <TableContainer style={containerStyle}>
           <Table stickyHeader={true}>
-            <Hidden only={['xs']}>
+            <Hidden only={['xs', 'sm', 'md']}>
               <TableHead
-                component={"thead"}
+                component="thead"
               >
-                {
-                  columns.map((c, i) => (
-                    <TableCell key={i} align="center">
-                      {c.header || c.key.toUpperCase()}
-                    </TableCell>
-                  ))
-                }
+                <tr>
+                  {
+                    columns.map((c, i) => (
+                      <TableCell key={c.key} align="center">
+                        {c.header || c.key.toUpperCase()}
+                      </TableCell>
+                    ))
+                  }
+                </tr>
               </TableHead>
             </Hidden>
             <TableBody>
@@ -131,10 +139,10 @@ function CollapseTable<T extends StringMap>(props: Props<T>) {
 
                         return (
                           <TableCell key={c.key} align="center" className={isMobile ? classes.mobileTableCell : ''}>
-                            <Hidden only={['xs']}>
+                            <Hidden only={['xs', 'sm', 'md']}>
                               {value}
                             </Hidden>
-                            <Hidden only={['sm', 'md', 'lg', 'xl']}>
+                            <Hidden only={['lg', 'xl']}>
                               <div className={isMobile ? classes.mobileTableCellHeader : ''}>
                                 {c.header || c.key.toUpperCase()}
                               </div>
@@ -148,6 +156,19 @@ function CollapseTable<T extends StringMap>(props: Props<T>) {
                     </TableRow>
                   </Grow>
                 ))
+              }
+              {
+                dataSource.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={columns.length}>
+                      <div className={classes.emptyCell}>
+                        <h3>
+                          No data are available
+                        </h3>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )
               }
             </TableBody>
           </Table>

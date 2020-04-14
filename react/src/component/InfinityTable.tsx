@@ -115,7 +115,9 @@ function InfinityTable<T>(props: Props<T>) {
     )
   }, [cache, chainId, classes])
 
-  const collapsedCellRender: TableCellRenderer = useCallback(({rowData, parent}) => {
+  const collapsedCellRender: TableCellRenderer = useCallback(({rowData, parent, columnData}) => {
+    const format = columnData ? columnData['format'] : undefined
+
     return (
       <CellMeasurer
         cache={cache}
@@ -134,7 +136,7 @@ function InfinityTable<T>(props: Props<T>) {
                   {c.label}
                 </div>
                 <div className={classes.collapsedCellBody}>
-                  {rowData[c.key]}
+                  {c.columnData?.format ? c.columnData.format(rowData[c.key], chainId) : rowData[c.key]}
                 </div>
               </div>
             ))}
