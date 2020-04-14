@@ -88,7 +88,8 @@ async function getAssetStat(chain_id) {
 
 async function getValidatorStat(chain_id) {
   return new Promise(function(resolve, reject) {
-    var query_str = "SELECT count(*) `num` FROM `s_accounts` \
+    // XXX: not very comfortable with this.
+    var query_str = "SELECT count(*) `num`, SUM(`eff_stake`) `total_eff_stakes`, AVG(`eff_stake`) `avg_eff_stake` FROM `s_accounts` \
       WHERE (`chain_id` = ? AND `val_addr` IS NOT NULL) LIMIT 1";
     var query_var = [chain_id];
     db.query(query_str, query_var, function (err, rows, fields) {

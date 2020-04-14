@@ -33,7 +33,7 @@ async function getDelegators(chain_id, address, from, num) {
     query_str = "SELECT r.`address`, r.`delegate` \
       FROM `s_accounts` l \
         LEFT JOIN `s_accounts` r ON l.`address` = r.`del_addr` \
-      WHERE l.`chain_id` = ? and l.`val_addr` = ? \
+      WHERE l.`chain_id` = ? AND l.`val_addr` = ? AND r.`address` IS NOT NULL \
       LIMIT ?,?";
     query_var = [chain_id, address, from, num];
     db.query(query_str, query_var, function (err, rows, fields) {
