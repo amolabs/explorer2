@@ -64,6 +64,7 @@ const Validator = () => {
         columns={columns}
         data={validator}
         title="Validator information"
+        divider
       />
     </>
   )

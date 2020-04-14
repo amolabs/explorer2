@@ -5,7 +5,7 @@ import {initialTransactions, TransactionSchema} from "../../reducer/blockchain"
 import ExplorerAPI from "../../ExplorerAPI"
 import {useUpdateState} from "../../reducer"
 import {ActualAMO, AMO} from "../../util"
-import {Grid} from "@material-ui/core"
+import {Grid, Link as UrlLink} from "@material-ui/core"
 
 const payloadColumns: StringMap = {
   transfer: [
@@ -73,6 +73,31 @@ const payloadColumns: StringMap = {
         return AMO(Number(amount))
       }
     }
+  ],
+  setup: [
+    {
+      key: 'storage',
+      header: 'Storage'
+    },
+    {
+      key: 'url',
+      header: 'URL',
+      format: (url: string) => {
+        return (
+          <UrlLink href={url}>
+            {url}
+          </UrlLink>
+        )
+      }
+    },
+    {
+      key: 'registration_fee',
+      header: 'Registration fee'
+    },
+    {
+      key: 'hosting_fee',
+      header: 'Hosting fee'
+    }
   ]
 }
 
@@ -80,14 +105,6 @@ const columns = [
   {
     key: 'hash',
     header: 'Hash'
-  },
-  {
-    key: 'type',
-    header: 'Type'
-  },
-  {
-    key: 'info',
-    header: 'Result'
   },
   {
     key: 'sender',
@@ -112,6 +129,10 @@ const columns = [
     }
   },
   {
+    key: 'index',
+    header: 'Index'
+  },
+  {
     key: 'fee',
     header: 'Fee',
     format: (fee: number) => {
@@ -121,6 +142,17 @@ const columns = [
   {
     key: 'tx_bytes',
     header: 'Tx bytes'
+  },
+]
+
+const payloadSpecificColumns = [
+  {
+    key: 'type',
+    header: 'Type'
+  },
+  {
+    key: 'info',
+    header: 'Result'
   }
 ]
 
@@ -157,8 +189,15 @@ const Transaction = () => {
           divider
         />
         <InformationCard
-          columns={payloadColumns[tx.type]}
-          data={JSON.parse(tx.payload)}
+          columns={[
+            ...payloadSpecificColumns,
+            ...payloadColumns[tx.type]
+          ]}
+          data={{
+            type: tx.type,
+            info: tx.info,
+            ...JSON.parse(tx.payload)
+          }}
         />
       </Grid>
     </Grid>

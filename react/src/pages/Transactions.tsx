@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react'
 import {useSelector} from "react-redux"
-import {RootState, useUpdateState} from "../reducer"
+import {RootState, useFixedHeight} from "../reducer"
 import {BlockchainState, TransactionSchema} from "../reducer/blockchain"
 import StatCard from "../component/StatCard"
 import {Equalizer, HighlightOff, Speed, Timelapse} from "@material-ui/icons"
@@ -68,6 +68,12 @@ const columns = [
     width: 100,
     flexGrow: 1
   },
+  {
+    key: 'info',
+    label: 'Result',
+    width: 100,
+    flexGrow: 2
+  }
 ]
 
 type TransactionStatsProps = {
@@ -133,12 +139,11 @@ const BlockStats = (props: TransactionStatsProps) => {
 const Transactions = () => {
   const [ref, setRef] = useState<HTMLDivElement | undefined>(undefined)
 
-  const {chainId, updated} = useUpdateState()
-  const height = useSelector<RootState, number>(state => state.blockchain.height)
+  const {chainId, fixedHeight} = useFixedHeight()
 
   const [list, setList, loading, setLoading, onScroll] = useScrollUpdate<TransactionSchema>(async (size: number) => {
     const {data} = await ExplorerAPI
-      .fetchTransactions(chainId, height, size)
+      .fetchTransactions(chainId, fixedHeight, size)
 
     if (data.length === 0) {
       setLoading('done')
@@ -148,9 +153,9 @@ const Transactions = () => {
   }, 200 + (ref ? ref.clientHeight : 0))
 
   useEffect(() => {
-    if (updated) {
+    if (fixedHeight !== -1) {
       ExplorerAPI
-        .fetchTransactions(chainId, height, 0)
+        .fetchTransactions(chainId, fixedHeight, 0)
         .then(({data}) => {
           setList(data)
           window.scrollTo({
@@ -159,7 +164,7 @@ const Transactions = () => {
         })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [updated])
+  }, [fixedHeight])
 
   return (
     <>

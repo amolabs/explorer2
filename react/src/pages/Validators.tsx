@@ -10,7 +10,7 @@ import {Link} from "react-router-dom"
 
 const columns = [
   {
-    key: 'address',
+    key: 'val_addr',
     header: 'Address',
     format: (validator: string, chainId: string) => {
       return (

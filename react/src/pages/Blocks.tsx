@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react'
 import {BlockState} from "../reducer/blocks"
-import {useSelector} from "react-redux"
-import {RootState, useUpdateState} from "../reducer"
+import {useFixedHeight, useUpdateState} from "../reducer"
 import {Grid} from "@material-ui/core"
 import InfinityTable, {useScrollUpdate} from "../component/InfinityTable"
 import ExplorerAPI, {BlocksStat} from '../ExplorerAPI'
@@ -133,29 +132,26 @@ const BlocksStatView = (props: BlocksStatProps) => {
 }
 
 const Blocks = () => {
-  const {chainId, updated} = useUpdateState()
-  const blockHeight = useSelector<RootState, number>(state => state.blockchain.height)
+  const {chainId, fixedHeight} = useFixedHeight()
 
-  const [maxHeight, setMaxHeight] = useState(1)
   const [ref, setRef] = useState<HTMLDivElement | undefined>(undefined)
 
   const [blocks, setBlocks, loading, setLoading, onScroll] = useScrollUpdate<BlockState>(async (size) => {
-    const nextHeight = maxHeight - size
+    const nextHeight = fixedHeight - size
 
     if (nextHeight <= 0) {
       setLoading('done')
       return []
     }
 
-    const {data} = await ExplorerAPI.fetchBlocks(chainId, maxHeight - size)
+    const {data} = await ExplorerAPI.fetchBlocks(chainId, nextHeight)
     return data
   }, 200 + (ref ? ref.clientHeight : 0))
 
   useEffect(() => {
-    if (updated) {
-      setMaxHeight(blockHeight)
+    if (fixedHeight !== -1) {
       ExplorerAPI
-        .fetchBlocks(chainId, blockHeight)
+        .fetchBlocks(chainId, fixedHeight)
         .then(({data}) => {
           setBlocks(data)
           window.scrollTo({
@@ -164,7 +160,7 @@ const Blocks = () => {
         })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [updated])
+  }, [chainId, fixedHeight])
 
   return (
     <>

@@ -1,18 +1,18 @@
 import React, {PropsWithChildren} from 'react'
-import {Divider, Grid} from "@material-ui/core"
+import {Divider, Grid, Theme} from "@material-ui/core"
 import {makeStyles} from "@material-ui/core/styles"
 import {Breakpoint} from "@material-ui/core/styles/createBreakpoints"
 import {GridSize} from "@material-ui/core/Grid/Grid"
 import {SvgIconComponent} from "@material-ui/icons"
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     color: theme.palette.text.primary,
     width: '100%',
     border: '0',
     display: 'flex',
     position: 'relative',
-    fontSize: '.875rem',
+    fontSize: '.675rem',
     minWidth: '0',
     wordWrap: 'break-word',
     background: theme.palette.background.paper,
@@ -48,8 +48,8 @@ const useStyles = makeStyles((theme) => ({
   },
   icon: {
     float: 'left',
-    padding: '15px',
-    marginTop: '-20px',
+    padding: '10px',
+    marginTop: '-16px',
     marginRight: '15px',
     borderRadius: '3px',
     backgroundColor: '#999',
@@ -94,7 +94,8 @@ const cardSize: { [k: string]: Partial<Record<Breakpoint, boolean | GridSize>> }
 const StatCard = (props: PropsWithChildren<Props>) => {
   const classes = useStyles()
   const size = props.size || 'small'
-  const color = props.color || '#42a5f5'
+  // const color = props.color || '#42a5f5'
+  const color = '#182026'
   const iconTheme: React.CSSProperties = {
     boxShadow: `0 4px 20px 0 rgba(0, 0, 0, .14), 0 7px 10px -5px ${color}`,
     background: `${color}`,
@@ -135,12 +136,12 @@ const StatCard = (props: PropsWithChildren<Props>) => {
           }
           {
             title && (
-              <p className={classes.title} style={{
-                fontSize: size === 'small' ? '14px' : '26px',
+              <h1 className={classes.title} style={{
+                fontSize: size === 'small' ? '14px' : '22px',
                 textAlign: titleAlign || 'right'
               }}>
                 {props.title}
-              </p>
+              </h1>
             )
           }
           {

@@ -111,6 +111,7 @@ const Block = () => {
         title="Block information"
         columns={columns}
         data={block}
+        divider
       />
       <CollapseTable
         dataSource={transactions}

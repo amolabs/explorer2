@@ -129,6 +129,7 @@ const Account = () => {
         title="Account information"
         columns={columns}
         data={account}
+        divider
       />
       <CollapseTable
         dataSource={transactions}

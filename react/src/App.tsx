@@ -38,10 +38,11 @@ const useStyles = makeStyles((theme) => ({
     marginRight: theme.spacing(2),
   },
   title: {
-    flexGrow: 1,
+    flexGrow: 2,
   },
   searchForm: {
-    flexDirection: 'row'
+    flexDirection: 'row',
+    flexGrow: 1
   }
 }))
 
@@ -157,7 +158,7 @@ function App() {
             height: '36px',
             marginRight: '12px'
           }}/>
-          <Hidden only={['xs']}>
+          <Hidden only={['xs', 'sm']}>
             <Typography variant={"h6"} className={classes.title}>
               AMO Blockchain Explorer
             </Typography>
@@ -173,7 +174,7 @@ function App() {
                 className={classes.mr2}
                 onChange={onChangeNetwork}
                 style={{
-                  width: '15vw'
+                  width: '40%'
                 }}
               >
                 {supportedNetworks.map((v, i) => (
@@ -182,7 +183,7 @@ function App() {
               </Select>
               <TextField
                 style={{
-                  width: '30vw'
+                  width: '60%'
                 }}
                 placeholder={"Block height, Account, Transaction hash"}
                 label="Search"

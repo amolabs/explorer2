@@ -72,6 +72,7 @@ const RecentBlocks = () => {
       columns={columns}
       rowKey='height'
       fallbackText="Ready"
+      loading={blocks.length === 0}
     />
   )
 }
@@ -155,7 +156,7 @@ const Blockchain = () => {
       <StatCard
         icon={Receipt}
         title="Transaction per Block"
-        suffix='/blk'
+        suffix='/ blk'
         color='#FFC940'
       >
         {(blockState.num_txs / blockState.height).toPrecision(3)}
@@ -176,13 +177,7 @@ const Blockchain = () => {
       >
         <CoinStats/>
       </StatCard>
-      <StatCard
-        icon={ViewCarousel}
-        title="Last blocks"
-        size='large'
-      >
-        <RecentBlocks/>
-      </StatCard>
+      <RecentBlocks/>
     </>
   )
 }

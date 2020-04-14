@@ -15,9 +15,12 @@ export const initialBlock = {
   validator_updates: "[]"
 }
 
-const initialState = {
+const initialState: {
+  currentHeight: number,
+  blocks: BlockState[]
+} = {
   currentHeight: 1,
-  blocks: [initialBlock]
+  blocks: []
 }
 
 export type BlocksInitialState = typeof initialState

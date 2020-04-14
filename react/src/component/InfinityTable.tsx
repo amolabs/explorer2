@@ -123,7 +123,7 @@ function InfinityTable<T>(props: Props<T>) {
           component="div"
           variant="body"
           className={clsx(classes.tableCell, classes.flexContainer)}
-          style={{height: `60px`}}
+          style={{height: `60px`, textAlign: 'center'}}
         >
           {format ? format(cellData, chainId) : cellData}
         </TableCell>
