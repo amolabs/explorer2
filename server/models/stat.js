@@ -86,17 +86,44 @@ async function getAssetStat(chain_id) {
   });
 }
 
-async function getValidatorStat(chain_id) {
+async function getValidatorStat(chain_id, num_blks) {
+  num_blks = Number(num_blks || 1000);
   return new Promise(function(resolve, reject) {
-    // XXX: not very comfortable with this.
-    var query_str = "SELECT count(*) `num`, SUM(`eff_stake`) `total_eff_stakes`, AVG(`eff_stake`) `avg_eff_stake` FROM `s_accounts` \
+    // CAUTION: not very comfortable with this sum().
+    var query_str = "SELECT count(*) `num_validators`, SUM(`eff_stake`) `total_eff_stakes`, AVG(`eff_stake`) `avg_eff_stake` FROM `s_accounts` \
       WHERE (`chain_id` = ? AND `val_addr` IS NOT NULL) LIMIT 1";
     var query_var = [chain_id];
     db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
       }
-      resolve(rows[0]);
+      stat = rows[0];
+
+      // another query
+      query_str = "SELECT \
+        JSON_EXTRACT(`incentives`, '$[*].amount') AS `amounts` \
+        FROM `c_blocks` WHERE `chain_id` = ? \
+        ORDER BY `height` DESC \
+        LIMIT ?";
+      query_var = [chain_id, num_blks];
+      db.query(query_str, query_var, function (err, rows, fields) {
+        if (err) {
+          return reject(err);
+        }
+        sum = BigInt(0);
+        rows.forEach(row => {
+          if (!row.amounts) {
+            return;
+          }
+          l = JSON.parse(row.amounts);
+          l.forEach(a => {
+            sum += BigInt(a);
+          });
+        });
+        stat.avg_blk_incentive = (sum / BigInt(num_blks)).toString();
+
+        resolve(stat);
+      });
     });
   });
 }

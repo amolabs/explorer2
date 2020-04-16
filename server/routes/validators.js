@@ -8,7 +8,8 @@ const stat = require('../models/stat');
 router.get('/', function(req, res) {
   const chain_id = res.locals.chain_id;
   if ('stat' in req.query) {
-    stat.getValidatorStat(chain_id)
+    var num_blks = req.query.num_blks || 0;
+    stat.getValidatorStat(chain_id, num_blks)
       .then((row) => {
         res.status(200);
         res.send(row);
