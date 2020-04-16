@@ -5,6 +5,7 @@ var mysql = require('mysql');
 var param = config.db;
 //param.supportBigNumbers = true;
 //param.bigNumberStrings = true;
+param.timezone = 'UTC';
 var pool = mysql.createPool(param);
 /*
 conn.connect((err) => {
