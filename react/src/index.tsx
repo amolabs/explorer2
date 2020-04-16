@@ -8,7 +8,7 @@ import {applyMiddleware, compose, createStore} from "redux"
 import reducer from './reducer'
 import {composeWithDevTools} from "redux-devtools-extension"
 import createSagaMiddleware from 'redux-saga'
-import {Box, createMuiTheme, CssBaseline, ThemeProvider} from "@material-ui/core"
+import {createMuiTheme, CssBaseline, ThemeProvider} from "@material-ui/core"
 import {syncBlockchain, syncRecentBlocks, syncRecentTxs} from "./sagas"
 import {createBrowserHistory} from 'history'
 import {ConnectedRouter, routerMiddleware} from "connected-react-router"

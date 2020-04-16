@@ -46,7 +46,7 @@ export const useFixedHeight = () => {
     if (updated && fixedHeight === -1) {
       setFixedHeight(height)
     }
-  }, [updated, height])
+  }, [fixedHeight, updated, height])
 
   useEffect(() => {
     setFixedHeight(-1)

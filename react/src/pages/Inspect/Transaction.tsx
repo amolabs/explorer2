@@ -4,21 +4,20 @@ import InformationCard from "../../component/InformationCard"
 import {initialTransactions, TransactionSchema} from "../../reducer/blockchain"
 import ExplorerAPI from "../../ExplorerAPI"
 import {useUpdateState} from "../../reducer"
-import {ActualAMO, AMO} from "../../util"
+import {AMO, displayAddress, displayAmount, displayResult} from "../../util"
 import {Grid, Link as UrlLink} from "@material-ui/core"
 
 const payloadColumns: StringMap = {
   transfer: [
     {
       key: 'to',
-      header: 'To'
+      header: 'To',
+      format: displayAddress
     },
     {
       key: 'amount',
       header: 'Amount',
-      format: (amount: string) => {
-        return `${Number(amount).toLocaleString()} mote (${ActualAMO(Number(amount))})`
-      }
+      format: displayAmount
     }
   ],
   register: [
@@ -39,9 +38,7 @@ const payloadColumns: StringMap = {
     {
       key: 'amount',
       header: 'Amount',
-      format: (amount: string) => {
-        return `${Number(amount).toLocaleString()} mote (${ActualAMO(Number(amount))})`
-      }
+      format: displayAmount
     }
   ],
   issue: [
@@ -56,9 +53,7 @@ const payloadColumns: StringMap = {
     {
       key: 'amount',
       header: 'Amount',
-      format: (amount: string) => {
-        return Number(amount).toLocaleString()
-      }
+      format: displayAmount
     }
   ],
   delegate: [
@@ -69,9 +64,7 @@ const payloadColumns: StringMap = {
     {
       key: 'amount',
       header: 'Amount',
-      format: (amount: string) => {
-        return AMO(Number(amount))
-      }
+      format: displayAmount
     }
   ],
   setup: [
@@ -97,6 +90,38 @@ const payloadColumns: StringMap = {
     {
       key: 'hosting_fee',
       header: 'Hosting fee'
+    }
+  ],
+  propose: [
+
+  ],
+  retract: [
+    {
+      key: 'amount',
+      header: 'Amount',
+      format: displayAmount
+    }
+  ],
+  close: [
+    {
+      key: 'storage',
+      header: 'Storage'
+    }
+  ],
+  lock: [
+    {
+      key: 'udc',
+      header: 'UDC'
+    },
+    {
+      key: 'holder',
+      header: 'Holder',
+      format: displayAddress
+    },
+    {
+      key: 'amount',
+      header: 'Amount',
+      format: displayAmount
     }
   ]
 }
@@ -135,9 +160,7 @@ const columns = [
   {
     key: 'fee',
     header: 'Fee',
-    format: (fee: number) => {
-      return AMO(fee)
-    }
+    format: AMO
   },
   {
     key: 'tx_bytes',
@@ -152,7 +175,8 @@ const payloadSpecificColumns = [
   },
   {
     key: 'info',
-    header: 'Result'
+    header: 'Result',
+    format: displayResult
   }
 ]
 
@@ -162,16 +186,20 @@ const Transaction = () => {
     hash,
     ...initialTransactions
   })
+  const [loading, setLoading] = useState(true)
 
-  const {chainId} = useUpdateState()
+  const {chainId, updated} = useUpdateState()
 
   useEffect(() => {
-    ExplorerAPI
-      .fetchTransaction(chainId, hash as string)
-      .then(({data}) => {
-        setTx(data[0])
-      })
-  }, [chainId, hash, setTx])
+    if (updated) {
+      ExplorerAPI
+        .fetchTransaction(chainId, hash as string)
+        .then(({data}) => {
+          setTx(data[0])
+          setLoading(false)
+        })
+    }
+  }, [chainId, hash, setTx, updated])
 
   return (
     <Grid
@@ -187,6 +215,7 @@ const Transaction = () => {
           columns={columns}
           data={tx}
           divider
+          loading={loading}
         />
         <InformationCard
           columns={[
@@ -198,6 +227,7 @@ const Transaction = () => {
             info: tx.info,
             ...JSON.parse(tx.payload)
           }}
+          loading={loading}
         />
       </Grid>
     </Grid>

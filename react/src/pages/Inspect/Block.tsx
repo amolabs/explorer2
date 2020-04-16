@@ -7,6 +7,7 @@ import InformationCard from "../../component/InformationCard"
 import CollapseTable from "../../component/CollapseTable"
 import {TransactionSchema} from "../../reducer/blockchain"
 import moment from 'moment'
+import {displayResult} from "../../util"
 
 const columns = [
   {
@@ -78,7 +79,8 @@ const transactionColumns = [
   },
   {
     key: 'info',
-    header: 'Result'
+    header: 'Result',
+    format: displayResult
   }
 ]
 
@@ -86,6 +88,9 @@ const Block = () => {
   const [block, setBlock] = useState<BlockState>(initialBlock)
   const [transactions, setTransactions] = useState<TransactionSchema[]>([])
   const {chainId} = useUpdateState()
+
+  const [blockLoading, setBlockLoading] = useState(true)
+  const [txLoading, setTxLoading] = useState(true)
 
   const {height} = useParams()
 
@@ -96,11 +101,13 @@ const Block = () => {
         .fetchBlock(chainId, blockHeight)
         .then(({data}) => {
           setBlock(data)
+          setBlockLoading(false)
         })
       ExplorerAPI
         .fetchBlockTransaction(chainId, blockHeight, 0)
         .then(({data}) => {
           setTransactions(data)
+          setTxLoading(false)
         })
     }
   }, [chainId, height])
@@ -112,12 +119,14 @@ const Block = () => {
         columns={columns}
         data={block}
         divider
+        loading={blockLoading}
       />
       <CollapseTable
         dataSource={transactions}
         columns={transactionColumns}
         rowKey='hash'
         fallbackText="There is no transaction in block"
+        loading={txLoading}
       />
     </>
   )

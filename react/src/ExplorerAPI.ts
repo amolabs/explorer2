@@ -86,13 +86,18 @@ const fetchAccountTransactions = (chainId: string, address: string, top: number,
     .get(`/chain/${chainId}/accounts/${address}/txs?top=${top}&from=${from}&num=${size}`)
 }
 
+type Delegate = {
+  address: string,
+  amount: string
+}
+
 export type ValidatorAccount = {
   address: string,
   pubkey: string,
   power: string,
   owner: string,
   stake: string,
-  delegators: []
+  delegators: Delegate[]
 }
 
 const fetchValidatorAccount = (chainId: string, address: string): Result<ValidatorAccount> => {

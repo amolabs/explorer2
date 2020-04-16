@@ -3,7 +3,9 @@ import {Link, useParams} from 'react-router-dom'
 import {useUpdateState} from "../../reducer"
 import ExplorerAPI, {ValidatorAccount} from "../../ExplorerAPI"
 import InformationCard from "../../component/InformationCard"
-import {AMO} from "../../util"
+import {AMO, displayAddress} from "../../util"
+import CollapseTable from "../../component/CollapseTable"
+import StatCard from "../../component/StatCard"
 
 const columns = [
   {
@@ -38,9 +40,22 @@ const columns = [
   }
 ]
 
+const delegatorColumns = [
+  {
+    key: 'address',
+    header: 'Address',
+    format: displayAddress
+  },
+  {
+    key: 'amount',
+    header: 'Amount',
+    format: AMO
+  }
+]
+
 const Validator = () => {
   const {address} = useParams()
-  const {chainId} = useUpdateState()
+  const {chainId, updated} = useUpdateState()
   const [validator, setValidator] = useState<ValidatorAccount>({
     address: '',
     delegators: [],
@@ -49,14 +64,18 @@ const Validator = () => {
     pubkey: '',
     stake: '0'
   })
-  useEffect(() => {
-    ExplorerAPI
-      .fetchValidatorAccount(chainId, address as string)
-      .then(({data}) => {
-        setValidator(data)
-      })
+  const [loading, setLoading] = useState(true)
 
-  }, [chainId])
+  useEffect(() => {
+    if (updated) {
+      ExplorerAPI
+        .fetchValidatorAccount(chainId, address as string)
+        .then(({data}) => {
+          setValidator(data)
+          setLoading(false)
+        })
+    }
+  }, [chainId, address, updated])
 
   return (
     <>
@@ -64,7 +83,15 @@ const Validator = () => {
         columns={columns}
         data={validator}
         title="Validator information"
+        loading={loading}
         divider
+      />
+      <CollapseTable
+        dataSource={validator.delegators}
+        columns={delegatorColumns}
+        rowKey="address"
+        fallbackText="No delegators"
+        loading={loading}
       />
     </>
   )

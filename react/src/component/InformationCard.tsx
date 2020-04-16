@@ -3,6 +3,7 @@ import StatCard from "./StatCard"
 import {CollapsedTableColumn} from "./CollapseTable"
 import {makeStyles, Theme} from "@material-ui/core/styles"
 import {useUpdateState} from "../reducer"
+import Skeleton from "@material-ui/lab/Skeleton"
 
 const useStyle = makeStyles((theme: Theme) => ({
   wrapper: {
@@ -21,6 +22,9 @@ const useStyle = makeStyles((theme: Theme) => ({
   },
   body: {
     flex: '1 1 auto'
+  },
+  loading: {
+    width: '60%'
   }
 }))
 
@@ -28,7 +32,8 @@ type InformationCardProps<T extends StringMap> = {
   title?: React.ReactNode,
   divider?: boolean
   columns: CollapsedTableColumn[],
-  data: T
+  data: T,
+  loading?: boolean
 }
 
 const InformationCard = function <T extends StringMap>(props: InformationCardProps<T>) {
@@ -39,7 +44,8 @@ const InformationCard = function <T extends StringMap>(props: InformationCardPro
     title,
     columns,
     data,
-    divider
+    divider,
+    loading
   } = props
 
   return (
@@ -51,20 +57,30 @@ const InformationCard = function <T extends StringMap>(props: InformationCardPro
       divider={divider}
     >
       {
-        columns.map((c, i) => {
-          const value = c.format ? c.format(data[c.key], chainId) : data[c.key]
+        loading ? (
+          <div className={classes.loading}>
+            <Skeleton animation="wave" />
+            <Skeleton animation="wave" />
+            <Skeleton animation="wave" />
+            <Skeleton animation="wave" />
+            <Skeleton animation="wave" />
+          </div>
+        ) : (
+          columns.map((c, i) => {
+            const value = c.format ? c.format(data[c.key], chainId) : data[c.key]
 
-          return (
-            <div className={classes.wrapper} key={c.key}>
-              <div className={classes.header}>
-                {c.header}
+            return (
+              <div className={classes.wrapper} key={c.key}>
+                <div className={classes.header}>
+                  {c.header}
+                </div>
+                <div className={classes.body}>
+                  {value}
+                </div>
               </div>
-              <div className={classes.body}>
-                {value}
-              </div>
-            </div>
-          )
-        })
+            )
+          })
+        )
       }
     </StatCard>
   )

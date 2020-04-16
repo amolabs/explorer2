@@ -9,6 +9,7 @@ import ExplorerAPI from "../ExplorerAPI"
 import {Grid} from "@material-ui/core"
 import SizeTitle, {LastOptions} from "../component/SizeTitle"
 import {Link} from "react-router-dom"
+import {displayAddress, displayResult} from "../util"
 
 const columns = [
   {
@@ -53,13 +54,7 @@ const columns = [
     width: 100,
     flexGrow: 5,
     columnData: {
-      format: (sender: string, chainId: string) => {
-        return (
-          <Link to={`/${chainId}/inspect/account/${sender}`}>
-            {sender}
-          </Link>
-        )
-      }
+      format: displayAddress
     }
   },
   {
@@ -72,7 +67,10 @@ const columns = [
     key: 'info',
     label: 'Result',
     width: 100,
-    flexGrow: 2
+    flexGrow: 2,
+    columnData: {
+      format: displayResult
+    }
   }
 ]
 
@@ -142,8 +140,7 @@ const Transactions = () => {
   const {chainId, fixedHeight} = useFixedHeight()
 
   const [list, setList, loading, setLoading, onScroll] = useScrollUpdate<TransactionSchema>(async (size: number) => {
-    const {data} = await ExplorerAPI
-      .fetchTransactions(chainId, fixedHeight, size)
+    const {data} = await ExplorerAPI.fetchTransactions(chainId, fixedHeight, size)
 
     if (data.length === 0) {
       setLoading('done')

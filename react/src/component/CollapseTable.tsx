@@ -17,7 +17,7 @@ import {
 import {makeStyles} from "@material-ui/core/styles"
 import {useUpdateState} from "../reducer"
 
-const useStyle = makeStyles({
+const useStyle = makeStyles((theme) => ({
   mobileTableCell: {
     display: 'flex',
     minHeight: '36px',
@@ -49,8 +49,14 @@ const useStyle = makeStyles({
     justifyContent: 'center',
     alignItems: 'center',
     height: '200px',
+  },
+  title: {
+    color: theme.palette.text.secondary,
+    margin: '10px 15px',
+    fontSize: '22px',
+    textAlign: 'left'
   }
-})
+}))
 
 export type CollapsedTableColumn = {
   key: string,
@@ -70,7 +76,8 @@ type Props<T extends StringMap> = {
     onChangePage: (event: React.MouseEvent<HTMLButtonElement> | null, page: number) => void
   },
   fallbackText: string,
-  loading?: boolean
+  loading?: boolean,
+  elevation?: number,
 }
 
 function CollapseTable<T extends StringMap>(props: Props<T>) {
@@ -84,8 +91,10 @@ function CollapseTable<T extends StringMap>(props: Props<T>) {
     rowKey,
     maxHeight,
     pagination,
-    fallbackText
+    fallbackText,
   } = props
+
+  const elevation = typeof props.elevation === 'number' ? props.elevation : 3
 
   const containerStyle = {
     maxHeight
@@ -109,7 +118,7 @@ function CollapseTable<T extends StringMap>(props: Props<T>) {
       md={12}
       lg={12}
     >
-      <Paper elevation={6}>
+      <Paper elevation={elevation}>
         {Pagination}
         <TableContainer style={containerStyle}>
           <Table stickyHeader={true}>

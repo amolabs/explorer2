@@ -3,10 +3,11 @@ import InformationCard from "../../component/InformationCard"
 import ExplorerAPI, {AccountSchema} from "../../ExplorerAPI"
 import {Link, useParams} from 'react-router-dom'
 import {RootState, useUpdateState} from "../../reducer"
-import {AMO} from "../../util"
+import {displayAmount, displayResult} from "../../util"
 import {useSelector} from "react-redux"
 import CollapseTable from "../../component/CollapseTable"
 import {TransactionSchema} from "../../reducer/blockchain"
+import {AxiosError} from "axios"
 
 const columns = [
   {
@@ -16,20 +17,17 @@ const columns = [
   {
     key: 'balance',
     header: 'Balance',
-    format: (balance: string) => {
-      return `${Number(balance).toLocaleString()} mote (${AMO(Number(balance))})`
-    }
+    format: displayAmount
   },
   {
     key: 'stake',
     header: 'Stake',
-    format: (stake: string) => {
-      return `${Number(stake).toLocaleString()} mote (${AMO(Number(stake))})`
-    }
+    format: displayAmount
   },
   {
     key: 'delegate',
-    header: 'Delegate'
+    header: 'Delegate',
+    format: displayAmount
   }
 ]
 
@@ -77,7 +75,8 @@ const transactionColumns = [
   },
   {
     key: 'info',
-    header: 'Result'
+    header: 'Result',
+    format: displayResult
   }
 ]
 
@@ -88,17 +87,18 @@ const Account = () => {
   const height = useSelector<RootState, number>(state => state.blockchain.height)
 
   const [account, setAccount] = useState<AccountSchema>({
-    address: '',
-    balance: '',
+    address: address as string,
+    balance: '0',
     chain_id: '',
     del_addr: '',
-    delegate: '',
-    stake: '',
+    delegate: '0',
+    stake: '0',
     val_addr: '',
-    val_power: '',
+    val_power: '0',
     val_pubkey: ''
   })
   const [transactions, setTransactions] = useState<TransactionSchema[]>([])
+  const [statLoading, setStatLoading] = useState(true)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -106,8 +106,12 @@ const Account = () => {
       .fetchAccount(chainId, address as string)
       .then(({data}) => {
         setAccount(data)
+        setStatLoading(false)
       })
-  }, [chainId])
+      .catch((e: AxiosError) => {
+        setStatLoading(false)
+      })
+  }, [chainId, address])
 
   useEffect(() => {
     if (updated) {
@@ -121,7 +125,7 @@ const Account = () => {
           setLoading(false)
         })
     }
-  }, [chainId, updated])
+  }, [chainId, updated, address, height])
 
   return (
     <>
@@ -130,6 +134,7 @@ const Account = () => {
         columns={columns}
         data={account}
         divider
+        loading={statLoading}
       />
       <CollapseTable
         dataSource={transactions}
