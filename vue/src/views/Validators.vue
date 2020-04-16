@@ -13,7 +13,7 @@
                   </v-col>
                   <v-col cols="12" md="6" class="py-0 px-lg-12 text-right subtitle-2">
                     <div>
-                      <span>{{ this.validatorStat.num.toLocaleString() }} </span>
+                      <span>{{ this.validatorStat.numValidators.toLocaleString() }} </span>
                     </div>
                   </v-col>
                 </v-row>
@@ -74,15 +74,15 @@
               @loadMore="reqTableData"
               :mobile-breakpoint="tableBreakpoint"
             >
-              <template #valAddr="{item}">
+              <template #address="{item}">
                 <router-link class="truncate-option"
-                             :to="{ path: '/inspect/validator/' + item.valAddr, params : {address: item.valAddr } }">{{ item.valAddr }}</router-link>
+                             :to="{ path: '/inspect/validator/' + item.address, params : {address: item.address } }">{{ item.address }}</router-link>
               </template>
               <template #effStake="{item}">
                 <span> {{ $amoShort(item.effStake) }}  AMO</span>
               </template>
-              <template #valPower="{item}">
-                <span>{{ Number(item.valPower).toPrecision(5) }} </span>
+              <template #power="{item}">
+                <span>{{ Number(item.power).toPrecision(5) }} </span>
               </template>
               <template #activity="{item}">
                 <span>{{ Number(item.activity.toFixed(2).toLocaleString())}} %  </span>
@@ -114,9 +114,9 @@
       statRange: 100,
       validatorTable: {
         headers: [
-          { text: 'address', align: 'center', value: 'valAddr'},
+          { text: 'address', align: 'center', value: 'address'},
           { text: 'eff stake', align: 'center', value: 'effStake'},
-          { text: 'power', align: 'center', value: 'valPower'},
+          { text: 'power', align: 'center', value: 'power'},
           { text: 'activity', align: 'center', value: 'activity'},
         ],
         validatorList: [],

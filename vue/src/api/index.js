@@ -136,7 +136,7 @@ export default {
       options)
       .then(res => {
         var stat = camelcaseKeys(res.data); 
-        if (!stat.num) stat.num = 0;
+        if (!stat.numValidators) stat.numValidators = 0;
         stat.avgOnline = 0;
         if (!stat.totalEffStakes) stat.totalEffStakes = 0;
         if (!stat.avgEffStake) stat.avgEffStake = 0;
