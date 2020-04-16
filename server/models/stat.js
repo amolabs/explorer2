@@ -87,7 +87,7 @@ async function getAssetStat(chain_id) {
 }
 
 async function getValidatorStat(chain_id, num_blks) {
-  num_blks = Number(num_blks || 1000);
+  num_blks = Number(num_blks) || 1000;
   return new Promise(function(resolve, reject) {
     // CAUTION: not very comfortable with this sum().
     var query_str = "SELECT count(*) `num_validators`, SUM(`eff_stake`) `total_eff_stakes`, AVG(`eff_stake`) `avg_eff_stake` FROM `s_accounts` \

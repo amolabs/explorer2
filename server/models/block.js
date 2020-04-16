@@ -40,22 +40,22 @@ async function getLast(chain_id) {
   });
 }
 
-async function getList(chain_id, from, num, order) {
+async function getList(chain_id, anchor, from, num) {
   return new Promise(function(resolve, reject) {
     from = Number(from);
     num = Number(num);
     var query_str;
     var query_var;
-    if (order == 'asc') {
-      query_str = "select * from c_blocks where (chain_id = ?) \
-        and (height >= ?) \
-        order by height asc limit ?";
+    if (anchor == 0) {
+      query_str = "select * from c_blocks \
+        where (chain_id = ?) \
+        order by height desc limit ?,?";
       query_var = [chain_id, from, num];
     } else {
-      query_str = "select * from c_blocks where (chain_id = ?) \
-        and (height <= ?) \
-        order by height desc limit ?";
-      query_var = [chain_id, from, num];
+      query_str = "select * from c_blocks \
+        where (chain_id = ?) and (height <= ?) \
+        order by height desc limit ?,?";
+      query_var = [chain_id, anchor, from, num];
     }
     db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {

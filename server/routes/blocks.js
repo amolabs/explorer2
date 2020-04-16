@@ -20,10 +20,10 @@ router.get('/', function(req, res) {
         res.send(err);
       });
   } else {
+    var anchor = req.query.anchor || 0;
     var from = req.query.from || 0;
     var num = req.query.num || 20;
-    var order = req.query.order || 'desc';
-    block.getList(chain_id, from, num, order)
+    block.getList(chain_id, anchor, from, num)
       .then((rows) => {
         res.status(200);
         res.send(rows);

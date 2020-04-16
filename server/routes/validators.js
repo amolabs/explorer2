@@ -1,7 +1,6 @@
 /* vim: set sw=2 ts=2 expandtab : */
 var express = require('express');
 var router = express.Router();
-const account = require('../models/account');
 const validator = require('../models/validator');
 const stat = require('../models/stat');
 
@@ -21,7 +20,7 @@ router.get('/', function(req, res) {
   } else {
     var from = req.query.from || 0;
     var num = req.query.num || 20;
-    account.getList(chain_id, true, from, num)
+    validator.getList(chain_id, from, num)
       .then((rows) => {
         if (rows.length > 0) {
           res.status(200);
