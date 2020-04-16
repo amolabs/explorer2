@@ -1,3 +1,4 @@
+const moment = require('moment-timezone');
 const globalMethods = {};
 
 globalMethods.install = function (Vue, options) {
@@ -77,6 +78,15 @@ globalMethods.install = function (Vue, options) {
       default:
         return {name: 'Inspect' };
     }
+  };
+
+  Vue.prototype.$formatTime = (timeString) => {
+    if (!timeString) {
+      return '-';
+    }
+    var d = moment(timeString);
+    var ret = d.tz(moment.tz.guess()).format('Y-MM-DD HH:mm:ss.SSS z');
+    return ret;
   };
 };
 

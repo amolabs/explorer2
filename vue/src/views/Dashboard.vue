@@ -16,7 +16,7 @@
                       height <router-link :to="{path: '/inspect/block/' + this.networkOverview.genesisHeight, param : {height : this.networkOverview.genesisHeight}}"> {{this.networkOverview.genesisHeight.toLocaleString()}} </router-link>
                     </div>
                     <div>
-                      <span> ({{this.networkOverview.genesisTime}})</span>
+                      <span> ({{this.$formatTime(this.networkOverview.genesisTime)}})</span>
                     </div>
                   </v-col>
                 </v-row>
@@ -31,7 +31,7 @@
                       height <router-link :to="{path: '/inspect/block/' + this.networkOverview.lastHeight, param : {height : this.networkOverview.lastHeight}}"> {{this.networkOverview.lastHeight.toLocaleString()}}</router-link>
                     </div>
                     <div>
-                      <span> ({{this.networkOverview.lastTime}})</span>
+                      <span> ({{this.$formatTime(this.networkOverview.lastTime)}})</span>
                     </div>
                   </v-col>
                 </v-row>
@@ -271,9 +271,9 @@
     data: () => ({
       networkOverview: {
         genesisHeight: 0,
-        genesisTime: 'not yet',
+        genesisTime: null,
         lastHeight: 0,
-        lastTime: 'not yet',
+        lastTime: null,
         avgInterval: 0,
         numTxsPerBlock: 0,
         avgTxFee: 0,

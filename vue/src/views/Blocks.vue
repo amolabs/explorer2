@@ -89,15 +89,12 @@
               @loadMore="reqBlockTableData"
               :mobile-breakpoint="tableBreakpoint"
             >
-              <template #timestamp="{item}">
+              <template #time="{item}">
                 <span class="font-option">
-                  {{item.timestamp.split(' ')[0]}}
-                  <br class="hidden-sm-and-up">
-                  {{item.timestamp.split(' ')[1]}} </span>
+                  {{$formatTime(item.time)}} </span>
               </template>
               <template #height="{item}">
                 <router-link :to="{ path: '/inspect/block/' + item.height, params : {block: item.height } }">{{ item.height }}</router-link>
-                <!--<v-chip style="cursor: pointer" color="#DCEDC8" :to="{ path: '/inspect/block/' + item.height, params : {block: item.height } }">{{ item.height }}</v-chip>-->
               </template>
               <template #proposer="{item}">
                 <router-link class="d-inline-block text-truncate truncate-option"
