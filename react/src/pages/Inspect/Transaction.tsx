@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useMemo, useState} from 'react'
 import {Link, useParams} from 'react-router-dom'
 import InformationCard from "../../component/InformationCard"
 import {initialTransactions, TransactionSchema} from "../../reducer/blockchain"
@@ -191,7 +191,8 @@ const Transaction = () => {
   const {chainId, updated} = useUpdateState()
 
   useEffect(() => {
-    if (updated) {
+    console.log(chainId, hash, updated)
+    if (updated && tx.sender === "") {
       ExplorerAPI
         .fetchTransaction(chainId, hash as string)
         .then(({data}) => {
@@ -199,7 +200,15 @@ const Transaction = () => {
           setLoading(false)
         })
     }
-  }, [chainId, hash, setTx, updated])
+  }, [chainId, hash, updated])
+
+  const payload = useMemo(() => {
+    return {
+      type: tx.type,
+      info: tx.info,
+      ...JSON.parse(tx.payload)
+    }
+  }, [tx])
 
   return (
     <Grid
@@ -222,11 +231,7 @@ const Transaction = () => {
             ...payloadSpecificColumns,
             ...payloadColumns[tx.type]
           ]}
-          data={{
-            type: tx.type,
-            info: tx.info,
-            ...JSON.parse(tx.payload)
-          }}
+          data={payload}
           loading={loading}
         />
       </Grid>

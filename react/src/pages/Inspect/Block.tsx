@@ -84,6 +84,8 @@ const transactionColumns = [
   }
 ]
 
+const PAGE_SIZE = 14
+
 const Block = () => {
   const [block, setBlock] = useState<BlockState>(initialBlock)
   const [transactions, setTransactions] = useState<TransactionSchema[]>([])
@@ -91,6 +93,7 @@ const Block = () => {
 
   const [blockLoading, setBlockLoading] = useState(true)
   const [txLoading, setTxLoading] = useState(true)
+  const [page, setPage] = useState(0)
 
   const {height} = useParams()
 
@@ -104,13 +107,34 @@ const Block = () => {
           setBlockLoading(false)
         })
       ExplorerAPI
-        .fetchBlockTransaction(chainId, blockHeight, 0)
+        .fetchBlockTransaction(chainId, blockHeight, 0, PAGE_SIZE)
         .then(({data}) => {
           setTransactions(data)
           setTxLoading(false)
         })
     }
   }, [chainId, height])
+
+  const onChangePage = (e: any, page: number) => {
+    if (height && !txLoading) {
+      const blockHeight = parseInt(height)
+      setTxLoading(true)
+      ExplorerAPI
+        .fetchBlockTransaction(chainId, blockHeight, page * PAGE_SIZE, PAGE_SIZE)
+        .then(({data}) => {
+          setTransactions(data)
+          setTxLoading(false)
+          setPage(page)
+        })
+    }
+  }
+
+  const pagination = {
+    onChangePage,
+    page,
+    count: block.num_txs,
+    rowsPerPage: PAGE_SIZE
+  }
 
   return (
     <>
@@ -127,6 +151,7 @@ const Block = () => {
         rowKey='hash'
         fallbackText="There is no transaction in block"
         loading={txLoading}
+        pagination={pagination}
       />
     </>
   )

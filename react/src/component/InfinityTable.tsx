@@ -28,6 +28,13 @@ const useInfinityScrollStyle = makeStyles((theme: Theme) => ({
   },
   tableCell: {
     flex: '1 1 auto',
+    width: '100%',
+    '& *': {
+      display: 'inline-block',
+      whiteSpace: 'nowrap',
+      textOverflow: 'ellipsis',
+      overflow: 'hidden'
+    }
   },
   collapsedCell: {
     flex: '1 1 auto',
@@ -49,7 +56,10 @@ const useInfinityScrollStyle = makeStyles((theme: Theme) => ({
     display: 'inline-block',
     whiteSpace: 'nowrap',
     textOverflow: 'ellipsis',
-    overflow: 'hidden'
+    overflow: 'hidden',
+    '& *': {
+      width: '100%'
+    }
   },
   flexContainer: {
     display: 'flex',
@@ -97,10 +107,12 @@ interface Props<T> {
   loading: Loading
 }
 
+const collapsedHeight = 170
+
 function InfinityTable<T>(props: Props<T>) {
   const classes = useInfinityScrollStyle()
 
-  const breakMD = useMediaQuery('(max-width: 960px)')
+  const breakMD = useMediaQuery('(max-width: 961px)')
   const [recentWidth, setRecentWidth] = useState<number | undefined>(undefined)
   const {chainId} = useUpdateState()
 
@@ -141,7 +153,7 @@ function InfinityTable<T>(props: Props<T>) {
           component="div"
           variant="body"
           className={clsx(classes.tableCell, classes.flexContainer)}
-          style={{height: `150px`}}
+          style={{height: `${collapsedHeight}px`}}
         >
           <div className={classes.collapsedCell}>
             {props.columns.map((c, i) => (
@@ -210,7 +222,7 @@ function InfinityTable<T>(props: Props<T>) {
                         autoHeight
                         height={height}
                         rowCount={props.data.length}
-                        rowHeight={breakMD ? 150 : 60}
+                        rowHeight={breakMD ? collapsedHeight : 60}
                         headerHeight={breakMD ? 0 : 50}
                         onScroll={onChildScroll}
                         isScrolling={isScrolling}

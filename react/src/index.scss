@@ -1,8 +1,8 @@
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-y: scroll;
@@ -10,7 +10,7 @@ body {
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  monospace;
 }
 
 .MuiAppBar-colorPrimary {
@@ -49,5 +49,29 @@ code {
 
 a {
   text-decoration: none;
-  color: #4580E6
+  color: #4580E6;
+}
+
+@media (min-width: 660px) {
+  .fixed-width {
+    width: 640px;
+  }
+}
+
+@media (min-width: 850px) {
+  .fixed-width {
+    width: 800px;
+  }
+}
+
+@media (min-width: 1000px) {
+  .fixed-width {
+    width: 960px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .fixed-width {
+    width: 1280px;
+  }
 }

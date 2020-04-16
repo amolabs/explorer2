@@ -4,8 +4,8 @@ import React from "react"
 const UNIT = 1000000000000000000
 const UNITS = ['', 'K', 'M', 'G', 'T']
 
-function convert(mote: number) {
-  let amo = mote / UNIT
+function convert(mote: number | string) {
+  let amo = (mote as number) / UNIT
 
   let idx = 0
   while (amo >= 1000 && idx < 4) {
@@ -16,9 +16,9 @@ function convert(mote: number) {
   return [amo, idx]
 }
 
-export function AMO(mote: number) {
+export function AMO(mote: number | string) {
   const [amo, idx] = convert(mote)
-  return `${Number(amo.toFixed(2)).toLocaleString()}${UNITS[idx]} AMO`
+  return `${Number(amo.toFixed(2)).toLocaleString()} ${UNITS[idx]} AMO`
 }
 
 export function displayAmount(s_mote: string) {

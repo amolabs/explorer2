@@ -98,14 +98,18 @@ function App() {
 
   const isDesktop = useMediaQuery('(min-width: 1280px)')
 
-  useEffect(() => {
-    dispatch({
-      type: UPDATE_BLOCKCHAIN
-    })
-    const handler = setInterval(() => {
+  const updateBlockchain = () => {
+    if (path.split('/')[1] === chainId) {
       dispatch({
         type: UPDATE_BLOCKCHAIN
       })
+    }
+  }
+
+  useEffect(() => {
+    updateBlockchain()
+    const handler = setInterval(() => {
+      updateBlockchain()
     }, 3000)
 
     return () => clearInterval(handler)
@@ -228,9 +232,7 @@ function App() {
           >
             <Grid
               item
-              lg={10}
-              md={11}
-              sm={12}
+              className="fixed-width"
             >
               <Grid
                 container

@@ -5,7 +5,6 @@ import ExplorerAPI, {ValidatorAccount} from "../../ExplorerAPI"
 import InformationCard from "../../component/InformationCard"
 import {AMO, displayAddress} from "../../util"
 import CollapseTable from "../../component/CollapseTable"
-import StatCard from "../../component/StatCard"
 
 const columns = [
   {
@@ -30,9 +29,7 @@ const columns = [
   {
     key: 'stake',
     header: 'Effective stake',
-    format: (stake: string) => {
-      return AMO(Number(stake))
-    }
+    format: AMO
   },
   {
     key: 'power',

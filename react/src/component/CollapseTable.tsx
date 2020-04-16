@@ -64,7 +64,7 @@ export type CollapsedTableColumn = {
   format?: (v: any, chainId: string) => React.ReactNode
 }
 
-type Props<T extends StringMap> = {
+type Props<T extends Record<string, any>> = {
   dataSource: T[],
   columns: CollapsedTableColumn[]
   rowKey: keyof T
@@ -80,9 +80,9 @@ type Props<T extends StringMap> = {
   elevation?: number,
 }
 
-function CollapseTable<T extends StringMap>(props: Props<T>) {
+function CollapseTable<T extends Record<string, any>>(props: Props<T>) {
   const classes = useStyle()
-  const isMobile = useMediaQuery('(max-width: 960px)')
+  const isMobile = useMediaQuery('(max-width: 1280px)')
   const {chainId} = useUpdateState()
 
   const {
