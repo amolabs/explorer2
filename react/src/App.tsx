@@ -73,7 +73,7 @@ const tabList = [
   'blockchain',
   'inspect',
   'blocks',
-  'transaction',
+  'transactions',
   'validators',
 ]
 

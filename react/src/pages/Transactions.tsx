@@ -108,7 +108,7 @@ const BlockStats = (props: TransactionStatsProps) => {
           <StatCard
             icon={HighlightOff}
             title={"Invalid Transaction ratio"}
-            suffix={`/${num_txs}`}
+            suffix={`/ ${num_txs}`}
             color="#9179F2"
           >
             {num_txs_invalid}

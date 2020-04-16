@@ -1,5 +1,5 @@
 import React from "react"
-import {Grid, LinearProgress, makeStyles} from "@material-ui/core"
+import {Grid, LinearProgress, makeStyles, withStyles} from "@material-ui/core"
 
 const useLinearGraphStyle = makeStyles((theme) => ({
   root: {
@@ -27,6 +27,21 @@ type Props = {
   color?: string
 }
 
+const ColoredLinearProgress = withStyles({
+  colorPrimary: {
+    backgroundColor: '#5C7080',
+  },
+  barColorPrimary: {
+    backgroundColor: '#182026'
+  },
+  root: {
+    height: 11,
+  },
+  bar: {
+    height: 11
+  }
+})(LinearProgress)
+
 const LinearGraph = (props: Props) => {
   const classes = useLinearGraphStyle()
 
@@ -47,7 +62,7 @@ const LinearGraph = (props: Props) => {
         <div className={classes.title}>
           {props.title}
         </div>
-        <LinearProgress
+        <ColoredLinearProgress
           variant="determinate"
           value={props.percent}
         />
