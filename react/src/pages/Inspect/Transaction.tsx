@@ -92,9 +92,7 @@ const payloadColumns: StringMap = {
       header: 'Hosting fee'
     }
   ],
-  propose: [
-
-  ],
+  propose: [],
   retract: [
     {
       key: 'amount',
@@ -191,7 +189,6 @@ const Transaction = () => {
   const {chainId, updated} = useUpdateState()
 
   useEffect(() => {
-    console.log(chainId, hash, updated)
     if (updated && tx.sender === "") {
       ExplorerAPI
         .fetchTransaction(chainId, hash as string)
@@ -200,7 +197,7 @@ const Transaction = () => {
           setLoading(false)
         })
     }
-  }, [chainId, hash, updated])
+  }, [chainId, hash, updated, tx.sender])
 
   const payload = useMemo(() => {
     return {

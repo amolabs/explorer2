@@ -101,7 +101,8 @@ function App() {
 
   useEffect(() => {
     const updateBlockchain = () => {
-      if (path.split('/')[1] === chainId) {
+      const matchedChainId = path.split('/')[1]
+      if (matchedChainId === chainId || matchedChainId === '') {
         dispatch({
           type: UPDATE_BLOCKCHAIN
         })
@@ -246,7 +247,7 @@ function App() {
                   <Route path={`/:chainId/blocks`} component={Blocks}/>
                   <Route path={`/:chainId/inspect`} component={Inspect}/>
                   <Route path={`/:chainId/validators`} component={Validators}/>
-                  <Route path="/">
+                  <Route path="/" exact={true}>
                     <Redirect to="/amo-cherryblossom-01/"/>
                   </Route>
                 </Switch>

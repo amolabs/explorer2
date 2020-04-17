@@ -16,7 +16,6 @@ import {
 } from "@material-ui/core"
 import {makeStyles} from "@material-ui/core/styles"
 import {useUpdateState} from "../reducer"
-import clsx from "clsx"
 
 const useStyle = makeStyles((theme) => ({
   mobileTableCell: {
