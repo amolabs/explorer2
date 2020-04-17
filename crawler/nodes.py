@@ -45,6 +45,7 @@ def expand(node):
     node['p2p_addr'] = node['node_info']['id']+'@'+tcp_addr
     node['rpc_addr'] = 'http://'+tcp_addr
     node['catching_up_sign'] = '+' if node['sync_info']['catching_up'] else ' '
+    node['voting_power'] = node['validator_info']['voting_power']
     return node
 
 cands = []
@@ -69,16 +70,16 @@ while cands:
 
 # this is just for neat display
 mlen = 0
-plen = 0
+alen = 0
 monikers = {}
 for _, n in nodes.items():
     expand(n)
     mlen = max(mlen, len(n['moniker']))
-    plen = max(plen, len(n['p2p_addr']))
+    alen = max(alen, len(n['rpc_addr']))
     monikers[n['moniker']] = n
 
 print()
 for k in sorted(monikers.keys()):
     n = monikers[k]
-    print(f'{k:{mlen}} {n["p2p_addr"]:{plen}} {n["catching_up_sign"]} {n["sync_info"]["latest_block_height"]}')
+    print(f'{k:{mlen}} {n["rpc_addr"]:{alen}} {n["sync_info"]["latest_block_height"]:>7} {n["catching_up_sign"]} {n["voting_power"]:>{20}}')
 
