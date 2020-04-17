@@ -121,6 +121,73 @@ const payloadColumns: StringMap = {
       header: 'Amount',
       format: displayAmount
     }
+  ],
+  withdraw: [
+    {
+      key: 'amount',
+      header: 'Amount',
+      format: displayAmount
+    }
+  ],
+  vote: [
+    {
+      key: 'draft_id',
+      header: 'Draft id'
+    },
+    {
+      key: 'approve',
+      header: 'Approve',
+      format: (approve: boolean) => {
+        return `${approve}`
+      }
+    }
+  ],
+  request: [
+    {
+      key: 'target',
+      header: 'Target'
+    },
+    {
+      key: 'payment',
+      header: 'Payment',
+      format: displayAmount
+    }
+  ],
+  grant: [
+    {
+      key: 'target',
+      header: 'Target'
+    }
+  ],
+  cancel: [
+    {
+      key: 'target',
+      header: 'Target'
+    }
+  ],
+  revoke: [
+    {
+      key: 'target',
+      header: 'Target'
+    },
+    {
+      key: 'grantee',
+      header: 'Grantee',
+      format: displayAddress
+    }
+  ],
+  burn: [
+    {
+      key: 'udc',
+      header: 'UDC'
+    },
+    {
+      key: 'amount',
+      header: 'Amount',
+      format: (amount: string) => {
+        return Number(amount).toLocaleString()
+      }
+    }
   ]
 }
 
