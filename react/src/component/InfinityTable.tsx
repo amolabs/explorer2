@@ -112,7 +112,7 @@ const collapsedHeight = 170
 function InfinityTable<T>(props: Props<T>) {
   const classes = useInfinityScrollStyle()
 
-  const breakMD = useMediaQuery('(max-width: 961px)')
+  const breakMD = useMediaQuery('(max-width: 960px)')
   const [recentWidth, setRecentWidth] = useState<number | undefined>(undefined)
   const {chainId} = useUpdateState()
 
@@ -303,7 +303,6 @@ export function useScrollUpdate<T>(fetcher: (size: number) => Promise<T[]>, thre
 
   const onScroll = useCallback((params: { scrollTop: number }) => {
     const height = document.documentElement.clientHeight + params.scrollTop + threshold
-    console.log(list.length, loading)
     if ((height >= document.body.scrollHeight) && loading === 'ready') {
       setLoading('fetch')
       fetcher(list.length)

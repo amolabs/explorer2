@@ -52,19 +52,13 @@ a {
   color: #4580E6;
 }
 
-@media (min-width: 660px) {
+@media (min-width: 600px) {
   .fixed-width {
-    width: 640px;
+    width: 600px;
   }
 }
 
-@media (min-width: 850px) {
-  .fixed-width {
-    width: 800px;
-  }
-}
-
-@media (min-width: 1000px) {
+@media (min-width: 960px) {
   .fixed-width {
     width: 960px;
   }

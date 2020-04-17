@@ -16,6 +16,7 @@ import {
 } from "@material-ui/core"
 import {makeStyles} from "@material-ui/core/styles"
 import {useUpdateState} from "../reducer"
+import clsx from "clsx"
 
 const useStyle = makeStyles((theme) => ({
   mobileTableCell: {
@@ -121,8 +122,8 @@ function CollapseTable<T extends Record<string, any>>(props: Props<T>) {
       <Paper elevation={elevation}>
         {Pagination}
         <TableContainer style={containerStyle}>
-          <Table stickyHeader={true}>
-            <Hidden only={['xs', 'sm', 'md']}>
+          <Table>
+            <Hidden only={['xs', 'sm', 'md', 'lg']}>
               <TableHead
                 component="thead"
               >
@@ -152,10 +153,10 @@ function CollapseTable<T extends Record<string, any>>(props: Props<T>) {
 
                         return (
                           <TableCell key={c.key} align="center" className={isMobile ? classes.mobileTableCell : ''}>
-                            <Hidden only={['xs', 'sm', 'md']}>
+                            <Hidden only={['xs', 'sm', 'md', 'lg']}>
                               {value}
                             </Hidden>
-                            <Hidden only={['lg', 'xl']}>
+                            <Hidden only={['xl']}>
                               <div className={isMobile ? classes.mobileTableCellHeader : ''}>
                                 {c.header || c.key.toUpperCase()}
                               </div>

@@ -44,10 +44,6 @@ const columns = [
 
 const transactionColumns = [
   {
-    key: 'height',
-    header: 'Height'
-  },
-  {
     key: 'index',
     header: 'Index'
   },

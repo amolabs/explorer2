@@ -37,7 +37,7 @@ const columns = [
     key: 'hash',
     label: 'Hash',
     width: 100,
-    flexGrow: 10,
+    flexGrow: 8,
     columnData: {
       format: (hash: string, chainId: string) => {
         return (
@@ -67,7 +67,7 @@ const columns = [
     key: 'info',
     label: 'Result',
     width: 100,
-    flexGrow: 2,
+    flexGrow: 4,
     columnData: {
       format: displayResult
     }

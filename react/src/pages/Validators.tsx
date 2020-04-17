@@ -100,7 +100,7 @@ const Validators = () => {
           <StatCard
             icon={CompareArrows}
             title={"Average effective stake"}
-            suffix={`/ validators`}
+            suffix={`/ validator`}
           >
             -
           </StatCard>

@@ -29,6 +29,7 @@ import {RESET_CURRENT_HEIGHT} from "./reducer/blocks"
 import Blocks from "./pages/Blocks"
 import Inspect from "./pages/Inspect"
 import Validators from "./pages/Validators"
+import Footer from "./component/Footer"
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -98,22 +99,22 @@ function App() {
 
   const isDesktop = useMediaQuery('(min-width: 1280px)')
 
-  const updateBlockchain = () => {
-    if (path.split('/')[1] === chainId) {
-      dispatch({
-        type: UPDATE_BLOCKCHAIN
-      })
-    }
-  }
-
   useEffect(() => {
+    const updateBlockchain = () => {
+      if (path.split('/')[1] === chainId) {
+        dispatch({
+          type: UPDATE_BLOCKCHAIN
+        })
+      }
+    }
+
     updateBlockchain()
     const handler = setInterval(() => {
       updateBlockchain()
     }, 3000)
 
     return () => clearInterval(handler)
-  }, [dispatch, chainId])
+  }, [dispatch, path, chainId])
 
   const handleTabChange = (event: any, newValue: any) => {
     dispatch(push(`/${chainId}${urls[newValue]}`))
@@ -223,8 +224,8 @@ function App() {
       }}>
         <div style={{
           padding: '24px',
-          height: '300px',
-          display: 'flex'
+          display: 'flex',
+          minHeight: 'calc(100vh - 254px)'
         }}>
           <Grid
             container
@@ -253,6 +254,7 @@ function App() {
             </Grid>
           </Grid>
         </div>
+        <Footer/>
       </div>
     </div>
   )
