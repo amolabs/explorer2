@@ -59,9 +59,9 @@ class Builder:
 
     def _vars(self):
         v = vars(self).copy()
-        del v['db']
-        del v['cursor']
-        del v['lock']
+        if 'db' in v: del v['db']
+        if 'cursor' in v: del v['cursor']
+        if 'lock' in v: del v['lock']
         return v
 
     def stat(self):
