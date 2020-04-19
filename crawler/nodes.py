@@ -43,7 +43,9 @@ def expand(node):
     node['moniker'] = node['node_info']['moniker']
     tcp_addr = node['node_info']['listen_addr'].split('tcp://')[1]
     node['p2p_addr'] = node['node_info']['id']+'@'+tcp_addr
-    node['rpc_addr'] = 'http://'+tcp_addr
+    ip_addr = tcp_addr.split(':')[0]
+    rpc_port = node['node_info']['other']['rpc_address'].split('tcp://')[1].split(':')[1]
+    node['rpc_addr'] = f'http://{ip_addr}:{rpc_port}'
     node['catching_up_sign'] = '+' if node['sync_info']['catching_up'] else ' '
     node['voting_power'] = node['validator_info']['voting_power']
     return node

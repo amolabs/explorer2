@@ -1,21 +1,45 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # vim: set sw=4 ts=4 expandtab :
 
+import argparse
 import json
 import base64
 from hashlib import sha256
+
+from filelock import FileLock
+import dbproxy
+from error import ArgError
 
 import amo
 import stats
 import models
 
 class Builder:
-    def __init__(self, chain_id, db):
+    def __init__(self, chain_id, db=None, force=False):
+        if chain_id == None:
+            raise ArgError('no chain_id is given.')
         self.chain_id = chain_id
-        self.db = db
 
-        self.height = 0
-        cur = self.db.cursor()
+        if db == None:
+            db = dbproxy.connect_db()
+        self.db = db
+        self.cursor = self.db.cursor()
+
+        self.lock = FileLock(f'builder-{self.chain_id}')
+        try:
+            self.lock.acquire()
+        except Exception:
+            if force:
+                self.lock.force_acquire()
+            else:
+                print('lock file exists. exiting.')
+                exit(-1)
+
+        self.refresh_roof()
+
+        cur = self.cursor
+        # get current explorer state
         cur.execute("""
             SELECT * FROM `play_stat` WHERE (`chain_id` = %(chain_id)s)
             """,
@@ -25,33 +49,23 @@ class Builder:
             d = dict(zip(cur.column_names, row))
             self.height = d['height']
         else:
+            self.height = 0
             cur.execute("""
                 INSERT INTO `play_stat` (`chain_id`, `height`)
                 VALUES (%(chain_id)s, %(height)s)
                 """,
                 self._vars())
-        cur.execute("""
-            SELECT `height` FROM `explorer`.`c_blocks` cb
-            WHERE cb.`chain_id` = %(chain_id)s
-            ORDER BY cb.`height` DESC LIMIT 1
-            """,
-            self._vars())
-        row = cur.fetchone()
-        if row:
-            d = dict(zip(cur.column_names, row))
-            self.roof = d['height']
-        else:
-            self.roof = 0
-        self.db.commit()
-        cur.close()
+            self.db.commit()
 
     def _vars(self):
         v = vars(self).copy()
         del v['db']
+        del v['cursor']
+        del v['lock']
         return v
 
     def stat(self):
-        print(f'[builder] chain: {self.chain_id}, local {self.height} => remote {self.roof}', flush=True)
+        print(f'[builder] chain: {self.chain_id}, local {self.height}, remote {self.roof}', flush=True)
 
     def clear(self):
         print('REBUILD state db')
@@ -110,13 +124,29 @@ class Builder:
         self.db.commit()
         cur.close()
 
-    def play(self, num):
+    def refresh_roof(self):
+        cur = self.cursor
+        # get current explorer collector state
+        cur.execute("""
+            SELECT `height` FROM `explorer`.`c_blocks` cb
+            WHERE cb.`chain_id` = %(chain_id)s
+            ORDER BY cb.`height` DESC LIMIT 1
+            """,
+            self._vars())
+        row = cur.fetchone()
+        if row:
+            d = dict(zip(cur.column_names, row))
+            self.roof = d['height']
+        else:
+            self.roof = 0
+
+    def play(self, limit, verbose):
         if self.height == 0:
             if self.play_genesis() == False:
                 return False
-        if num == 0:
-            num = self.roof - self.height
-        for i in range(num):
+        if limit == 0:
+            limit = self.roof - self.height
+        for i in range(limit):
             if self.play_block() == True:
                 continue
 
@@ -225,6 +255,10 @@ class Builder:
             """,
             self._vars())
 
+    def close(self):
+        self.db.close()
+        self.lock.release()
+
 def delete_val(chain_id, addr, cur):
     cur.execute("""
         UPDATE `s_accounts`
@@ -244,4 +278,39 @@ def update_val(chain_id, addr, power, cur):
         WHERE (`chain_id` = %(chain_id)s AND `val_addr` = %(val_addr)s)
         """,
         {'chain_id': chain_id, 'val_addr': addr, 'val_power': str(power)})
+
+if __name__ == "__main__":
+    # command line args
+    p = argparse.ArgumentParser('AMO blockchain explorer DB builder')
+    p.add_argument("-c", "--chain", help="chain id to build state db",
+                   type=str)
+    p.add_argument("-l", "--limit", help="limit number of blocks to play",
+                   type=int, default=100)
+    p.add_argument("-r", "--rebuild", help="rebuild",
+                   default=False, dest='rebuild', action='store_true')
+    p.add_argument("-v", "--verbose", help="verbose output",
+                   default=False, dest='verbose', action='store_true')
+    p.add_argument("-f", "--force", help="force-run even if there is a lock",
+                   default=False, dest='force', action='store_true')
+    args = p.parse_args()
+
+    try:
+        builder = Builder(args.chain, force=args.force)
+    except ArgError as e:
+        print(e.message)
+        exit(-1)
+
+    if args.rebuild:
+        builder.clear()
+
+    builder.stat()
+    builder.play(args.limit, args.verbose)
+    if args.limit == 0:
+        builder.refresh_roof()
+        while builder.roof - builder.height > 0:
+            builder.stat()
+            builder.play(0, args.verbose)
+    builder.stat()
+
+    builder.close()
 
