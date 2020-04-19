@@ -24,6 +24,8 @@ class Collector:
         self.db = db
         cur = self.db.cursor()
 
+        self.refresh_remote()
+
         self.lock = FileLock(f'collector-{self.chain_id}')
         try:
             self.lock.acquire()
@@ -33,8 +35,6 @@ class Collector:
             else:
                 print('lock file exists. exiting.')
                 exit(-1)
-
-        self.refresh_remote()
 
         # get current explorer state
         cur.execute("""SELECT `height` FROM `c_blocks` 

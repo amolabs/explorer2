@@ -26,6 +26,8 @@ class Builder:
         self.db = db
         self.cursor = self.db.cursor()
 
+        self.refresh_roof()
+
         self.lock = FileLock(f'builder-{self.chain_id}')
         try:
             self.lock.acquire()
@@ -35,8 +37,6 @@ class Builder:
             else:
                 print('lock file exists. exiting.')
                 exit(-1)
-
-        self.refresh_roof()
 
         cur = self.cursor
         # get current explorer state
