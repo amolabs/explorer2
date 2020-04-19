@@ -178,9 +178,9 @@ class Collector:
             self.db.commit()
 
         # closing
-        print(f'{acc} blocks collected')
         if verbose:
             print()
+        print(f'{acc} blocks collected')
         cur.close()
 
     def collect_block(self, s, height):

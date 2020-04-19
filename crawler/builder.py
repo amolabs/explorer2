@@ -148,7 +148,17 @@ class Builder:
             limit = self.roof - self.height
         for i in range(limit):
             if self.play_block() == True:
+                h = self.height
+                if verbose:
+                    if h % 50 == 0:
+                        print('.', flush=True)
+                    else:
+                        print('.', end='', flush=True)
+                if h % 1000 == 0:
+                    print(f'block height {h}', flush=True)
                 continue
+        if verbose:
+            print()
 
     def play_genesis(self):
         cur = self.db.cursor()
@@ -189,10 +199,6 @@ class Builder:
         self._save_height(cur)
         self.db.commit()
         cur.close()
-
-        # progress report
-        if self.height % 1000 == 0:
-            print(f'block height {self.height}', flush=True)
 
         return True
 
