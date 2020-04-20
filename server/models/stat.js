@@ -1,5 +1,6 @@
 /* vim: set sw=2 ts=2 expandtab : */
 const db = require('../db/db');
+const BigInt = require('BigInt');
 
 async function getBlockStat(chain_id, non_empty, num_blks) {
   return new Promise(function(resolve, reject) {
