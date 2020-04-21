@@ -11,6 +11,10 @@ from filelock import FileLock
 import dbproxy
 from error import ArgError
 
+# for main
+import time
+import signal
+
 import amo
 import stats
 import models
@@ -125,6 +129,7 @@ class Builder:
         cur.close()
 
     def refresh_roof(self):
+        self.db.commit() # to get updated blocks
         cur = self.cursor
         # get current explorer collector state
         cur.execute("""
@@ -146,8 +151,10 @@ class Builder:
                 return False
         if limit == 0:
             limit = self.roof - self.height
+        acc = 0
         for i in range(limit):
             if self.play_block() == True:
+                acc += 1
                 h = self.height
                 if verbose:
                     if h % 50 == 0:
@@ -156,9 +163,9 @@ class Builder:
                         print('.', end='', flush=True)
                 if h % 1000 == 0:
                     print(f'block height {h}', flush=True)
-                continue
         if verbose:
             print()
+        print(f'{acc} blocks played')
 
     def play_genesis(self):
         cur = self.db.cursor()
@@ -265,6 +272,15 @@ class Builder:
         self.db.close()
         self.lock.release()
 
+    def watch(self):
+        print(f'Waiting for new block from db')
+        while True:
+            time.sleep(2)
+            self.refresh_roof()
+            if self.roof - self.height > 0:
+                self.play(0, args.verbose)
+                self.stat()
+
 def delete_val(chain_id, addr, cur):
     cur.execute("""
         UPDATE `s_accounts`
@@ -284,6 +300,9 @@ def update_val(chain_id, addr, power, cur):
         WHERE (`chain_id` = %(chain_id)s AND `val_addr` = %(val_addr)s)
         """,
         {'chain_id': chain_id, 'val_addr': addr, 'val_power': str(power)})
+
+def handle(sig, st):
+    raise KeyboardInterrupt
 
 if __name__ == "__main__":
     # command line args
@@ -309,14 +328,27 @@ if __name__ == "__main__":
     if args.rebuild:
         builder.clear()
 
-    builder.stat()
-    builder.play(args.limit, args.verbose)
-    if args.limit == 0:
-        builder.refresh_roof()
-        while builder.roof - builder.height > 0:
-            builder.stat()
-            builder.play(0, args.verbose)
-    builder.stat()
-
-    builder.close()
+    try:
+        signal.signal(signal.SIGTERM, handle)
+        builder.stat()
+        builder.play(args.limit, args.verbose)
+        builder.stat()
+        if args.limit == 0:
+            builder.refresh_roof()
+            while builder.roof - builder.height > 0:
+                builder.play(0, args.verbose)
+                builder.stat()
+                builder.refresh_roof()
+            print('No more blocks.')
+            builder.watch()
+    except Exception as e:
+        print('exception occurred', e)
+        builder.close()
+        exit(-1)
+    except KeyboardInterrupt:
+        print('interrupted. closing builder')
+        builder.close()
+    else:
+        print('closing builder')
+        builder.close()
 

@@ -23,14 +23,14 @@ class Block:
         return v
 
     def read(self, raw):
-        self.hash = raw['block_id']['hash']
+        self.hash = raw['block_id']['hash'] if 'block_id' in raw else ''
         header = raw['block']['header']
         self.time = dateparse(header['time']) .astimezone(tz=timezone.utc)
         self.proposer = header['proposer_address']
         self.txs = raw['block']['data']['txs']
 
     def read_meta(self, raw):
-        self.hash = raw['block_id']['hash']
+        self.hash = raw['block_id']['hash'] if 'block_id' in raw else ''
         header = raw['header']
         self.time = dateparse(header['time']) .astimezone(tz=timezone.utc)
         self.proposer = header['proposer_address']
@@ -45,16 +45,6 @@ class Block:
         self.validator_updates = raw['validator_updates']
         if self.validator_updates == None:
             self.validator_updates = []
-        #val_updates = json.loads(r.text)['result']['validator_updates']
-        #"validator_updates": [
-        #  {
-        #    "pub_key": {
-        #      "type": "ed25519",
-        #      "data": "G73RonjbbShWc0JXQ2lqStkx67tt5U8uyfcJy+SM6AQ="
-        #    },
-        #    "power": "325962901115417480"
-        #  }
-        #],
 
     def set_meta(self, blk_id, blk_header):
         self.time = dateparse(blk_header['time']).astimezone(tz=timezone.utc)

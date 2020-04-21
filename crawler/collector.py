@@ -11,6 +11,11 @@ from filelock import FileLock
 import dbproxy
 from error import ArgError
 
+# for main
+import asyncio
+import websockets
+import signal
+
 import amo
 
 class Collector:
@@ -52,6 +57,8 @@ class Collector:
     def _vars(self):
         v = vars(self).copy()
         if 'db' in v: del v['db']
+        if 'cursor' in v: del v['cursor']
+        if 'http_sess' in v: del v['http_sess']
         if 'lock' in v: del v['lock']
         return v
 
@@ -115,10 +122,11 @@ class Collector:
         cur.close()
 
     def play(self, limit, verbose):
-        cur = self.db.cursor()
-        s = requests.Session()
+        self.verbose = verbose
+        self.cursor = self.db.cursor()
+        self.http_sess = requests.Session()
 
-        self.ensure_genesis(s)
+        self.ensure_genesis(self.http_sess)
 
         # figure out
         if limit > 0:
@@ -131,46 +139,13 @@ class Collector:
         while limit > 0:
             # 20 blocks is a tendermint limitation
             batch = min(20, limit)
-            blocks = self.collect_block_metas(s, batch_base + 1, batch)
+            blocks = self.collect_block_metas(self.http_sess, batch_base + 1, batch)
             if len(blocks) == 0:
                 print('No more blocks')
                 break
             self.db.autocommit = False
             for block in blocks:
-                h = block.height
-                if verbose:
-                    if h % 50 == 0:
-                        print('.', flush=True)
-                    else:
-                        print('.', end='', flush=True)
-                if h % 1000 == 0:
-                    print(f'block height {h}', flush=True)
-
-                block.save(cur) # for FK contraint
-                if block.num_txs > 0:
-                    block = self.collect_block(s, h)
-
-                    num = 0
-                    num_valid = 0
-                    num_invalid = 0
-                    for i in range(len(block.txs) if block.txs else 0):
-                        tx_body = block.txs[i]
-                        tx_result = block.txs_results[i]
-                        tx = amo.Tx(block.chain_id, block.height, i)
-                        tx.parse_body(tx_body)
-                        tx.set_result(tx_result)
-                        if tx_result['code'] == 0:
-                            num_valid += 1
-                        else:
-                            num_invalid += 1
-                        num += 1
-                        tx.save(cur)
-
-                    if num_valid > 0 or num_invalid > 0:
-                        block.num_txs = num
-                        block.num_txs_valid = num_valid
-                        block.num_txs_invalid = num_invalid
-                        block.update_num_txs(cur)
+                self.play_block(block)
             limit -= len(blocks)
             acc += len(blocks)
             batch_base += len(blocks)
@@ -181,7 +156,44 @@ class Collector:
         if verbose:
             print()
         print(f'{acc} blocks collected')
-        cur.close()
+        self.cursor.close()
+        self.cursor = None
+
+    def play_block(self, block):
+        h = block.height
+        if self.verbose:
+            if h % 50 == 0:
+                print('.', flush=True)
+            else:
+                print('.', end='', flush=True)
+        if h % 1000 == 0:
+            print(f'block height {h}', flush=True)
+
+        block.save(self.cursor) # for FK contraint
+        if block.num_txs > 0:
+            block = self.collect_block(self.http_sess, h)
+
+            num = 0
+            num_valid = 0
+            num_invalid = 0
+            for i in range(len(block.txs) if block.txs else 0):
+                tx_body = block.txs[i]
+                tx_result = block.txs_results[i]
+                tx = amo.Tx(block.chain_id, block.height, i)
+                tx.parse_body(tx_body)
+                tx.set_result(tx_result)
+                if tx_result['code'] == 0:
+                    num_valid += 1
+                else:
+                    num_invalid += 1
+                num += 1
+                tx.save(self.cursor)
+
+            if num_valid > 0 or num_invalid > 0:
+                block.num_txs = num
+                block.num_txs_valid = num_valid
+                block.num_txs_invalid = num_invalid
+                block.update_num_txs(self.cursor)
 
     def collect_block(self, s, height):
         r = s.get(f'{self.node}/block?height={height}')
@@ -222,6 +234,45 @@ class Collector:
         self.db.close()
         self.lock.release()
 
+    async def watch_loop(self):
+        async with websockets.connect(self.ws_server) as ws:
+            await ws.send(json.dumps({
+                'jsonrpc': '2.0',
+                'method': 'subscribe',
+                'id': 'newBlock',
+                'params': { 'query': "tm.event='NewBlockHeader'" }
+                }))
+            msg = await ws.recv() # eat up subscription response
+            #print(f'msg {msg}')
+            while True:
+                r = await ws.recv()
+
+                # XXX: Response from subscription does not give the block_id of
+                # the newly added block. We need another rpc query to get the
+                # block_id. Instead, just call self.play().
+                self.refresh_remote()
+                self.play(0, self.verbose)
+
+                #print(f'websocket message {r}')
+                #msg = json.loads(r)
+                #raw = msg['result']['data']['value']
+                #block = amo.Block(raw['header']['chain_id'],
+                #        raw['header']['height'])
+                #block.read_meta(raw)
+                #self.cursor = self.db.cursor()
+                #self.play_block(block)
+                #self.db.commit()
+                #self.cursor.close()
+                #self.cursor = None
+
+    def watch(self):
+        self.ws_server = args.node.replace('http:', 'ws:') + '/websocket'
+        print(f'Waiting for new block from websocket: {self.ws_server}')
+        asyncio.get_event_loop().run_until_complete(self.watch_loop())
+
+def handle(sig, st):
+    raise KeyboardInterrupt
+
 if __name__ == '__main__':
     # command line args
     p = argparse.ArgumentParser('AMO blockchain explorer block collector')
@@ -246,15 +297,27 @@ if __name__ == '__main__':
     if args.rebuild:
         collector.clear()
 
-    collector.stat()
-    collector.play(args.limit, args.verbose)
-    if args.limit == 0:
-        collector.refresh_remote()
-        while collector.remote_height - collector.height > 0:
-            collector.stat()
-            collector.play(0, args.verbose)
-    collector.stat()
-
-    collector.close()
-
+    try:
+        signal.signal(signal.SIGTERM, handle)
+        collector.stat()
+        collector.play(args.limit, args.verbose)
+        collector.stat()
+        if args.limit == 0:
+            collector.refresh_remote()
+            while collector.remote_height - collector.height > 0:
+                collector.play(0, args.verbose)
+                collector.stat()
+                collector.refresh_remote()
+            print('No more blocks.')
+            collector.watch()
+    except Exception as e:
+        print('exception occurred', e.message)
+        collector.close()
+        exit(-1)
+    except KeyboardInterrupt:
+        print('interrupted. closing collector')
+        collector.close()
+    else:
+        print('closing collector')
+        collector.close()
 
