@@ -25,7 +25,8 @@ router.get('/', function(req, res) {
   const chain_id = res.locals.chain_id;
   var non_empty = 'non_empty' in req.query;
   var num_blks = req.query.num_blks || 0;
-  chain.getSummary(chain_id, non_empty, num_blks)
+  var num_txs = req.query.num_txs || 0;
+  chain.getSummary(chain_id, non_empty, num_blks, num_txs)
     .then((val) => {
       res.send(val);
     })

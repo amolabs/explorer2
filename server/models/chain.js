@@ -4,10 +4,10 @@ const stat = require('./stat');
 const block = require('./block');
 const tx = require('./tx');
 
-async function getSummary(chain_id, non_empty, num_blks) {
+async function getSummary(chain_id, non_empty, num_blks, num_txs) {
   return Promise.all([
     stat.getBlockStat(chain_id, non_empty, num_blks),
-    stat.getTxStat(chain_id),
+    stat.getTxStat(chain_id, num_txs),
     stat.getAssetStat(chain_id),
     block.getLast(chain_id),
     tx.getLast(chain_id),
