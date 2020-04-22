@@ -3,6 +3,7 @@ import {put, select, takeEvery} from 'redux-saga/effects'
 import {newBlockchainState, newRecentTxs, UPDATE_BLOCKCHAIN, UPDATE_RECENT_TXS} from "./reducer/blockchain"
 import {AMO} from "./util"
 import {newBlocksAction, UPDATE_BLOCKS} from "./reducer/blocks"
+import ExplorerAPI from "./ExplorerAPI"
 
 const server = 'http://explorer.amolabs.io/api'
 
@@ -15,7 +16,7 @@ const option: AxiosRequestConfig = {
 const fetchBlockchain = function* () {
   try {
     const chainId = yield select(state => state.blockchain.chainId)
-    const {data} = yield Axios.get(`${server}/chain/${chainId}?num_blks=1000`, option)
+    const {data} = yield ExplorerAPI.fetchBlockchain(chainId)
 
     const stakes = Number(data.stakes)
     const delegates = Number(data.delegates)
@@ -101,6 +102,10 @@ const fetchRecentBlocks = function* () {
   } catch (e) {
 
   }
+}
+
+const fetchBlockStats = function* () {
+  const chainId = yield select(state => state.blockchain.chainId)
 }
 
 export function* syncBlockchain() {

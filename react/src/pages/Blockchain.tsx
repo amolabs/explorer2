@@ -136,7 +136,7 @@ const Blockchain = () => {
         suffix='s'
         color='#FF6E4A'
       >
-        {blockState.avg_interval.toPrecision(3)}
+        {blockState.avg_interval.toFixed(2)}
       </StatCard>
       <StatCard
         icon={Timeline}
@@ -151,7 +151,7 @@ const Blockchain = () => {
         suffix='/ blk'
         color='#FFC940'
       >
-        {(blockState.num_txs / blockState.height).toPrecision(3)}
+        {(blockState.num_txs / blockState.height).toFixed(4)}
       </StatCard>
       <StatCard
         icon={AccountBalance}

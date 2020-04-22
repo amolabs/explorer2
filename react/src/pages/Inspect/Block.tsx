@@ -45,7 +45,10 @@ const columns = [
 const transactionColumns = [
   {
     key: 'index',
-    header: 'Index'
+    header: 'Index',
+    format: (index: number) => {
+      return index + 1
+    }
   },
   {
     key: 'hash',
@@ -101,12 +104,16 @@ const Block = () => {
         .then(({data}) => {
           setBlock(data)
           setBlockLoading(false)
-        })
-      ExplorerAPI
-        .fetchBlockTransaction(chainId, blockHeight, 0, PAGE_SIZE)
-        .then(({data}) => {
-          setTransactions(data)
-          setTxLoading(false)
+          if (data.num_txs !== 0) {
+            ExplorerAPI
+              .fetchBlockTransaction(chainId, blockHeight, 0, PAGE_SIZE)
+              .then(({data}) => {
+                setTransactions(data)
+                setTxLoading(false)
+              })
+          } else {
+            setTxLoading(false)
+          }
         })
     }
   }, [chainId, height])

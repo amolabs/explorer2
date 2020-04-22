@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react'
 import StatCard from "../component/StatCard"
 import {Grid} from "@material-ui/core"
-import ExplorerAPI, {AccountSchema, ValidatorStat} from "../ExplorerAPI"
+import ExplorerAPI, {ValidatorAccount, ValidatorStat} from "../ExplorerAPI"
 import {AccountBalance, AllInclusive, CompareArrows} from "@material-ui/icons"
 import CollapseTable from "../component/CollapseTable"
 import {useUpdateState} from "../reducer"
@@ -10,7 +10,7 @@ import {Link} from "react-router-dom"
 
 const columns = [
   {
-    key: 'val_addr',
+    key: 'address',
     header: 'Address',
     format: (validator: string, chainId: string) => {
       return (
@@ -28,7 +28,7 @@ const columns = [
     }
   },
   {
-    key: 'val_power',
+    key: 'power',
     header: 'Power',
     format: (power: string) => {
       return Number(power).toPrecision(5)
@@ -39,7 +39,10 @@ const columns = [
 const Validators = () => {
   const {chainId} = useUpdateState()
   const [stat, setStat] = useState<ValidatorStat>({
-    num: 0
+    num_validators: 0,
+    avg_blk_incentive: '0',
+    avg_eff_stake: 0,
+    total_eff_stakes: 0
   })
   const [loading, setLoading] = useState(true)
 
@@ -51,7 +54,7 @@ const Validators = () => {
       })
   }, [chainId])
 
-  const [validators, setValidators] = useState<AccountSchema[]>([])
+  const [validators, setValidators] = useState<ValidatorAccount[]>([])
 
   useEffect(() => {
     ExplorerAPI
@@ -80,29 +83,29 @@ const Validators = () => {
             title={"# of validators"}
             color="#FF6E4A"
           >
-            {stat.num}
+            {stat.num_validators}
           </StatCard>
           <StatCard
             icon={AllInclusive}
-            title={"Average activity"}
-            suffix={`%`}
+            title={"Average incentive"}
+            suffix={`/ blk`}
             color="#62D96B"
           >
-            -
+            {AMO(stat.avg_blk_incentive)}
           </StatCard>
           <StatCard
             icon={CompareArrows}
             title={"Total effective stakes"}
             color="#9179F2"
           >
-            -
+            {AMO(stat.total_eff_stakes)}
           </StatCard>
           <StatCard
             icon={CompareArrows}
             title={"Average effective stake"}
             suffix={`/ validator`}
           >
-            -
+            {AMO(stat.avg_eff_stake)}
           </StatCard>
         </Grid>
       </StatCard>

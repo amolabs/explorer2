@@ -1,11 +1,10 @@
 import React, {useEffect, useState} from 'react'
-import {useSelector} from "react-redux"
-import {RootState, useFixedHeight} from "../reducer"
-import {BlockchainState, TransactionSchema} from "../reducer/blockchain"
+import {useFixedHeight, useUpdateState} from "../reducer"
+import {TransactionSchema} from "../reducer/blockchain"
 import StatCard from "../component/StatCard"
 import {Equalizer, HighlightOff, Speed, Timelapse} from "@material-ui/icons"
 import InfinityTable, {useScrollUpdate} from "../component/InfinityTable"
-import ExplorerAPI from "../ExplorerAPI"
+import ExplorerAPI, {TxStat} from "../ExplorerAPI"
 import {Grid} from "@material-ui/core"
 import SizeTitle, {LastOptions} from "../component/SizeTitle"
 import {Link} from "react-router-dom"
@@ -79,17 +78,36 @@ type TransactionStatsProps = {
 }
 
 const BlockStats = (props: TransactionStatsProps) => {
-  const {
-    avg_binding_lag,
-    num_txs_invalid,
-    num_txs
-  } = useSelector<RootState, BlockchainState>(state => state.blockchain.blockState)
+  const [txStat, setTxStat] = useState<TxStat>({
+    chain_id: 'amo-cherrryblossom-01',
+    avg_binding_lag: 0,
+    avg_fee: 0,
+    avg_tx_bytes: 0,
+    max_binding_lag: 0,
+    num_txs: 0,
+    num_txs_invalid: 0,
+    num_txs_valid: 0,
+    tx_height: 1
+  })
+  const {chainId} = useUpdateState()
+
+  const onSizeChange = (txs: number) => {
+    ExplorerAPI
+      .fetchTxStat(chainId, txs)
+      .then(({data}) => {
+        setTxStat(data)
+      })
+  }
+
+  useEffect(() => {
+    onSizeChange(100)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <>
       <StatCard
-        title={<SizeTitle target="Tx" values={LastOptions} onSizeChange={() => {
-        }}/>}
+        title={<SizeTitle target="Tx" values={LastOptions} onSizeChange={onSizeChange}/>}
         size="large"
         setRef={props.setRef}
       >
@@ -103,15 +121,15 @@ const BlockStats = (props: TransactionStatsProps) => {
             suffix={`blks`}
             color="#FF6E4A"
           >
-            {avg_binding_lag.toFixed(2)}
+            {txStat.avg_binding_lag.toFixed(2)}
           </StatCard>
           <StatCard
             icon={HighlightOff}
             title={"Invalid Transaction ratio"}
-            suffix={`/ ${num_txs}`}
+            suffix={`/ ${txStat.num_txs}`}
             color="#9179F2"
           >
-            {num_txs_invalid}
+            {txStat.num_txs_invalid}
           </StatCard>
           <StatCard
             icon={Timelapse}
@@ -119,14 +137,14 @@ const BlockStats = (props: TransactionStatsProps) => {
             suffix={`B`}
             color="#62D96B"
           >
-            {0}
+            {txStat.avg_tx_bytes}
           </StatCard>
           <StatCard
             icon={Equalizer}
             title={"Average fee"}
             suffix={`/ tx`}
           >
-            {0}
+            {txStat.avg_fee.toFixed(2)}
           </StatCard>
         </Grid>
       </StatCard>

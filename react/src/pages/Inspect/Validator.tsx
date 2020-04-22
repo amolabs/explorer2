@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react'
 import {Link, useParams} from 'react-router-dom'
 import {useUpdateState} from "../../reducer"
-import ExplorerAPI, {ValidatorAccount} from "../../ExplorerAPI"
+import ExplorerAPI, {DelegateItem, ValidatorAccount} from "../../ExplorerAPI"
 import InformationCard from "../../component/InformationCard"
 import {AMO, displayAddress} from "../../util"
 import CollapseTable from "../../component/CollapseTable"
@@ -44,8 +44,8 @@ const delegatorColumns = [
     format: displayAddress
   },
   {
-    key: 'amount',
-    header: 'Amount',
+    key: 'delegate',
+    header: 'Delegate',
     format: AMO
   }
 ]
@@ -55,13 +55,15 @@ const Validator = () => {
   const {chainId, updated} = useUpdateState()
   const [validator, setValidator] = useState<ValidatorAccount>({
     address: '',
-    delegators: [],
     owner: '',
     power: '0',
     pubkey: '',
-    stake: '0'
+    stake: '0',
+    eff_stake: '0'
   })
+  const [delegators, setDelegators] = useState<DelegateItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [delegatorsLoading, setDelegatorsLoading] = useState(true)
 
   useEffect(() => {
     if (updated) {
@@ -70,6 +72,12 @@ const Validator = () => {
         .then(({data}) => {
           setValidator(data)
           setLoading(false)
+        })
+      ExplorerAPI
+        .fetchDelegators(chainId, address as string, 0)
+        .then(({data}) => {
+          setDelegators(data)
+          setDelegatorsLoading(false)
         })
     }
   }, [chainId, address, updated])
@@ -84,11 +92,11 @@ const Validator = () => {
         divider
       />
       <CollapseTable
-        dataSource={validator.delegators}
+        dataSource={delegators}
         columns={delegatorColumns}
         rowKey="address"
         fallbackText="No delegators"
-        loading={loading}
+        loading={delegatorsLoading}
       />
     </>
   )

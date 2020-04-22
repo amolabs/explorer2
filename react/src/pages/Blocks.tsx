@@ -3,7 +3,7 @@ import {BlockState} from "../reducer/blocks"
 import {useFixedHeight, useUpdateState} from "../reducer"
 import {Grid} from "@material-ui/core"
 import InfinityTable, {useScrollUpdate} from "../component/InfinityTable"
-import ExplorerAPI, {BlocksStat} from '../ExplorerAPI'
+import ExplorerAPI, {BlockStat} from '../ExplorerAPI'
 import {Link} from "react-router-dom"
 import StatCard from "../component/StatCard"
 import {History, Timeline, TrendingUp, ViewModule} from "@material-ui/icons"
@@ -59,10 +59,9 @@ type BlocksStatProps = {
 }
 
 const BlocksStatView = (props: BlocksStatProps) => {
-  const [blocksStat, setBlocksStat] = useState<BlocksStat>({
+  const [blocksStat, setBlocksStat] = useState<BlockStat>({
     chain_id: 'amo-cherrryblossom-01',
     last_height: 1,
-    num_blocks: 1,
     num_txs: 0,
     avg_num_txs: 0,
     avg_blk_tx_bytes: 0,
@@ -95,20 +94,19 @@ const BlocksStatView = (props: BlocksStatProps) => {
           spacing={2}
         >
           <StatCard
+            icon={TrendingUp}
+            title="Last block height"
+            color="#9179F2"
+          >
+            {blocksStat.last_height}
+          </StatCard>
+          <StatCard
             icon={History}
             title="Average interval"
             suffix="s / blk"
             color="#FF6E4A"
           >
             {blocksStat.avg_interval.toFixed(2)}
-          </StatCard>
-          <StatCard
-            icon={TrendingUp}
-            title="Average incentive"
-            suffix="AMO / blk"
-            color="#9179F2"
-          >
-            -
           </StatCard>
           <StatCard
             icon={Timeline}
