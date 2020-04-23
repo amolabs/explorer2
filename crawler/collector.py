@@ -8,10 +8,10 @@ import base64
 import requests
 
 from filelock import FileLock
-import dbproxy
 from error import ArgError
 
 # for main
+import dbproxy
 import asyncio
 import websockets
 import signal
@@ -251,6 +251,7 @@ class Collector:
                 # the newly added block. We need another rpc query to get the
                 # block_id. Instead, just call self.play().
                 self.refresh_remote()
+                self.db = dbproxy.connect_db()
                 self.play(0, self.verbose)
 
                 #print(f'websocket message {r}')
@@ -266,6 +267,10 @@ class Collector:
                 #self.cursor = None
 
     def watch(self):
+        # XXX: It is possible that we may wait so long that the DB connection
+        # is lost due to the timeout. To avoid the situation, close the db
+        # connection now, and reconnect when it is needed.
+        self.db.close()
         self.ws_server = args.node.replace('http:', 'ws:') + '/websocket'
         print(f'Waiting for new block from websocket: {self.ws_server}')
         asyncio.get_event_loop().run_until_complete(self.watch_loop())

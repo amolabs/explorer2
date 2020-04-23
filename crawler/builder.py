@@ -8,10 +8,10 @@ import base64
 from hashlib import sha256
 
 from filelock import FileLock
-import dbproxy
 from error import ArgError
 
 # for main
+import dbproxy
 import time
 import signal
 
