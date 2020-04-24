@@ -244,36 +244,31 @@ class Collector:
         self.lock.release()
 
     async def watch_loop(self):
-        async with websockets.connect(self.ws_server) as ws:
-            await ws.send(json.dumps({
-                'jsonrpc': '2.0',
-                'method': 'subscribe',
-                'id': 'newBlock',
-                'params': { 'query': "tm.event='NewBlockHeader'" }
-                }))
-            msg = await ws.recv() # eat up subscription response
-            #print(f'msg {msg}')
-            while True:
-                r = await ws.recv()
-
-                # XXX: Response from subscription does not give the block_id of
-                # the newly added block. We need another rpc query to get the
-                # block_id. Instead, just call self.play().
-                self.refresh_remote()
-                self.db = dbproxy.connect_db()
-                self.play(0, self.verbose)
-
-                #print(f'websocket message {r}')
-                #msg = json.loads(r)
-                #raw = msg['result']['data']['value']
-                #block = amo.Block(raw['header']['chain_id'],
-                #        raw['header']['height'])
-                #block.read_meta(raw)
-                #self.cursor = self.db.cursor()
-                #self.play_block(block)
-                #self.db.commit()
-                #self.cursor.close()
-                #self.cursor = None
+        while True:
+            async with websockets.connect(self.ws_server) as ws:
+                await ws.send(
+                    json.dumps({
+                        'jsonrpc': '2.0',
+                        'method': 'subscribe',
+                        'id': 'newBlock',
+                        'params': {
+                            'query': "tm.event='NewBlockHeader'"
+                        }
+                    }))
+                await ws.recv()  # eat up subscription response
+                while True:
+                    try:
+                        await ws.recv()
+                        # XXX: Response from subscription does not give the
+                        # block_id of the newly added block. We need another
+                        # rpc query to get the block_id. Instead, just call
+                        # self.play().
+                        self.refresh_remote()
+                        self.db = dbproxy.connect_db()
+                        self.play(0, self.verbose)
+                        self.db.close()
+                    except websockets.exceptions.ConnectionClosed:
+                        break
 
     def watch(self):
         # XXX: It is possible that we may wait so long that the DB connection
@@ -282,7 +277,9 @@ class Collector:
         self.db.close()
         self.ws_server = args.node.replace('http:', 'ws:') + '/websocket'
         print(f'Waiting for new block from websocket: {self.ws_server}')
-        asyncio.get_event_loop().run_until_complete(self.watch_loop())
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(self.watch_loop())
+
 
 def handle(sig, st):
     raise KeyboardInterrupt
