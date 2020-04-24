@@ -71,7 +71,7 @@ const routers = {
 const urls = Object.keys(routers)
 
 const tabList = [
-  'blockchain',
+  'dashboard',
   'inspect',
   'blocks',
   'transactions',

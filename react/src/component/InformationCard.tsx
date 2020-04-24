@@ -34,6 +34,7 @@ type InformationCardProps<T extends StringMap> = {
   columns: CollapsedTableColumn[],
   data: T,
   loading?: boolean
+  setRef?: (instance?: HTMLDivElement) => void
 }
 
 const InformationCard = function <T extends StringMap>(props: InformationCardProps<T>) {
@@ -45,7 +46,8 @@ const InformationCard = function <T extends StringMap>(props: InformationCardPro
     columns,
     data,
     divider,
-    loading
+    loading,
+    setRef
   } = props
 
   return (
@@ -55,6 +57,7 @@ const InformationCard = function <T extends StringMap>(props: InformationCardPro
       titleAlign="left"
       bodyAlign="left"
       divider={divider}
+      setRef={setRef}
     >
       {
         loading ? (

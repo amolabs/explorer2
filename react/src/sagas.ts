@@ -74,10 +74,8 @@ const fetchRecentTransactions = function* () {
 
 const fetchRecentBlocks = function* () {
   try {
-    const {chainId, blockState} = yield select(state => state.blockchain)
+    const {chainId, height} = yield select(state => state.blockchain)
     const {blocks, currentHeight} = yield select(state => state.blocks)
-
-    const height = blockState.height
 
     if (height === currentHeight || height < 11) {
       return
@@ -88,7 +86,7 @@ const fetchRecentBlocks = function* () {
     const newBlocks = []
 
     for (let i = 0; i < fetchLength; i++) {
-      const {data: block} = yield Axios.get(`${server}/chain/${chainId}/blocks/${height - i}`)
+      const {data: block} = yield ExplorerAPI.fetchBlock(chainId, height - i)
       newBlocks.push(block)
     }
 
@@ -102,10 +100,6 @@ const fetchRecentBlocks = function* () {
   } catch (e) {
 
   }
-}
-
-const fetchBlockStats = function* () {
-  const chainId = yield select(state => state.blockchain.chainId)
 }
 
 export function* syncBlockchain() {

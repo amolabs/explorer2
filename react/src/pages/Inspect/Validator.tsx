@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react'
 import {Link, useParams} from 'react-router-dom'
 import {useUpdateState} from "../../reducer"
-import ExplorerAPI, {DelegateItem, ValidatorAccount} from "../../ExplorerAPI"
+import ExplorerAPI, {DelegateItem} from "../../ExplorerAPI"
 import InformationCard from "../../component/InformationCard"
 import {AMO, displayAddress} from "../../util"
 import CollapseTable from "../../component/CollapseTable"

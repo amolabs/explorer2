@@ -4,74 +4,10 @@ import {TransactionSchema} from "../reducer/blockchain"
 import StatCard from "../component/StatCard"
 import {Equalizer, HighlightOff, Speed, Timelapse} from "@material-ui/icons"
 import InfinityTable, {useScrollUpdate} from "../component/InfinityTable"
-import ExplorerAPI, {TxStat} from "../ExplorerAPI"
+import ExplorerAPI from "../ExplorerAPI"
 import {Grid} from "@material-ui/core"
 import SizeTitle, {LastOptions} from "../component/SizeTitle"
-import {Link} from "react-router-dom"
-import {displayAddress, displayResult} from "../util"
-
-const columns = [
-  {
-    key: 'height',
-    label: 'Height',
-    width: 100,
-    flexGrow: 1,
-    columnData: {
-      format: (height: number, chainId: string) => {
-        return (
-          <Link to={`/${chainId}/inspect/block/${height}`}>
-            {height}
-          </Link>
-        )
-      }
-    }
-  },
-  {
-    key: 'index',
-    label: 'Index',
-    width: 100,
-    flexGrow: 1
-  },
-  {
-    key: 'hash',
-    label: 'Hash',
-    width: 100,
-    flexGrow: 8,
-    columnData: {
-      format: (hash: string, chainId: string) => {
-        return (
-          <Link to={`/${chainId}/inspect/tx/${hash}`}>
-            {hash}
-          </Link>
-        )
-      }
-    }
-  },
-  {
-    key: 'sender',
-    label: 'Sender',
-    width: 100,
-    flexGrow: 5,
-    columnData: {
-      format: displayAddress
-    }
-  },
-  {
-    key: 'type',
-    label: 'Type',
-    width: 100,
-    flexGrow: 1
-  },
-  {
-    key: 'info',
-    label: 'Result',
-    width: 100,
-    flexGrow: 4,
-    columnData: {
-      format: displayResult
-    }
-  }
-]
+import {transactionColumns} from "../component/columns"
 
 type TransactionStatsProps = {
   setRef: (instance?: HTMLDivElement) => void
@@ -102,7 +38,7 @@ const BlockStats = (props: TransactionStatsProps) => {
   useEffect(() => {
     onSizeChange(100)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [chainId])
 
   return (
     <>
@@ -186,7 +122,7 @@ const Transactions = () => {
       <BlockStats setRef={setRef}/>
       <InfinityTable
         onScroll={onScroll}
-        columns={columns}
+        columns={transactionColumns}
         rowKey="hash"
         data={list}
         loading={loading}

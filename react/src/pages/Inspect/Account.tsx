@@ -1,13 +1,15 @@
 import React, {useEffect, useState} from 'react'
 import InformationCard from "../../component/InformationCard"
-import ExplorerAPI, {AccountSchema} from "../../ExplorerAPI"
+import ExplorerAPI from "../../ExplorerAPI"
 import {Link, useParams} from 'react-router-dom'
-import {RootState, useUpdateState} from "../../reducer"
-import {displayAmount, displayResult} from "../../util"
+import {RootState, useFixedHeight, useUpdateState} from "../../reducer"
+import {displayAddress, displayAmount, displayResult} from "../../util"
 import {useSelector} from "react-redux"
 import CollapseTable from "../../component/CollapseTable"
 import {TransactionSchema} from "../../reducer/blockchain"
 import {AxiosError} from "axios"
+import InfinityTable, {useScrollUpdate} from "../../component/InfinityTable"
+import {transactionColumns} from "../../component/columns"
 
 const columns = [
   {
@@ -31,60 +33,9 @@ const columns = [
   }
 ]
 
-const transactionColumns = [
-  {
-    key: 'height',
-    header: 'Height',
-    format: (height: number, chainId: string) => {
-      return (
-        <Link to={`/${chainId}/inspect/block/${height}`}>
-          {height}
-        </Link>
-      )
-    }
-  },
-  {
-    key: 'index',
-    header: 'Index'
-  },
-  {
-    key: 'hash',
-    header: 'Hash',
-    format: (hash: string, chainId: string) => {
-      return (
-        <Link to={`/${chainId}/inspect/tx/${hash}`}>
-          {hash}
-        </Link>
-      )
-    }
-  },
-  {
-    key: 'sender',
-    header: 'Sender',
-    format: (sender: string, chainId: string) => {
-      return (
-        <Link to={`/${chainId}/inspect/account/${sender}`}>
-          {sender}
-        </Link>
-      )
-    }
-  },
-  {
-    key: 'type',
-    header: 'Type'
-  },
-  {
-    key: 'info',
-    header: 'Result',
-    format: displayResult
-  }
-]
-
 const Account = () => {
   const {address} = useParams()
-  const {chainId, updated} = useUpdateState()
-
-  const height = useSelector<RootState, number>(state => state.blockchain.height)
+  const {chainId, fixedHeight} = useFixedHeight()
 
   const [account, setAccount] = useState<AccountSchema>({
     address: address as string,
@@ -97,9 +48,8 @@ const Account = () => {
     val_power: '0',
     val_pubkey: ''
   })
-  const [transactions, setTransactions] = useState<TransactionSchema[]>([])
   const [statLoading, setStatLoading] = useState(true)
-  const [loading, setLoading] = useState(true)
+  const [ref, setRef] = useState<HTMLDivElement | undefined>(undefined)
 
   useEffect(() => {
     ExplorerAPI
@@ -113,34 +63,44 @@ const Account = () => {
       })
   }, [chainId, address])
 
+  const [list, setList, loading, setLoading, onScroll] = useScrollUpdate<TransactionSchema>(async (size: number) => {
+    const {data} = await ExplorerAPI.fetchAccountTransactions(chainId, address as string, fixedHeight, size)
+
+    if (data.length === 0) {
+      setLoading('done')
+    }
+
+    return data
+  }, 200 + (ref ? ref.clientHeight : 0))
+
   useEffect(() => {
-    if (updated) {
-      ExplorerAPI
-        .fetchAccountTransactions(chainId, address as string, height, 0)
+    if (fixedHeight !== -1) {
+      ExplorerAPI.fetchAccountTransactions(chainId, address as string, fixedHeight, 0)
         .then(({data}) => {
-          setTransactions(data)
-          setLoading(false)
-        })
-        .catch(() => {
-          setLoading(false)
+          setList(data)
+          window.scrollTo({
+            top: 0
+          })
         })
     }
-  }, [chainId, updated, address, height])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fixedHeight])
 
   return (
     <>
       <InformationCard
+        setRef={setRef}
         title="Account information"
         columns={columns}
         data={account}
         divider
         loading={statLoading}
       />
-      <CollapseTable
-        dataSource={transactions}
+      <InfinityTable
+        onScroll={onScroll}
         columns={transactionColumns}
         rowKey="hash"
-        fallbackText="No related transactions"
+        data={list}
         loading={loading}
       />
     </>

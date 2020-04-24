@@ -3,7 +3,7 @@ import {BlockState} from "../reducer/blocks"
 import {useFixedHeight, useUpdateState} from "../reducer"
 import {Grid} from "@material-ui/core"
 import InfinityTable, {useScrollUpdate} from "../component/InfinityTable"
-import ExplorerAPI, {BlockStat} from '../ExplorerAPI'
+import ExplorerAPI from '../ExplorerAPI'
 import {Link} from "react-router-dom"
 import StatCard from "../component/StatCard"
 import {History, Timeline, TrendingUp, ViewModule} from "@material-ui/icons"
@@ -80,7 +80,7 @@ const BlocksStatView = (props: BlocksStatProps) => {
   useEffect(() => {
     onSizeChange(100)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [chainId])
 
   return (
     <>

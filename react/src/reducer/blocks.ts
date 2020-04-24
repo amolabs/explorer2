@@ -1,4 +1,5 @@
 import {Action} from "redux"
+import {SET_NETWORK, SetNetwork} from "./blockchain"
 
 export const initialBlock = {
   chain_id: "amo-cherryblossom-01",
@@ -51,11 +52,16 @@ interface NewRecentBlocks extends Action {
 
 type actions =
   NewRecentBlocks |
+  SetNetwork |
   Action<typeof UPDATE_BLOCKS> |
   Action<typeof RESET_CURRENT_HEIGHT>
 
 export default (state: BlocksInitialState = initialState, action: actions) => {
   switch (action.type) {
+    case SET_NETWORK:
+      return {
+        ...initialState
+      }
     case NEW_BLOCKS:
       return {
         ...state,

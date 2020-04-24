@@ -90,7 +90,7 @@ interface NewRecentTransactions extends Action {
   payload: TransactionSchema[]
 }
 
-interface SetNetwork extends Action {
+export interface SetNetwork extends Action {
   type: typeof SET_NETWORK,
   payload: string
 }

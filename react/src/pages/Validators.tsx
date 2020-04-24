@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react'
 import StatCard from "../component/StatCard"
 import {Grid} from "@material-ui/core"
-import ExplorerAPI, {ValidatorAccount, ValidatorStat} from "../ExplorerAPI"
+import ExplorerAPI from "../ExplorerAPI"
 import {AccountBalance, AllInclusive, CompareArrows} from "@material-ui/icons"
 import CollapseTable from "../component/CollapseTable"
 import {useUpdateState} from "../reducer"
