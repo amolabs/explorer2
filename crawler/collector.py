@@ -18,13 +18,14 @@ import signal
 
 import amo
 
+
 class Collector:
     def __init__(self, node, db=None, force=False):
-        if node == None:
+        if node is None:
             raise ArgError('no node is given.')
         self.node = node
 
-        if db == None:
+        if db is None:
             db = dbproxy.connect_db()
         self.db = db
         cur = self.db.cursor()
@@ -42,10 +43,10 @@ class Collector:
                 exit(-1)
 
         # get current explorer state
-        cur.execute("""SELECT `height` FROM `c_blocks` 
+        cur.execute(
+            """SELECT `height` FROM `c_blocks`
             WHERE (`chain_id` = %(chain_id)s)
-            ORDER BY `height` DESC LIMIT 1""",
-            self._vars())
+            ORDER BY `height` DESC LIMIT 1""", self._vars())
         row = cur.fetchone()
         if row:
             b = dict(zip(cur.column_names, row))
@@ -63,22 +64,27 @@ class Collector:
         return v
 
     def stat(self):
-        print(f'[collector] chain: {self.chain_id}, local {self.height}, remote {self.remote_height}', flush=True)
+        print(
+            f'[collector] chain: {self.chain_id}, local {self.height}, remote {self.remote_height}',
+            flush=True)
 
     def clear(self):
         print('REBUILD block db')
         cur = self.db.cursor()
-        cur.execute("""DELETE FROM `c_genesis`
+        cur.execute(
+            """DELETE FROM `c_genesis`
             WHERE (`chain_id` = %(chain_id)s)
             """, self._vars())
         cur.execute("""OPTIMIZE TABLE `c_genesis`""")
         cur.fetchall()
-        cur.execute("""DELETE FROM `c_txs`
+        cur.execute(
+            """DELETE FROM `c_txs`
             WHERE (`chain_id` = %(chain_id)s)
             """, self._vars())
         cur.execute("""OPTIMIZE TABLE `c_txs`""")
         cur.fetchall()
-        cur.execute("""DELETE FROM `c_blocks`
+        cur.execute(
+            """DELETE FROM `c_blocks`
             WHERE (`chain_id` = %(chain_id)s)
             """, self._vars())
         cur.execute("""OPTIMIZE TABLE `c_blocks`""")
@@ -91,33 +97,33 @@ class Collector:
         # get node status
         try:
             r = requests.get(f'{self.node}/status')
-        except:
+        except Exception:
             print('unable to get node status')
             exit(-1)
         dat = json.loads(r.text)
-        self.remote_height = int(dat['result']['sync_info']['latest_block_height'])
+        self.remote_height = int(
+            dat['result']['sync_info']['latest_block_height'])
         self.chain_id = dat['result']['node_info']['network']
-
 
     def ensure_genesis(self, s):
         cur = self.db.cursor()
         # check genesis
-        cur.execute("""
+        cur.execute(
+            """
             SELECT COUNT(*) FROM `c_genesis` WHERE (`chain_id` = %(chain_id)s)
-            """,
-            self._vars())
+            """, self._vars())
         row = cur.fetchone()
         if row[0] == 0:
             r = s.get(f'{self.node}/genesis')
             dat = json.loads(r.text)
             self.genesis = json.dumps(dat['result']['genesis'])
-            cur.execute("""
+            cur.execute(
+                """
                 INSERT INTO `c_genesis`
                     (`chain_id`, `genesis`)
                 VALUES
                     (%(chain_id)s, %(genesis)s)
-                """,
-                self._vars())
+                """, self._vars())
             self.db.commit()
         cur.close()
 
@@ -139,7 +145,8 @@ class Collector:
         while limit > 0:
             # 20 blocks is a tendermint limitation
             batch = min(20, limit)
-            blocks = self.collect_block_metas(self.http_sess, batch_base + 1, batch)
+            blocks = self.collect_block_metas(self.http_sess, batch_base + 1,
+                                              batch)
             if len(blocks) == 0:
                 print('No more blocks')
                 break
@@ -169,7 +176,7 @@ class Collector:
         if h % 1000 == 0:
             print(f'block height {h}', flush=True)
 
-        block.save(self.cursor) # for FK contraint
+        block.save(self.cursor)  # for FK contraint
         if block.num_txs > 0:
             block = self.collect_block(self.http_sess, h)
 
@@ -199,7 +206,7 @@ class Collector:
         r = s.get(f'{self.node}/block?height={height}')
         dat = json.loads(r.text)['result']
         block = amo.Block(dat['block']['header']['chain_id'],
-                dat['block']['header']['height'])
+                          dat['block']['header']['height'])
         block.read(dat)
 
         r = s.get(f'{self.node}/block_results?height={height}')
@@ -209,7 +216,7 @@ class Collector:
         q = f'"{height}"'.encode('latin1').hex()
         r = s.get(f'{self.node}/abci_query?path="/inc_block"&data=0x{q}')
         b = json.loads(r.text)['result']['response']['value']
-        if b == None:
+        if b is None:
             incs = json.dumps([])
         else:
             incs = base64.b64decode(b)
@@ -219,13 +226,15 @@ class Collector:
 
     def collect_block_metas(self, s, start, num):
         # NOTE: max 20 items
-        r = s.get(f'{self.node}/blockchain?minHeight={start}&maxHeight={start+num-1}')
+        r = s.get(
+            f'{self.node}/blockchain?minHeight={start}&maxHeight={start+num-1}'
+        )
         metas = json.loads(r.text)['result']['block_metas']
         list.sort(metas, key=lambda val: int(val['header']['height']))
         blocks = []
         for meta in metas:
             block = amo.Block(meta['header']['chain_id'],
-                    meta['header']['height'])
+                              meta['header']['height'])
             block.read_meta(meta)
             blocks.append(block)
         return blocks
@@ -278,6 +287,7 @@ class Collector:
 def handle(sig, st):
     raise KeyboardInterrupt
 
+
 if __name__ == '__main__':
     # command line args
     p = argparse.ArgumentParser('AMO blockchain explorer block collector')
@@ -294,7 +304,7 @@ if __name__ == '__main__':
     args = p.parse_args()
 
     try:
-        collector = Collector(node = args.node, force=args.force)
+        collector = Collector(node=args.node, force=args.force)
     except ArgError as e:
         print(e.message)
         exit(-1)
@@ -325,4 +335,3 @@ if __name__ == '__main__':
     else:
         print('closing collector')
         collector.close()
-
