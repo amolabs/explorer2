@@ -2,13 +2,17 @@
 # vim: set sw=4 ts=4 expandtab :
 
 import json
+import os
 
 import mysql.connector
 from mysql.connector import Error as DBError
 
+
 def connect_db():
     # read config
-    dbconfigfile = '../db/config.json'
+    config_dir = os.path.dirname(os.path.abspath(__file__)) + '/../db'
+    dbconfigfile = config_dir + '/config.json'
+    # print(dbconfigfile)
     try:
         f = open(dbconfigfile, "r")
         cfg = json.load(f)
@@ -34,4 +38,3 @@ def connect_db():
     else:
         print("DB connected")
         return db
-
