@@ -322,13 +322,13 @@ if __name__ == '__main__':
                 collector.refresh_remote()
             print('No more blocks.')
             collector.watch()
-    except Exception as e:
-        print('exception occurred', e.message)
-        collector.close()
-        exit(-1)
     except KeyboardInterrupt:
         print('interrupted. closing collector')
         collector.close()
+    except Exception as e:
+        print('exception occurred', e)
+        collector.close()
+        exit(-1)
     else:
         print('closing collector')
         collector.close()

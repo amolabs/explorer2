@@ -362,14 +362,12 @@ if __name__ == "__main__":
                 builder.refresh_roof()
             print('No more blocks.')
             builder.watch()
-    except Exception as e:
-        print('exception occurred', e)
-        builder.close()
-        exit(-1)
     except KeyboardInterrupt:
         print('interrupted. closing builder')
+        builder.close()
+    except Exception as e:
+        print('exception occurred', e)
         builder.close()
     else:
         print('closing builder')
         builder.close()
-
