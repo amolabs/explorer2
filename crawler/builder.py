@@ -19,13 +19,14 @@ import amo
 import stats
 import models
 
+
 class Builder:
     def __init__(self, chain_id, db=None, force=False):
-        if chain_id == None:
+        if chain_id is None:
             raise ArgError('no chain_id is given.')
         self.chain_id = chain_id
 
-        if db == None:
+        if db is None:
             db = dbproxy.connect_db()
         self.db = db
         self.cursor = self.db.cursor()
@@ -44,21 +45,21 @@ class Builder:
 
         cur = self.cursor
         # get current explorer state
-        cur.execute("""
+        cur.execute(
+            """
             SELECT * FROM `play_stat` WHERE (`chain_id` = %(chain_id)s)
-            """,
-            self._vars())
+            """, self._vars())
         row = cur.fetchone()
         if row:
             d = dict(zip(cur.column_names, row))
             self.height = d['height']
         else:
             self.height = 0
-            cur.execute("""
+            cur.execute(
+                """
                 INSERT INTO `play_stat` (`chain_id`, `height`)
                 VALUES (%(chain_id)s, %(height)s)
-                """,
-                self._vars())
+                """, self._vars())
             self.db.commit()
 
     def _vars(self):
@@ -69,55 +70,65 @@ class Builder:
         return v
 
     def stat(self):
-        print(f'[builder] chain: {self.chain_id}, local {self.height}, remote {self.roof}', flush=True)
+        print(
+            f'[builder] chain: {self.chain_id}, local {self.height}, remote {self.roof}',
+            flush=True)
 
     def clear(self):
         print('REBUILD state db')
         cur = self.db.cursor()
 
-        cur.execute("""DELETE FROM `s_requests`
+        cur.execute(
+            """DELETE FROM `s_requests`
             WHERE (`chain_id` = %(chain_id)s)
             """, self._vars())
         cur.execute("""OPTIMIZE TABLE `s_requests`""")
         cur.fetchall()
 
-        cur.execute("""DELETE FROM `s_usages`
+        cur.execute(
+            """DELETE FROM `s_usages`
             WHERE (`chain_id` = %(chain_id)s)
             """, self._vars())
         cur.execute("""OPTIMIZE TABLE `s_usages`""")
         cur.fetchall()
 
-        cur.execute("""DELETE FROM `s_parcels`
+        cur.execute(
+            """DELETE FROM `s_parcels`
             WHERE (`chain_id` = %(chain_id)s)
             """, self._vars())
         cur.execute("""OPTIMIZE TABLE `s_parcels`""")
         cur.fetchall()
 
-        cur.execute("""DELETE FROM `s_storages`
+        cur.execute(
+            """DELETE FROM `s_storages`
             WHERE (`chain_id` = %(chain_id)s)
             """, self._vars())
         cur.execute("""OPTIMIZE TABLE `s_storages`""")
         cur.fetchall()
 
-        cur.execute("""DELETE FROM `s_votes`
+        cur.execute(
+            """DELETE FROM `s_votes`
             WHERE (`chain_id` = %(chain_id)s)
             """, self._vars())
         cur.execute("""OPTIMIZE TABLE `s_votes`""")
         cur.fetchall()
 
-        cur.execute("""DELETE FROM `s_drafts`
+        cur.execute(
+            """DELETE FROM `s_drafts`
             WHERE (`chain_id` = %(chain_id)s)
             """, self._vars())
         cur.execute("""OPTIMIZE TABLE `s_drafts`""")
         cur.fetchall()
 
-        cur.execute("""DELETE FROM `s_accounts`
+        cur.execute(
+            """DELETE FROM `s_accounts`
             WHERE (`chain_id` = %(chain_id)s)
             """, self._vars())
         cur.execute("""OPTIMIZE TABLE `s_accounts`""")
         cur.fetchall()
 
-        cur.execute("""DELETE FROM `asset_stat`
+        cur.execute(
+            """DELETE FROM `asset_stat`
             WHERE (`chain_id` = %(chain_id)s)
             """, self._vars())
         cur.execute("""OPTIMIZE TABLE `asset_stat`""")
@@ -129,15 +140,15 @@ class Builder:
         cur.close()
 
     def refresh_roof(self):
-        self.db.commit() # to get updated blocks
+        self.db.commit()  # to get updated blocks
         cur = self.cursor
         # get current explorer collector state
-        cur.execute("""
+        cur.execute(
+            """
             SELECT `height` FROM `explorer`.`c_blocks` cb
             WHERE cb.`chain_id` = %(chain_id)s
             ORDER BY cb.`height` DESC LIMIT 1
-            """,
-            self._vars())
+            """, self._vars())
         row = cur.fetchone()
         if row:
             d = dict(zip(cur.column_names, row))
@@ -147,13 +158,13 @@ class Builder:
 
     def play(self, limit, verbose):
         if self.height == 0:
-            if self.play_genesis() == False:
+            if self.play_genesis() is False:
                 return False
         if limit == 0:
             limit = self.roof - self.height
         acc = 0
         for i in range(limit):
-            if self.play_block() == True:
+            if self.play_block() is True:
                 acc += 1
                 h = self.height
                 if verbose:
@@ -169,11 +180,11 @@ class Builder:
 
     def play_genesis(self):
         cur = self.db.cursor()
-        cur.execute("""
+        cur.execute(
+            """
             SELECT `genesis` FROM `c_genesis`
             WHERE (`chain_id` = %(chain_id)s)
-            """,
-            self._vars())
+            """, self._vars())
         row = cur.fetchone()
         asset_stat = stats.Asset(self.chain_id, cur)
         if row:
@@ -184,7 +195,7 @@ class Builder:
                 asset_stat.active_coins += int(item['amount'])
                 acc.save(cur)
         else:
-            return False # TODO: return error
+            return False  # TODO: return error
 
         # stat
         asset_stat.save(cur)
@@ -211,11 +222,11 @@ class Builder:
 
     def play_block_txs(self, cursor):
         # txs
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT * FROM `c_txs`
             WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s + 1)
-            """,
-            self._vars())
+            """, self._vars())
         rows = cursor.fetchall()
         cols = cursor.column_names
         for row in rows:
@@ -226,11 +237,11 @@ class Builder:
 
     def play_block_incentives(self, cursor):
         # block incentives
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT `incentives` FROM `c_blocks`
             WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s + 1)
-            """,
-            self._vars())
+            """, self._vars())
         row = cursor.fetchone()
         asset_stat = stats.Asset(self.chain_id, cursor)
         if row:
@@ -244,13 +255,12 @@ class Builder:
 
     def play_block_val_updates(self, cursor):
         # validator updates
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT `validator_updates` FROM `c_blocks`
             WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s + 1)
-            """,
-            self._vars())
+            """, self._vars())
         row = cursor.fetchone()
-        #asset_stat = stats.Asset(self.chain_id, cursor)
         if row:
             vals = json.loads(row[0])
             for val in vals:
@@ -262,11 +272,11 @@ class Builder:
                     update_val(self.chain_id, val_addr, val['power'], cursor)
 
     def _save_height(self, cursor):
-        cursor.execute("""
+        cursor.execute(
+            """
             UPDATE `play_stat` SET `height` = %(height)s
             WHERE `chain_id` = %(chain_id)s
-            """,
-            self._vars())
+            """, self._vars())
 
     def close(self):
         self.db.close()
@@ -281,28 +291,39 @@ class Builder:
                 self.play(0, args.verbose)
                 self.stat()
 
+
 def delete_val(chain_id, addr, cur):
-    cur.execute("""
+    cur.execute(
+        """
         UPDATE `s_accounts`
         SET
             `val_addr` = NULL,
             `val_pubkey` = NULL,
             `val_power` = '0'
         WHERE (`chain_id` = %(chain_id)s AND `val_addr` = %(val_addr)s)
-        """,
-        {'chain_id': chain_id, 'val_addr': addr})
+        """, {
+            'chain_id': chain_id,
+            'val_addr': addr
+        })
+
 
 def update_val(chain_id, addr, power, cur):
-    cur.execute("""
+    cur.execute(
+        """
         UPDATE `s_accounts`
         SET
             `val_power` = %(val_power)s
         WHERE (`chain_id` = %(chain_id)s AND `val_addr` = %(val_addr)s)
-        """,
-        {'chain_id': chain_id, 'val_addr': addr, 'val_power': str(power)})
+        """, {
+            'chain_id': chain_id,
+            'val_addr': addr,
+            'val_power': str(power)
+        })
+
 
 def handle(sig, st):
     raise KeyboardInterrupt
+
 
 if __name__ == "__main__":
     # command line args
