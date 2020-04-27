@@ -7,6 +7,8 @@ import json
 import socket
 import requests as r
 
+REQUEST_TIMEOUT = 1 
+
 p = argparse.ArgumentParser('AMO blockchain node inspector')
 p.add_argument('node', type=str, nargs='+')
 
@@ -16,7 +18,7 @@ def neighbors(addr):
     try:
         #print(f'collecting neighbors from {addr}')
         print('.', end='', flush=True)
-        res = r.get(f'http://{addr}/net_info')
+        res = r.get(url=f'http://{addr}/net_info', timeout=REQUEST_TIMEOUT)
     except:
         return []
     peers = json.loads(res.text)['result']['peers']
@@ -33,7 +35,7 @@ def peek(addr):
     try:
         #print(f'collecting information from {addr}')
         print('.', end='', flush=True)
-        res = r.get(f'http://{addr}/status')
+        res = r.get(url=f'http://{addr}/status', timeout=REQUEST_TIMEOUT)
     except:
         return {}
     node = json.loads(res.text)['result']
@@ -64,7 +66,10 @@ print('collecting', end='', flush=True)
 while cands:
     n = cands.pop()
     if n not in nodes:
-        nodes[n] = peek(n)
+        peek_n = peek(n)
+        if peek_n == {}: # when cannot reach to node behind firewall via rpc
+            continue
+        nodes[n] = peek_n 
     peers = neighbors(n)
     for n in peers:
         if n not in nodes and n not in cands:
