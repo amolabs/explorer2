@@ -1,11 +1,15 @@
-import {DependencyList, useCallback, useEffect, useState} from "react"
+import {useCallback, useEffect, useState} from "react"
 import {AxiosError} from "axios"
 
 type useScrollUpdateReturn<T> = [
   T[], UseScrollLoading, (params: { scrollTop: number }) => void
 ]
 
-export default function useScrollUpdate<T>(fetcher: (size: number) => Promise<T[] | null>, ref: HTMLDivElement | undefined, deps?: DependencyList): useScrollUpdateReturn<T> {
+export default function useScrollUpdate<T>(
+  fetcher: (size: number) => Promise<T[] | UseScrollLoading>,
+  ref: HTMLDivElement | undefined,
+  fetchSize: number = 20
+): useScrollUpdateReturn<T> {
   const [list, setList] = useState<T[]>([])
   const [loading, setLoading] = useState<UseScrollLoading>('READY')
 
@@ -14,12 +18,17 @@ export default function useScrollUpdate<T>(fetcher: (size: number) => Promise<T[
       setLoading('FETCH')
       fetcher(list.length)
         .then((data) => {
-          if (data === null) {
-            setLoading('DONE')
+          if (!Array.isArray(data)) {
+            setLoading(data)
             return
           }
 
           setList([...list, ...data])
+          if (data.length < fetchSize) {
+            setLoading('DONE')
+            return
+          }
+
           setTimeout(() => {
             setLoading('READY')
           }, 300)
@@ -30,12 +39,17 @@ export default function useScrollUpdate<T>(fetcher: (size: number) => Promise<T[
               setLoading('DONE')
               return
             }
+
+            if (e.response?.status === 404) {
+              setLoading('DONE')
+              return
+            }
           }
 
           setLoading('READY')
         })
     }
-  }, [list, loading, fetcher])
+  }, [list, loading, fetcher, fetchSize])
 
   const onScroll = (params: { scrollTop: number }) => {
     const height = 200 + document.documentElement.clientHeight + params.scrollTop + (ref?.clientHeight || 0)

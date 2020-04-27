@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useCallback, useState} from 'react'
 import InformationCard from "../../component/InformationCard"
 import ExplorerAPI from "../../ExplorerAPI"
 import {useParams} from 'react-router-dom'
@@ -8,9 +8,10 @@ import {TransactionSchema} from "../../reducer/blockchain"
 import {AxiosError} from "axios"
 import InfinityTable from "../../component/InfinityTable"
 import {transactionColumns} from "../../component/columns"
-import useScrollUpdate from "../../component/useScrollUpdate"
+import useScrollUpdate from "../../hooks/useScrollUpdate"
 import {useDispatch} from "react-redux"
 import {replace} from "connected-react-router"
+import useOnce from "../../hooks/useOnce"
 
 const columns = [
   {
@@ -53,7 +54,7 @@ const Account = () => {
   const [ref, setRef] = useState<HTMLDivElement | undefined>(undefined)
   const dispatch = useDispatch()
 
-  useEffect(() => {
+  const fetchAccount = useCallback((chainId: string) => {
     ExplorerAPI
       .fetchAccount(chainId, address as string)
       .then(({data}) => {
@@ -64,20 +65,21 @@ const Account = () => {
         dispatch(replace(`/${chainId}/inspect/404`, {type: 'ACCOUNT', search: address}))
         setStatLoading(false)
       })
-  }, [chainId, address])
+  }, [address, dispatch])
+  useOnce(fetchAccount)
 
   const [list, loading, onScroll] = useScrollUpdate<TransactionSchema>(async (size: number) => {
     if (fixedHeight !== -1) {
       const {data} = await ExplorerAPI.fetchAccountTransactions(chainId, address as string, fixedHeight, size)
 
       if (data.length === 0) {
-        return null
+        return "DONE"
       }
 
       return data
     }
 
-    return []
+    return "READY"
   }, ref)
 
   return (

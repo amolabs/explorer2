@@ -18,7 +18,8 @@ export type RootState = ReturnType<ReturnType<typeof rootReducer>>
 
 type UpdateState = {
   updated: boolean,
-  chainId: string
+  chainId: string,
+  height: number
 }
 
 type FixedHeightState = {
@@ -30,7 +31,8 @@ type FixedHeightState = {
 export const useUpdateState = () => {
   return useSelector<RootState, UpdateState>(state => ({
     updated: state.blockchain.updated,
-    chainId: state.blockchain.chainId
+    chainId: state.blockchain.chainId,
+    height: state.blockchain.height
   }), shallowEqual)
 }
 

@@ -133,7 +133,7 @@ const ExplorerBar = () => {
     }
 
     dispatch(replace(`/${supportedNetworks[0]}`))
-  }, [path, dispatch])
+  }, [path, dispatch, chainId])
 
   const onChangeNetwork = (e: React.ChangeEvent<{ name?: string; value: unknown }>,) => {
     window.open(`/${e.target.value}`)

@@ -8,7 +8,7 @@ import {Link} from "react-router-dom"
 import StatCard from "../component/StatCard"
 import {History, Timeline, TrendingUp, ViewModule} from "@material-ui/icons"
 import SizeTitle, {LastOptions} from "../component/SizeTitle"
-import useScrollUpdate from "../component/useScrollUpdate"
+import useScrollUpdate from "../hooks/useScrollUpdate"
 
 const columns = [
   {
@@ -140,14 +140,14 @@ const Blocks = () => {
       const nextHeight = fixedHeight - size
 
       if (nextHeight <= 0) {
-        return null
+        return "DONE"
       }
 
       const {data} = await ExplorerAPI.fetchBlocks(chainId, nextHeight)
       return data
     }
 
-    return []
+    return "READY"
   }, [chainId, fixedHeight])
 
   const [blocks, loading, onScroll] = useScrollUpdate<BlockState>(onUpdate, ref)

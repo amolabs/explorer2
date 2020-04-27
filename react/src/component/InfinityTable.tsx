@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react'
+import React, {useCallback, useMemo, useState} from 'react'
 import {
   AutoSizer,
   CellMeasurer,
@@ -14,7 +14,6 @@ import {makeStyles} from "@material-ui/styles"
 import {Backdrop, CircularProgress, Grid, Paper, TableCell, Theme, useMediaQuery} from "@material-ui/core"
 import clsx from "clsx"
 import {useUpdateState} from "../reducer"
-import {AxiosError} from "axios"
 
 const useInfinityScrollStyle = makeStyles((theme: Theme) => ({
   wrapper: {

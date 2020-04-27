@@ -8,7 +8,7 @@ import ExplorerAPI from "../ExplorerAPI"
 import {Grid} from "@material-ui/core"
 import SizeTitle, {LastOptions} from "../component/SizeTitle"
 import {transactionColumns} from "../component/columns"
-import useScrollUpdate from "../component/useScrollUpdate"
+import useScrollUpdate from "../hooks/useScrollUpdate"
 
 type TransactionStatsProps = {
   setRef: (instance?: HTMLDivElement) => void
@@ -99,13 +99,13 @@ const Transactions = () => {
       const {data} = await ExplorerAPI.fetchTransactions(chainId, fixedHeight, size)
 
       if (data.length === 0) {
-        return null
+        return "DONE"
       }
 
       return data
     }
 
-    return []
+    return "READY"
   }, ref)
 
   return (

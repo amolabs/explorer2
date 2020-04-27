@@ -123,7 +123,7 @@ const Block = () => {
           dispatch(replace(`/${chainId}/inspect/404`, { type: 'BLOCK', search: height }))
         })
     }
-  }, [chainId, height])
+  }, [chainId, height, dispatch])
 
   const onChangePage = (e: any, page: number) => {
     if (height && !txLoading) {

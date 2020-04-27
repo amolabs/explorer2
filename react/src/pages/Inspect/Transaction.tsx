@@ -270,7 +270,7 @@ const Transaction = () => {
           dispatch(replace(`/${chainId}/inspect/404`, {type: 'TRANSACTION', search: hash}))
         })
     }
-  }, [chainId, hash, updated, tx.sender])
+  }, [chainId, hash, updated, tx.sender, dispatch])
 
   const payload = useMemo(() => {
     return {
