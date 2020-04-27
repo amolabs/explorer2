@@ -16,7 +16,8 @@ import asyncio
 import websockets
 import signal
 
-import amo
+import block
+import tx
 
 
 class Collector:
@@ -145,18 +146,18 @@ class Collector:
         while limit > 0:
             # 20 blocks is a tendermint limitation
             batch = min(20, limit)
-            blocks = self.collect_block_metas(self.http_sess, batch_base + 1,
-                                              batch)
-            if len(blocks) == 0:
+            blks = self.collect_block_metas(self.http_sess, batch_base + 1,
+                                            batch)
+            if len(blks) == 0:
                 print('No more blocks')
                 break
             self.db.autocommit = False
-            for block in blocks:
-                self.play_block(block)
-            limit -= len(blocks)
-            acc += len(blocks)
-            batch_base += len(blocks)
-            self.height += len(blocks)
+            for blk in blks:
+                self.play_block(blk)
+            limit -= len(blks)
+            acc += len(blks)
+            batch_base += len(blks)
+            self.height += len(blks)
             self.db.commit()
 
         # closing
@@ -166,8 +167,8 @@ class Collector:
         self.cursor.close()
         self.cursor = None
 
-    def play_block(self, block):
-        h = block.height
+    def play_block(self, blk):
+        h = blk.height
         if self.verbose:
             if h % 50 == 0:
                 print('.', flush=True)
@@ -176,42 +177,42 @@ class Collector:
         if h % 1000 == 0:
             print(f'block height {h}', flush=True)
 
-        block.save(self.cursor)  # for FK contraint
-        if block.num_txs > 0:
-            block = self.collect_block(self.http_sess, h)
+        blk.save(self.cursor)  # for FK contraint
+        if blk.num_txs > 0:
+            blk = self.collect_block(self.http_sess, h)
 
             num = 0
             num_valid = 0
             num_invalid = 0
-            for i in range(len(block.txs) if block.txs else 0):
-                tx_body = block.txs[i]
-                tx_result = block.txs_results[i]
-                tx = amo.Tx(block.chain_id, block.height, i)
-                tx.parse_body(tx_body)
-                tx.set_result(tx_result)
+            for i in range(len(blk.txs) if blk.txs else 0):
+                tx_body = blk.txs[i]
+                tx_result = blk.txs_results[i]
+                t = tx.Tx(blk.chain_id, blk.height, i)
+                t.parse_body(tx_body)
+                t.set_result(tx_result)
                 if tx_result['code'] == 0:
                     num_valid += 1
                 else:
                     num_invalid += 1
                 num += 1
-                tx.save(self.cursor)
+                t.save(self.cursor)
 
             if num_valid > 0 or num_invalid > 0:
-                block.num_txs = num
-                block.num_txs_valid = num_valid
-                block.num_txs_invalid = num_invalid
-                block.update_num_txs(self.cursor)
+                blk.num_txs = num
+                blk.num_txs_valid = num_valid
+                blk.num_txs_invalid = num_invalid
+                blk.update_num_txs(self.cursor)
 
     def collect_block(self, s, height):
         r = s.get(f'{self.node}/block?height={height}')
         dat = json.loads(r.text)['result']
-        block = amo.Block(dat['block']['header']['chain_id'],
+        blk = block.Block(dat['block']['header']['chain_id'],
                           dat['block']['header']['height'])
-        block.read(dat)
+        blk.read(dat)
 
         r = s.get(f'{self.node}/block_results?height={height}')
         dat = json.loads(r.text)['result']
-        block.read_results(dat)
+        blk.read_results(dat)
 
         q = f'"{height}"'.encode('latin1').hex()
         r = s.get(f'{self.node}/abci_query?path="/inc_block"&data=0x{q}')
@@ -220,9 +221,9 @@ class Collector:
             incs = json.dumps([])
         else:
             incs = base64.b64decode(b)
-        block.incentives = incs
+        blk.incentives = incs
 
-        return block
+        return blk
 
     def collect_block_metas(self, s, start, num):
         # NOTE: max 20 items
@@ -231,13 +232,13 @@ class Collector:
         )
         metas = json.loads(r.text)['result']['block_metas']
         list.sort(metas, key=lambda val: int(val['header']['height']))
-        blocks = []
+        blks = []
         for meta in metas:
-            block = amo.Block(meta['header']['chain_id'],
+            blk = block.Block(meta['header']['chain_id'],
                               meta['header']['height'])
-            block.read_meta(meta)
-            blocks.append(block)
-        return blocks
+            blk.read_meta(meta)
+            blks.append(blk)
+        return blks
 
     def close(self):
         self.db.close()

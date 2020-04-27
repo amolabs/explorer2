@@ -3,16 +3,79 @@
 
 import json
 from hashlib import sha256
+import base64
+import hashlib
 
 import stats
 import models
 
 
-def unknown(tx, cursor):
+class Tx:
+    """form a tx"""
+    def __init__(self, chain_id, height, index):
+        self.chain_id = chain_id
+        self.height = height
+        self.index = index
+
+    def _vars(self):
+        v = vars(self).copy()
+        return v
+
+    def parse_body(self, body):
+        b = base64.b64decode(body)
+        self.tx_bytes = len(b)
+        self.hash = hashlib.sha256(b).hexdigest().upper()
+        self.body = body
+        parsed = json.loads(b)
+        self.type = parsed['type']
+        self.sender = parsed['sender']
+        self.fee = int(parsed['fee'])
+        self.last_height = int(parsed['last_height'])
+        self.payload = json.dumps(parsed['payload'])
+
+    def set_result(self, result):
+        self.code = result['code']
+        self.info = result['info']
+
+    def read(self, d):
+        self.type = d['type']
+        self.sender = d['sender']
+        self.fee = int(d['fee'])
+        self.last_height = int(d['last_height'])
+        self.payload = d['payload']
+        self.code = d['code']
+        self.info = d['info']
+
+    def play(self, cursor):
+        if self.code != 0:
+            return
+        processor.get(self.type, tx_unknown)(self, cursor)
+
+    """Save to DB
+
+    :param cursor: db cursor opened with conn.cursor()
+    """
+
+    def save(self, cursor):
+        cursor.execute(
+            """
+            INSERT INTO `c_txs`
+                (`chain_id`, `height`, `index`, `hash`, `tx_bytes`,
+                `code`, `info`,
+                `type`, `sender`, `fee`, `last_height`, `payload`)
+            VALUES
+                (%(chain_id)s, %(height)s, %(index)s, %(hash)s, %(tx_bytes)s,
+                %(code)s, %(info)s,
+                %(type)s, %(sender)s, %(fee)s, %(last_height)s, %(payload)s
+                )
+            """, self._vars())
+
+
+def tx_unknown(tx, cursor):
     print(f'tx type ({tx.type}) unknown')
 
 
-def transfer(tx, cursor):
+def tx_transfer(tx, cursor):
     payload = json.loads(tx.payload)
     payload['amount'] = int(payload['amount'])
 
@@ -25,7 +88,7 @@ def transfer(tx, cursor):
     recp.save(cursor)
 
 
-def stake(tx, cursor):
+def tx_stake(tx, cursor):
     payload = json.loads(tx.payload)
     payload['amount'] = int(payload['amount'])
 
@@ -44,7 +107,7 @@ def stake(tx, cursor):
     asset_stat.save(cursor)
 
 
-def withdraw(tx, cursor):
+def tx_withdraw(tx, cursor):
     payload = json.loads(tx.payload)
     payload['amount'] = int(payload['amount'])
 
@@ -62,7 +125,7 @@ def withdraw(tx, cursor):
     asset_stat.save(cursor)
 
 
-def delegate(tx, cursor):
+def tx_delegate(tx, cursor):
     payload = json.loads(tx.payload)
     payload['amount'] = int(payload['amount'])
 
@@ -82,7 +145,7 @@ def delegate(tx, cursor):
     asset_stat.save(cursor)
 
 
-def retract(tx, cursor):
+def tx_retract(tx, cursor):
     payload = json.loads(tx.payload)
     payload['amount'] = int(payload['amount'])
 
@@ -105,7 +168,7 @@ def retract(tx, cursor):
     asset_stat.save(cursor)
 
 
-def setup(tx, cursor):
+def tx_setup(tx, cursor):
     payload = json.loads(tx.payload)
     payload['registration_fee'] = int(payload['registration_fee'])
     payload['hosting_fee'] = int(payload['hosting_fee'])
@@ -121,7 +184,7 @@ def setup(tx, cursor):
     storage.save(cursor)
 
 
-def close(tx, cursor):
+def tx_close(tx, cursor):
     payload = json.loads(tx.payload)
 
     storage = models.Storage(tx.chain_id, payload['storage'], None, cursor)
@@ -130,7 +193,7 @@ def close(tx, cursor):
     storage.save(cursor)
 
 
-def register(tx, cursor):
+def tx_register(tx, cursor):
     payload = json.loads(tx.payload)
 
     owner = models.Account(tx.chain_id, tx.sender, cursor)
@@ -152,7 +215,7 @@ def register(tx, cursor):
     host.save(cursor)
 
 
-def discard(tx, cursor):
+def tx_discard(tx, cursor):
     payload = json.loads(tx.payload)
 
     parcel = models.Parcel(tx.chain_id, payload['target'], None, cursor)
@@ -161,7 +224,7 @@ def discard(tx, cursor):
     parcel.save(cursor)
 
 
-def request(tx, cursor):
+def tx_request(tx, cursor):
     payload = json.loads(tx.payload)
     payload['payment'] = int(payload['payment'])
     payload['dealer_fee'] = int(payload.get('dealer_fee', '0'))
@@ -183,7 +246,7 @@ def request(tx, cursor):
     buyer.save(cursor)
 
 
-def cancel(tx, cursor):
+def tx_cancel(tx, cursor):
     payload = json.loads(tx.payload)
 
     buyer = models.Account(tx.chain_id, tx.sender, cursor)
@@ -196,7 +259,7 @@ def cancel(tx, cursor):
     request.delete(cursor)
 
 
-def grant(tx, cursor):
+def tx_grant(tx, cursor):
     payload = json.loads(tx.payload)
 
     parcel = models.Parcel(tx.chain_id, payload['target'], None, cursor)
@@ -226,7 +289,7 @@ def grant(tx, cursor):
     request.delete(cursor)
 
 
-def revoke(tx, cursor):
+def tx_revoke(tx, cursor):
     payload = json.loads(tx.payload)
 
     usage = models.Usage(tx.chain_id, payload['target'], payload['grantee'],
@@ -235,7 +298,7 @@ def revoke(tx, cursor):
     usage.delete(cursor)
 
 
-def issue(tx, cursor):
+def tx_issue(tx, cursor):
     payload = json.loads(tx.payload)
     payload['amount'] = int(payload['amount'])
 
@@ -253,7 +316,7 @@ def issue(tx, cursor):
     issuer.save(cursor)
 
 
-def lock(tx, cursor):
+def tx_lock(tx, cursor):
     payload = json.loads(tx.payload)
     payload['amount'] = int(payload['amount'])
 
@@ -264,7 +327,7 @@ def lock(tx, cursor):
     udc_bal.save(cursor)
 
 
-def burn(tx, cursor):
+def tx_burn(tx, cursor):
     payload = json.loads(tx.payload)
     payload['amount'] = int(payload['amount'])
 
@@ -274,7 +337,7 @@ def burn(tx, cursor):
     udc_bal.save(cursor)
 
 
-def propose(tx, cursor):
+def tx_propose(tx, cursor):
     payload = json.loads(tx.payload)
     payload['deposit'] = int(payload.get('deposit', '0'))
 
@@ -295,7 +358,7 @@ def propose(tx, cursor):
     draft.save(cursor)
 
 
-def vote(tx, cursor):
+def tx_vote(tx, cursor):
     payload = json.loads(tx.payload)
 
     voter = models.Account(tx.chain_id, tx.sender, cursor)
@@ -307,22 +370,22 @@ def vote(tx, cursor):
 
 
 processor = {
-    'transfer': transfer,
-    'stake': stake,
-    'withdraw': withdraw,
-    'delegate': delegate,
-    'retract': retract,
-    'setup': setup,
-    'close': close,
-    'register': register,
-    'discard': discard,
-    'request': request,
-    'cancel': cancel,
-    'grant': grant,
-    'revoke': revoke,
-    'issue': issue,
-    'lock': lock,
-    'burn': burn,
-    'propose': propose,
-    'vote': vote,
+    'transfer': tx_transfer,
+    'stake': tx_stake,
+    'withdraw': tx_withdraw,
+    'delegate': tx_delegate,
+    'retract': tx_retract,
+    'setup': tx_setup,
+    'close': tx_close,
+    'register': tx_register,
+    'discard': tx_discard,
+    'request': tx_request,
+    'cancel': tx_cancel,
+    'grant': tx_grant,
+    'revoke': tx_revoke,
+    'issue': tx_issue,
+    'lock': tx_lock,
+    'burn': tx_burn,
+    'propose': tx_propose,
+    'vote': tx_vote,
 }

@@ -15,7 +15,7 @@ import dbproxy
 import time
 import signal
 
-import amo
+import tx
 import stats
 import models
 
@@ -231,9 +231,9 @@ class Builder:
         cols = cursor.column_names
         for row in rows:
             d = dict(zip(cols, row))
-            tx = amo.Tx(self.chain_id, d['height'], d['index'])
-            tx.read(d)
-            tx.play(cursor)
+            t = tx.Tx(self.chain_id, d['height'], d['index'])
+            t.read(d)
+            t.play(cursor)
 
     def play_block_incentives(self, cursor):
         # block incentives
