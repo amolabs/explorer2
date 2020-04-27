@@ -92,6 +92,7 @@ CREATE TABLE `c_txs` (
   `tx_bytes` int(11) NOT NULL,
   PRIMARY KEY (`chain_id`,`height`,`index`),
   KEY `txs_hash` (`chain_id`,`hash`) USING BTREE,
+  KEY `txs_sender` (`chain_id`,`sender`) USING BTREE,
   CONSTRAINT `block_FK` FOREIGN KEY (`chain_id`, `height`) REFERENCES `c_blocks` (`chain_id`, `height`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
