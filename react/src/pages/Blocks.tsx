@@ -1,13 +1,14 @@
-import React, {useEffect, useState} from 'react'
+import React, {useCallback, useEffect, useState} from 'react'
 import {BlockState} from "../reducer/blocks"
 import {useFixedHeight, useUpdateState} from "../reducer"
 import {Grid} from "@material-ui/core"
-import InfinityTable, {useScrollUpdate} from "../component/InfinityTable"
+import InfinityTable from "../component/InfinityTable"
 import ExplorerAPI from '../ExplorerAPI'
 import {Link} from "react-router-dom"
 import StatCard from "../component/StatCard"
 import {History, Timeline, TrendingUp, ViewModule} from "@material-ui/icons"
 import SizeTitle, {LastOptions} from "../component/SizeTitle"
+import useScrollUpdate from "../component/useScrollUpdate"
 
 const columns = [
   {
@@ -134,31 +135,22 @@ const Blocks = () => {
 
   const [ref, setRef] = useState<HTMLDivElement | undefined>(undefined)
 
-  const [blocks, setBlocks, loading, setLoading, onScroll] = useScrollUpdate<BlockState>(async (size) => {
-    const nextHeight = fixedHeight - size
-
-    if (nextHeight <= 0) {
-      setLoading('done')
-      return []
-    }
-
-    const {data} = await ExplorerAPI.fetchBlocks(chainId, nextHeight)
-    return data
-  }, 200 + (ref ? ref.clientHeight : 0))
-
-  useEffect(() => {
+  const onUpdate = useCallback(async (size: number) => {
     if (fixedHeight !== -1) {
-      ExplorerAPI
-        .fetchBlocks(chainId, fixedHeight)
-        .then(({data}) => {
-          setBlocks(data)
-          window.scrollTo({
-            top: 0
-          })
-        })
+      const nextHeight = fixedHeight - size
+
+      if (nextHeight <= 0) {
+        return null
+      }
+
+      const {data} = await ExplorerAPI.fetchBlocks(chainId, nextHeight)
+      return data
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    return []
   }, [chainId, fixedHeight])
+
+  const [blocks, loading, onScroll] = useScrollUpdate<BlockState>(onUpdate, ref)
 
   return (
     <>

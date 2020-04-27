@@ -6,6 +6,8 @@ import ExplorerAPI from "../../ExplorerAPI"
 import {useUpdateState} from "../../reducer"
 import {AMO, displayAddress, displayAmount, displayResult} from "../../util"
 import {Grid, Link as UrlLink} from "@material-ui/core"
+import {useDispatch} from "react-redux"
+import {replace} from "connected-react-router"
 
 const payloadColumns: StringMap = {
   transfer: [
@@ -254,6 +256,7 @@ const Transaction = () => {
   const [loading, setLoading] = useState(true)
 
   const {chainId, updated} = useUpdateState()
+  const dispatch = useDispatch()
 
   useEffect(() => {
     if (updated && tx.sender === "") {
@@ -262,6 +265,9 @@ const Transaction = () => {
         .then(({data}) => {
           setTx(data[0])
           setLoading(false)
+        })
+        .catch(() => {
+          dispatch(replace(`/${chainId}/inspect/404`, {type: 'TRANSACTION', search: hash}))
         })
     }
   }, [chainId, hash, updated, tx.sender])

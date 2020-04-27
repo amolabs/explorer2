@@ -1,15 +1,16 @@
 import React, {useEffect, useState} from 'react'
 import InformationCard from "../../component/InformationCard"
 import ExplorerAPI from "../../ExplorerAPI"
-import {Link, useParams} from 'react-router-dom'
-import {RootState, useFixedHeight, useUpdateState} from "../../reducer"
-import {displayAddress, displayAmount, displayResult} from "../../util"
-import {useSelector} from "react-redux"
-import CollapseTable from "../../component/CollapseTable"
+import {useParams} from 'react-router-dom'
+import {useFixedHeight} from "../../reducer"
+import {displayAmount} from "../../util"
 import {TransactionSchema} from "../../reducer/blockchain"
 import {AxiosError} from "axios"
-import InfinityTable, {useScrollUpdate} from "../../component/InfinityTable"
+import InfinityTable from "../../component/InfinityTable"
 import {transactionColumns} from "../../component/columns"
+import useScrollUpdate from "../../component/useScrollUpdate"
+import {useDispatch} from "react-redux"
+import {replace} from "connected-react-router"
 
 const columns = [
   {
@@ -50,6 +51,7 @@ const Account = () => {
   })
   const [statLoading, setStatLoading] = useState(true)
   const [ref, setRef] = useState<HTMLDivElement | undefined>(undefined)
+  const dispatch = useDispatch()
 
   useEffect(() => {
     ExplorerAPI
@@ -59,32 +61,24 @@ const Account = () => {
         setStatLoading(false)
       })
       .catch((e: AxiosError) => {
+        dispatch(replace(`/${chainId}/inspect/404`, {type: 'ACCOUNT', search: address}))
         setStatLoading(false)
       })
   }, [chainId, address])
 
-  const [list, setList, loading, setLoading, onScroll] = useScrollUpdate<TransactionSchema>(async (size: number) => {
-    const {data} = await ExplorerAPI.fetchAccountTransactions(chainId, address as string, fixedHeight, size)
-
-    if (data.length === 0) {
-      setLoading('done')
-    }
-
-    return data
-  }, 200 + (ref ? ref.clientHeight : 0))
-
-  useEffect(() => {
+  const [list, loading, onScroll] = useScrollUpdate<TransactionSchema>(async (size: number) => {
     if (fixedHeight !== -1) {
-      ExplorerAPI.fetchAccountTransactions(chainId, address as string, fixedHeight, 0)
-        .then(({data}) => {
-          setList(data)
-          window.scrollTo({
-            top: 0
-          })
-        })
+      const {data} = await ExplorerAPI.fetchAccountTransactions(chainId, address as string, fixedHeight, size)
+
+      if (data.length === 0) {
+        return null
+      }
+
+      return data
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fixedHeight])
+
+    return []
+  }, ref)
 
   return (
     <>

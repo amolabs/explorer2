@@ -2,13 +2,14 @@ import React, {useEffect} from 'react'
 import StatCard from "../component/StatCard"
 import {AccountBalance, AccountBalanceWallet, History, Receipt, Timeline, ViewHeadline} from "@material-ui/icons"
 import {useDispatch, useSelector} from "react-redux"
-import {RootState, useUpdateState} from "../reducer"
-import {GraphState, UPDATE_BLOCKCHAIN} from "../reducer/blockchain"
+import {RootState} from "../reducer"
+import {GraphState} from "../reducer/blockchain"
 import LinearGraph from "../component/LinearGraph"
 import CollapseTable from "../component/CollapseTable"
 import {BlockState, UPDATE_BLOCKS} from "../reducer/blocks"
 import moment from 'moment'
 import {Link} from "react-router-dom"
+import {Grid} from "@material-ui/core"
 
 const columns = [
   {
@@ -53,9 +54,7 @@ const RecentBlocks = () => {
   const dispatch = useDispatch()
 
   useEffect(() => {
-    dispatch({
-      type: UPDATE_BLOCKS
-    })
+    dispatch({type: UPDATE_BLOCKS})
   }, [height, dispatch])
 
   return (
@@ -125,33 +124,47 @@ const Blockchain = () => {
   return (
     <>
       <StatCard
-        icon={ViewHeadline}
-        title="Block height"
+        size="large"
+        title="Block stats in last 1000 blocks"
       >
-        {blockState.height}
-      </StatCard>
-      <StatCard
-        icon={History}
-        title="Average interval"
-        suffix='s'
-        color='#FF6E4A'
-      >
-        {blockState.avg_interval.toFixed(2)}
-      </StatCard>
-      <StatCard
-        icon={Timeline}
-        title="Number of Transaction"
-        color='#62D96B'
-      >
-        {blockState.num_txs}
-      </StatCard>
-      <StatCard
-        icon={Receipt}
-        title="Transaction per Block"
-        suffix='/ blk'
-        color='#FFC940'
-      >
-        {(blockState.num_txs / blockState.height).toFixed(4)}
+        <Grid
+          container
+          spacing={2}
+        >
+          <StatCard
+            icon={ViewHeadline}
+            title="Block height"
+            size="small"
+          >
+            {blockState.height}
+          </StatCard>
+          <StatCard
+            icon={History}
+            title="Average interval"
+            suffix='s'
+            color='#FF6E4A'
+            size="small"
+          >
+            {blockState.avg_interval.toFixed(2)}
+          </StatCard>
+          <StatCard
+            icon={Timeline}
+            title="Number of Transaction"
+            color='#62D96B'
+            size="small"
+          >
+            {blockState.num_txs}
+          </StatCard>
+          <StatCard
+            icon={Receipt}
+            title="Transaction per Block"
+            suffix='/ blk'
+            color='#FFC940'
+            size="small"
+          >
+            {(blockState.num_txs / blockState.height).toFixed(4)}
+          </StatCard>
+        </Grid>
       </StatCard>
       <StatCard
         icon={AccountBalance}

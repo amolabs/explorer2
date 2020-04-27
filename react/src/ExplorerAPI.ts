@@ -2,7 +2,7 @@ import Axios, {AxiosResponse} from "axios"
 import {BlockState} from "./reducer/blocks"
 import {TransactionSchema} from "./reducer/blockchain"
 
-const defaultURL = "http://52.231.99.106:3000"
+const defaultURL = "https://explorer.amolabs.io/api"
 
 const client = Axios.create({
   baseURL: defaultURL
@@ -69,11 +69,6 @@ const fetchAccount = (chainId: string, address: string): Result<AccountSchema> =
 const fetchAccountTransactions = (chainId: string, address: string, top: number, from: number, size: number = 20): Result<TransactionSchema[]> => {
   return client
     .get(`/chain/${chainId}/accounts/${address}/txs?top=${top}&from=${from}&num=${size}`)
-}
-
-type Delegate = {
-  address: string,
-  amount: string
 }
 
 const fetchValidatorAccount = (chainId: string, address: string): Result<ValidatorAccount> => {

@@ -122,7 +122,7 @@ function CollapseTable<T extends Record<string, any>>(props: Props<T>) {
         {Pagination}
         <TableContainer style={containerStyle}>
           <Table>
-            <Hidden only={['xs', 'sm', 'md', 'lg']}>
+            <Hidden only={['xs', 'sm', 'md']}>
               <TableHead
                 component="thead"
               >
@@ -152,10 +152,10 @@ function CollapseTable<T extends Record<string, any>>(props: Props<T>) {
 
                         return (
                           <TableCell key={c.key} align="center" className={isMobile ? classes.mobileTableCell : ''}>
-                            <Hidden only={['xs', 'sm', 'md', 'lg']}>
+                            <Hidden only={['xs', 'sm', 'md']}>
                               {value}
                             </Hidden>
-                            <Hidden only={['xl']}>
+                            <Hidden only={['lg', 'xl']}>
                               <div className={isMobile ? classes.mobileTableCellHeader : ''}>
                                 {c.header || c.key.toUpperCase()}
                               </div>

@@ -3,11 +3,12 @@ import {useFixedHeight, useUpdateState} from "../reducer"
 import {TransactionSchema} from "../reducer/blockchain"
 import StatCard from "../component/StatCard"
 import {Equalizer, HighlightOff, Speed, Timelapse} from "@material-ui/icons"
-import InfinityTable, {useScrollUpdate} from "../component/InfinityTable"
+import InfinityTable from "../component/InfinityTable"
 import ExplorerAPI from "../ExplorerAPI"
 import {Grid} from "@material-ui/core"
 import SizeTitle, {LastOptions} from "../component/SizeTitle"
 import {transactionColumns} from "../component/columns"
+import useScrollUpdate from "../component/useScrollUpdate"
 
 type TransactionStatsProps = {
   setRef: (instance?: HTMLDivElement) => void
@@ -93,29 +94,19 @@ const Transactions = () => {
 
   const {chainId, fixedHeight} = useFixedHeight()
 
-  const [list, setList, loading, setLoading, onScroll] = useScrollUpdate<TransactionSchema>(async (size: number) => {
-    const {data} = await ExplorerAPI.fetchTransactions(chainId, fixedHeight, size)
-
-    if (data.length === 0) {
-      setLoading('done')
-    }
-
-    return data
-  }, 200 + (ref ? ref.clientHeight : 0))
-
-  useEffect(() => {
+  const [list, loading, onScroll] = useScrollUpdate<TransactionSchema>(async (size: number) => {
     if (fixedHeight !== -1) {
-      ExplorerAPI
-        .fetchTransactions(chainId, fixedHeight, 0)
-        .then(({data}) => {
-          setList(data)
-          window.scrollTo({
-            top: 0
-          })
-        })
+      const {data} = await ExplorerAPI.fetchTransactions(chainId, fixedHeight, size)
+
+      if (data.length === 0) {
+        return null
+      }
+
+      return data
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fixedHeight])
+
+    return []
+  }, ref)
 
   return (
     <>

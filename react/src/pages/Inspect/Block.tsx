@@ -8,6 +8,8 @@ import CollapseTable from "../../component/CollapseTable"
 import {TransactionSchema} from "../../reducer/blockchain"
 import moment from 'moment'
 import {displayResult} from "../../util"
+import {useDispatch} from "react-redux"
+import {replace} from "connected-react-router"
 
 const columns = [
   {
@@ -33,7 +35,7 @@ const columns = [
     key: 'time',
     header: 'Time',
     format: (time: string) => {
-      return `${moment(time).fromNow()} (${time})`
+      return `${moment(time).fromNow()} (${moment(time).format("YYYY-MM-DD HH:mm:ss.SSS ZZ")})`
     }
   },
   {
@@ -93,6 +95,7 @@ const Block = () => {
   const [blockLoading, setBlockLoading] = useState(true)
   const [txLoading, setTxLoading] = useState(true)
   const [page, setPage] = useState(0)
+  const dispatch = useDispatch()
 
   const {height} = useParams()
 
@@ -112,8 +115,12 @@ const Block = () => {
                 setTxLoading(false)
               })
           } else {
+            setTransactions([])
             setTxLoading(false)
           }
+        })
+        .catch(() => {
+          dispatch(replace(`/${chainId}/inspect/404`, { type: 'BLOCK', search: height }))
         })
     }
   }, [chainId, height])

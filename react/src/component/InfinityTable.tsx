@@ -1,4 +1,4 @@
-import React, {useCallback, useMemo, useState} from 'react'
+import React, {useCallback, useEffect, useMemo, useState} from 'react'
 import {
   AutoSizer,
   CellMeasurer,
@@ -14,6 +14,7 @@ import {makeStyles} from "@material-ui/styles"
 import {Backdrop, CircularProgress, Grid, Paper, TableCell, Theme, useMediaQuery} from "@material-ui/core"
 import clsx from "clsx"
 import {useUpdateState} from "../reducer"
+import {AxiosError} from "axios"
 
 const useInfinityScrollStyle = makeStyles((theme: Theme) => ({
   wrapper: {
@@ -104,7 +105,7 @@ interface Props<T> {
   columns: Column[]
   rowKey: string
   data: T[],
-  loading: Loading
+  loading: UseScrollLoading
 }
 
 const collapsedHeight = 170
@@ -269,11 +270,11 @@ function InfinityTable<T>(props: Props<T>) {
                   )
                 }}
               </AutoSizer>
-              <Backdrop open={props.loading === 'fetch'} className={classes.backdrop}>
+              <Backdrop open={props.loading === 'FETCH'} className={classes.backdrop}>
                 <CircularProgress color="inherit"/>
               </Backdrop>
               {
-                (props.loading === 'ready' && props.data.length === 0) && (
+                (props.loading === 'READY' && props.data.length === 0) && (
                   <div className={classes.loading}>
                     <CircularProgress/>
                   </div>
@@ -288,34 +289,3 @@ function InfinityTable<T>(props: Props<T>) {
 }
 
 export default InfinityTable
-
-type Loading = 'ready' | 'fetch' | 'done'
-
-export function useScrollUpdate<T>(fetcher: (size: number) => Promise<T[]>, threshold: number = 200): [
-  T[],
-  (list: T[]) => void,
-  Loading,
-  (loading: Loading) => void,
-  (params: { scrollTop: number }) => void
-] {
-  const [list, setList] = useState<T[]>([])
-  const [loading, setLoading] = useState<Loading>('ready')
-
-  const onScroll = useCallback((params: { scrollTop: number }) => {
-    const height = document.documentElement.clientHeight + params.scrollTop + threshold
-    if ((height >= document.body.scrollHeight) && loading === 'ready') {
-      setLoading('fetch')
-      fetcher(list.length)
-        .then((data) => {
-          setList([...list, ...data])
-          setTimeout(() => {
-            if (data.length !== 0) {
-              setLoading('ready')
-            }
-          }, 300)
-        })
-    }
-  }, [list, loading, threshold, fetcher])
-
-  return [list, setList, loading, setLoading, onScroll]
-}

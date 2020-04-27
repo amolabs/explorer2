@@ -39,18 +39,15 @@ export const useFixedHeight = () => {
     updated: state.blockchain.updated,
     height: state.blockchain.height,
     chainId: state.blockchain.chainId
-  }), shallowEqual)
+  }))
   const [fixedHeight, setFixedHeight] = useState(-1)
 
   useEffect(() => {
+    console.log('Fixed', fixedHeight, updated, height)
     if (updated && fixedHeight === -1) {
       setFixedHeight(height)
     }
   }, [fixedHeight, updated, height])
-
-  useEffect(() => {
-    setFixedHeight(-1)
-  }, [chainId])
 
   return {chainId, fixedHeight}
 }

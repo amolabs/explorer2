@@ -70,9 +70,9 @@ const Footer = () => {
           ))
         }
       </div>
-      <div className={classes.logo}>
+      <h3 className={classes.logo}>
         (C) AMO Labs 2020
-      </div>
+      </h3>
     </div>
   )
 }
