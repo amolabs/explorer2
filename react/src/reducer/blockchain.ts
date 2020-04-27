@@ -15,6 +15,7 @@ const initialBlockState = {
   num_txs_invalid: 0,
   avg_binding_lag: 0.0,
   max_binding_lag: 0,
+  avg_num_txs: 0,
   active_coins: '0',
   stakes: '0',
   delegates: '0',

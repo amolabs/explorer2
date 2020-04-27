@@ -162,7 +162,7 @@ const Blockchain = () => {
             color='#FFC940'
             size="small"
           >
-            {(blockState.num_txs / blockState.height).toFixed(4)}
+            {(blockState.avg_num_txs).toFixed(2)}
           </StatCard>
         </Grid>
       </StatCard>
