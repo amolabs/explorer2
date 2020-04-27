@@ -7,21 +7,23 @@ from hashlib import sha256
 import stats
 import models
 
+
 def unknown(tx, cursor):
     print(f'tx type ({tx.type}) unknown')
+
 
 def transfer(tx, cursor):
     payload = json.loads(tx.payload)
     payload['amount'] = int(payload['amount'])
 
     sender = models.Account(tx.chain_id, tx.sender, cursor)
-    recp = models.Account(tx.chain_id, payload['to'], cursor)
-
     sender.balance -= payload['amount']
-    recp.balance += payload['amount']
-
     sender.save(cursor)
+
+    recp = models.Account(tx.chain_id, payload['to'], cursor)
+    recp.balance += payload['amount']
     recp.save(cursor)
+
 
 def stake(tx, cursor):
     payload = json.loads(tx.payload)
@@ -41,6 +43,7 @@ def stake(tx, cursor):
     asset_stat.stakes += payload['amount']
     asset_stat.save(cursor)
 
+
 def withdraw(tx, cursor):
     payload = json.loads(tx.payload)
     payload['amount'] = int(payload['amount'])
@@ -57,6 +60,7 @@ def withdraw(tx, cursor):
     asset_stat.active_coins += payload['amount']
     asset_stat.stakes -= payload['amount']
     asset_stat.save(cursor)
+
 
 def delegate(tx, cursor):
     payload = json.loads(tx.payload)
@@ -77,11 +81,14 @@ def delegate(tx, cursor):
     asset_stat.delegates += payload['amount']
     asset_stat.save(cursor)
 
+
 def retract(tx, cursor):
     payload = json.loads(tx.payload)
     payload['amount'] = int(payload['amount'])
 
     sender = models.Account(tx.chain_id, tx.sender, cursor)
+    asset_stat = stats.Asset(tx.chain_id, cursor)
+
     sender.delegate -= payload['amount']
     sender.balance += payload['amount']
     del_addr = sender.del_addr
@@ -93,10 +100,10 @@ def retract(tx, cursor):
     delegatee.eff_stake -= payload['amount']
     delegatee.save(cursor)
 
-    asset_stat = stats.Asset(tx.chain_id, cursor)
     asset_stat.active_coins += payload['amount']
     asset_stat.delegates -= payload['amount']
     asset_stat.save(cursor)
+
 
 def setup(tx, cursor):
     payload = json.loads(tx.payload)
@@ -105,14 +112,14 @@ def setup(tx, cursor):
 
     owner = models.Account(tx.chain_id, tx.sender, cursor)
     storage = models.Storage(tx.chain_id, payload['storage'], owner.address,
-            cursor)
+                             cursor)
 
     storage.url = payload['url']
     storage.registration_fee = payload['registration_fee']
     storage.hosting_fee = payload['hosting_fee']
     storage.active = True
-
     storage.save(cursor)
+
 
 def close(tx, cursor):
     payload = json.loads(tx.payload)
@@ -120,15 +127,15 @@ def close(tx, cursor):
     storage = models.Storage(tx.chain_id, payload['storage'], None, cursor)
 
     storage.active = False
-
     storage.save(cursor)
+
 
 def register(tx, cursor):
     payload = json.loads(tx.payload)
 
     owner = models.Account(tx.chain_id, tx.sender, cursor)
     parcel = models.Parcel(tx.chain_id, payload['target'], owner.address,
-            cursor)
+                           cursor)
     storage = models.Storage(tx.chain_id, parcel.storage_id, None, cursor)
     host = models.Account(tx.chain_id, storage.owner, cursor)
 
@@ -136,13 +143,14 @@ def register(tx, cursor):
     parcel.proxy_account = payload.get('proxy_account', None)
     parcel.extra = payload.get('extra', '{}')
     parcel.on_sale = True
+    parcel.save(cursor)
 
     owner.balance -= storage.registration_fee
-    host.balance += storage.registration_fee
-
     owner.save(cursor)
-    parcel.save(cursor)
+
+    host.balance += storage.registration_fee
     host.save(cursor)
+
 
 def discard(tx, cursor):
     payload = json.loads(tx.payload)
@@ -150,8 +158,8 @@ def discard(tx, cursor):
     parcel = models.Parcel(tx.chain_id, payload['target'], None, cursor)
 
     parcel.on_sale = False
-
     parcel.save(cursor)
+
 
 def request(tx, cursor):
     payload = json.loads(tx.payload)
@@ -160,22 +168,20 @@ def request(tx, cursor):
 
     buyer = models.Account(tx.chain_id, tx.sender, cursor)
     parcel = models.Parcel(tx.chain_id, payload['target'], None, cursor)
-    storage = models.Storage(tx.chain_id, parcel.storage_id, None, cursor)
-    host = models.Account(tx.chain_id, storage.owner, cursor)
     request = models.Request(tx.chain_id, parcel.parcel_id, buyer.address,
-            cursor)
+                             cursor)
 
     request.payment = payload['payment']
     request.dealer = payload.get('dealer', None)
     request.dealer_fee = payload['dealer_fee']
     request.extra = payload.get('extra', '{}')
+    request.save(cursor)
 
     if request.dealer is not None:
         buyer.balance -= request.dealer_fee
     buyer.balance -= request.payment
-
-    request.save(cursor)
     buyer.save(cursor)
+
 
 def cancel(tx, cursor):
     payload = json.loads(tx.payload)
@@ -185,9 +191,10 @@ def cancel(tx, cursor):
 
     buyer.balance += request.payment
     buyer.balance += request.dealer_fee
+    buyer.save(cursor)
 
     request.delete(cursor)
-    buyer.save(cursor)
+
 
 def grant(tx, cursor):
     payload = json.loads(tx.payload)
@@ -196,32 +203,37 @@ def grant(tx, cursor):
     storage = models.Storage(tx.chain_id, parcel.storage_id, None, cursor)
     host = models.Account(tx.chain_id, storage.owner, cursor)
     owner = models.Account(tx.chain_id, parcel.owner, cursor)
-    request = models.Request(tx.chain_id, payload['target'], payload['grantee'],
-            cursor)
+    request = models.Request(tx.chain_id, payload['target'],
+                             payload['grantee'], cursor)
     usage = models.Usage(tx.chain_id, payload['target'], payload['grantee'],
-            cursor)
+                         cursor)
 
     usage.custody = payload['custody']
     usage.extra = payload.get('extra', '{}')
+    usage.save(cursor)
 
     owner.balance += request.payment
     if request.dealer is not None:
         dealer = models.Account(tx.chain_id, request.dealer, cursor)
         dealer.balance += request.dealer_fee
-        deader.save(cursor)
+        dealer.save(cursor)
     owner.balance -= storage.hosting_fee
+    owner.save(cursor)
+
     host.balance += storage.hosting_fee
+    host.save(cursor)
 
     request.delete(cursor)
-    usage.save(cursor)
+
 
 def revoke(tx, cursor):
     payload = json.loads(tx.payload)
 
     usage = models.Usage(tx.chain_id, payload['target'], payload['grantee'],
-            cursor)
+                         cursor)
 
     usage.delete(cursor)
+
 
 def issue(tx, cursor):
     payload = json.loads(tx.payload)
@@ -230,36 +242,37 @@ def issue(tx, cursor):
     udc = models.UDC(tx.chain_id, payload['udc'], cursor)
     issuer = models.UDCBalance(tx.chain_id, udc.udc_id, tx.sender, cursor)
 
-    if udc.total == 0: # initial issue
+    if udc.total == 0:  # initial issue
         udc.owner = tx.sender
     udc.desc = payload['desc'] if 'desc' in payload else ''
     udc.operators = json.dumps(payload.get('operators', []))
     udc.total += payload['amount']
+    udc.save(cursor)
 
     issuer.balance += payload['amount']
-
-    udc.save(cursor)
     issuer.save(cursor)
+
 
 def lock(tx, cursor):
     payload = json.loads(tx.payload)
     payload['amount'] = int(payload['amount'])
 
     udc_bal = models.UDCBalance(tx.chain_id, payload['udc'], payload['holder'],
-            cursor)
-    udc_bal.balance_lock = payload['amount']
+                                cursor)
 
+    udc_bal.balance_lock = payload['amount']
     udc_bal.save(cursor)
+
 
 def burn(tx, cursor):
     payload = json.loads(tx.payload)
     payload['amount'] = int(payload['amount'])
 
-    udc_bal = models.UDCBalance(tx.chain_id, payload['udc'], tx.sender,
-            cursor)
-    udc_bal.balance -= payload['amount']
+    udc_bal = models.UDCBalance(tx.chain_id, payload['udc'], tx.sender, cursor)
 
+    udc_bal.balance -= payload['amount']
     udc_bal.save(cursor)
+
 
 def propose(tx, cursor):
     payload = json.loads(tx.payload)
@@ -267,6 +280,9 @@ def propose(tx, cursor):
 
     proposer = models.Account(tx.chain_id, tx.sender, cursor)
     draft = models.Draft(tx.chain_id, payload['draft_id'], tx.sender, cursor)
+
+    proposer.balance -= payload['deposit']
+    proposer.save(cursor)
 
     draft.config = json.dumps(payload['config'])
     draft.desc = payload['desc']
@@ -276,11 +292,8 @@ def propose(tx, cursor):
     draft.deposit = payload['deposit']
     draft.tally_approve = 0
     draft.tally_reject = 0
-
-    proposer.balance -= payload['deposit']
-
-    proposer.save(cursor)
     draft.save(cursor)
+
 
 def vote(tx, cursor):
     payload = json.loads(tx.payload)
@@ -290,26 +303,26 @@ def vote(tx, cursor):
     vote = models.Vote(tx.chain_id, draft.draft_id, voter.address, cursor)
 
     vote.approve = payload['approve']
-
     vote.save(cursor)
 
+
 processor = {
-        'transfer': transfer,
-        'stake': stake,
-        'withdraw': withdraw,
-        'delegate': delegate,
-        'retract': retract,
-        'setup': setup,
-        'close': close,
-        'register': register,
-        'discard': discard,
-        'request': request,
-        'cancel': cancel,
-        'grant': grant,
-        'revoke': revoke,
-        'issue': issue,
-        'lock': lock,
-        'burn': burn,
-        'propose': propose,
-        'vote': vote,
-        }
+    'transfer': transfer,
+    'stake': stake,
+    'withdraw': withdraw,
+    'delegate': delegate,
+    'retract': retract,
+    'setup': setup,
+    'close': close,
+    'register': register,
+    'discard': discard,
+    'request': request,
+    'cancel': cancel,
+    'grant': grant,
+    'revoke': revoke,
+    'issue': issue,
+    'lock': lock,
+    'burn': burn,
+    'propose': propose,
+    'vote': vote,
+}
