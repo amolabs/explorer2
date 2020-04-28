@@ -67,24 +67,26 @@ def expand(node):
 
 def print_nodes(nodes):
     # this is just for neat display
+    clen = 0
     mlen = 0
     alen = 0
     monikers = {}
     for _, n in nodes.items():
-        expand(n)
+        clen = max(clen, len(n['chain_id']))
         mlen = max(mlen, len(n['moniker']))
         alen = max(alen, len(n['rpc_addr']))
-        monikers[n['moniker']] = n
+        monikers[n['chain_id'] + '_' + n['moniker']] = n
     
     print()
     for k in sorted(monikers.keys()):
         n = monikers[k]
-        print(f'{k:{mlen}}', end=' ')
-        print(f'{n["rpc_addr"]:{alen}}', end=' ')
-        print(f'{n["latest_block_height"]:>7}', end=' ')
-        print(f'{n["n_peers"]:>3}', end=' ')
-        print(f'{n["catching_up_sign"]}', end=' ')
-        print(f'{n["voting_power"]:>{20}}')
+        print(f'{n["chain_id"]:{clen}}', end=' ', flush=True)
+        print(f'{n["moniker"]:{mlen}}', end=' ', flush=True)
+        print(f'{n["rpc_addr"]:{alen}}', end=' ', flush=True)
+        print(f'{n["latest_block_height"]:>7}', end=' ', flush=True)
+        print(f'{n["n_peers"]:>3}', end=' ', flush=True)
+        print(f'{n["catching_up_sign"]}', end=' ', flush=True)
+        print(f'{n["voting_power"]:>{20}}', flush=True)
 
 if __name__ == '__main__':
     # command line args
@@ -92,7 +94,7 @@ if __name__ == '__main__':
     p.add_argument('node', type=str, nargs='+')
     
     args = p.parse_args()
-    
+
     cands = []
     for n in args.node:
         host, port = n.split(':')
@@ -110,11 +112,11 @@ if __name__ == '__main__':
             peek_n = peek(n)
             if peek_n == {}:  # when cannot reach to node behind firewall via rpc
                 continue
-            nodes[n] = peek_n
+            nodes[n] = expand(peek_n)
         peers = neighbors(n)
         nodes[n]["n_peers"] = len(peers)
         for n in peers:
             if n not in nodes and n not in cands:
                 cands.append(n)
-    
+
     print_nodes(nodes) 
