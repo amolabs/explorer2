@@ -17,7 +17,7 @@ REQUEST_TIMEOUT = 1
 def neighbors(addr):
     try:
         if args.verbose: print(f'collecting neighbors from {addr}')
-        print('.', end='', flush=True)
+        if args.verbose: print('.', end='', flush=True)
         res = r.get(url=f'http://{addr}/net_info', timeout=REQUEST_TIMEOUT)
     except Exception:
         return []
@@ -35,7 +35,7 @@ def neighbors(addr):
 def peek(addr):
     try:
         if args.verbose: print(f'collecting information from {addr}')
-        print('.', end='', flush=True)
+        if args.verbose: print('.', end='', flush=True)
         res = r.get(url=f'http://{addr}/status', timeout=REQUEST_TIMEOUT)
     except Exception:
         return {}
@@ -148,40 +148,47 @@ if __name__ == '__main__':
             print('lock file exists. exiting.')
             exit(-1)
 
-    cands = []
-    for t in args.targets:
-        host, port = t.split(':')
-        ip = socket.gethostbyname(host)
-        n_addr = f'{ip}:{port}'
-        cands.append(n_addr)
-
-    nodes = {}
+    try:
+        cands = []
+        for t in args.targets:
+            host, port = t.split(':')
+            ip = socket.gethostbyname(host)
+            n_addr = f'{ip}:{port}'
+            cands.append(n_addr)
     
-    # collecting nodes
-    print(f'collecting', end='', flush=True)
-    while cands:
-        n = cands.pop()
-        if n not in nodes:
-            peek_n = peek(n)
-            if peek_n == {}:  # when cannot reach to node behind firewall via rpc
-                continue
-            nodes[n] = expand(peek_n)
-        peers = neighbors(n)
-        nodes[n]["n_peers"] = len(peers)
-        for n in peers:
-            if n not in nodes and n not in cands:
-                cands.append(n)
-    print('done !')
-
-    # updating nodes
-    print(f'updating {len(nodes)} nodes', end=' - ', flush=True)
-    update_nodes(db, nodes)
-    print('done !')
-
-    if args.verbose: print_nodes(nodes) 
-
-    # close
-    print('closing', end=' - ', flush=True)
-    db.close()
-    lock.release()
-    print('done !')
+        nodes = {}
+        
+        # collecting nodes
+        print(f'collecting', end=' - ', flush=True)
+        while cands:
+            n = cands.pop()
+            if n not in nodes:
+                peek_n = peek(n)
+                if peek_n == {}:  # when cannot reach to node behind firewall via rpc
+                    continue
+                nodes[n] = expand(peek_n)
+            peers = neighbors(n)
+            nodes[n]["n_peers"] = len(peers)
+            for n in peers:
+                if n not in nodes and n not in cands:
+                    cands.append(n)
+        print('done !')
+    
+        # updating nodes
+        print(f'updating {len(nodes)} nodes', end=' - ', flush=True)
+        update_nodes(db, nodes)
+        print('done !')
+    
+        if args.verbose: print_nodes(nodes) 
+    except KeyboardInterrupt:
+        print('interrupted. closing db. releasing lock.')
+        db.close()
+        lock.release()
+    except Exception as e:
+        print('exception occurred', e)
+        db.close()
+        lock.release()
+    else:
+        print('closing db. releasing lock.')
+        db.close()
+        lock.release()
