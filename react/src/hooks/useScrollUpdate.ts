@@ -1,25 +1,26 @@
 import {useCallback, useEffect, useState} from "react"
 import {AxiosError} from "axios"
+import {useFixedHeight} from "../reducer"
 
 type useScrollUpdateReturn<T> = [
   T[], UseScrollLoading, (params: { scrollTop: number }) => void
 ]
 
 export default function useScrollUpdate<T>(
-  fetcher: (size: number) => Promise<T[] | UseScrollLoading>,
+  fetcher: (size: number, fixedHeight: number, chainId: string) => Promise<T[] | null>,
   ref: HTMLDivElement | undefined,
   fetchSize: number = 20
 ): useScrollUpdateReturn<T> {
   const [list, setList] = useState<T[]>([])
   const [loading, setLoading] = useState<UseScrollLoading>('READY')
+  const {fixedHeight, chainId} = useFixedHeight()
 
   const fetch = useCallback(() => {
     if (loading === 'READY') {
       setLoading('FETCH')
-      fetcher(list.length)
+      fetcher(list.length, fixedHeight, chainId)
         .then((data) => {
-          if (!Array.isArray(data)) {
-            setLoading(data)
+          if (data === null) {
             return
           }
 
@@ -49,7 +50,7 @@ export default function useScrollUpdate<T>(
           setLoading('READY')
         })
     }
-  }, [list, loading, fetcher, fetchSize])
+  }, [list, loading, fetcher, fetchSize, fixedHeight, chainId])
 
   const onScroll = (params: { scrollTop: number }) => {
     const height = 200 + document.documentElement.clientHeight + params.scrollTop + (ref?.clientHeight || 0)
@@ -59,10 +60,10 @@ export default function useScrollUpdate<T>(
   }
 
   useEffect(() => {
-    if (list.length === 0 && loading === 'READY') {
+    if (fixedHeight !== -1 && list.length === 0 && loading === 'READY') {
       fetch()
     }
-  }, [fetch, list, loading])
+  }, [fetch, list, loading, fixedHeight])
 
   return [list, loading, onScroll]
 }

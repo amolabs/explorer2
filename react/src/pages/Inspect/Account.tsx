@@ -2,7 +2,6 @@ import React, {useCallback, useState} from 'react'
 import InformationCard from "../../component/InformationCard"
 import ExplorerAPI from "../../ExplorerAPI"
 import {useParams} from 'react-router-dom'
-import {useFixedHeight} from "../../reducer"
 import {displayAmount} from "../../util"
 import {TransactionSchema} from "../../reducer/blockchain"
 import {AxiosError} from "axios"
@@ -11,7 +10,7 @@ import {transactionColumns} from "../../component/columns"
 import useScrollUpdate from "../../hooks/useScrollUpdate"
 import {useDispatch} from "react-redux"
 import {replace} from "connected-react-router"
-import useOnce from "../../hooks/useOnce"
+import useEnsureNetwork from "../../hooks/useOnce"
 
 const columns = [
   {
@@ -37,7 +36,6 @@ const columns = [
 
 const Account = () => {
   const {address} = useParams()
-  const {chainId, fixedHeight} = useFixedHeight()
 
   const [account, setAccount] = useState<AccountSchema>({
     address: address as string,
@@ -66,21 +64,18 @@ const Account = () => {
         setStatLoading(false)
       })
   }, [address, dispatch])
-  useOnce(fetchAccount)
+  useEnsureNetwork(fetchAccount)
 
-  const [list, loading, onScroll] = useScrollUpdate<TransactionSchema>(async (size: number) => {
+  const fetchAccountTransactions = useCallback(async (size: number, fixedHeight: number, chainId: string) => {
     if (fixedHeight !== -1) {
       const {data} = await ExplorerAPI.fetchAccountTransactions(chainId, address as string, fixedHeight, size)
-
-      if (data.length === 0) {
-        return "DONE"
-      }
 
       return data
     }
 
-    return "READY"
-  }, ref)
+    return null
+  }, [address])
+  const [list, loading, onScroll] = useScrollUpdate<TransactionSchema>(fetchAccountTransactions, ref)
 
   return (
     <>

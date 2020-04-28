@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useState} from 'react'
 import {BlockState} from "../reducer/blocks"
-import {useFixedHeight, useUpdateState} from "../reducer"
+import {useUpdateState} from "../reducer"
 import {Grid} from "@material-ui/core"
 import InfinityTable from "../component/InfinityTable"
 import ExplorerAPI from '../ExplorerAPI'
@@ -131,26 +131,23 @@ const BlocksStatView = (props: BlocksStatProps) => {
 }
 
 const Blocks = () => {
-  const {chainId, fixedHeight} = useFixedHeight()
-
   const [ref, setRef] = useState<HTMLDivElement | undefined>(undefined)
 
-  const onUpdate = useCallback(async (size: number) => {
+  const fetchBlocks = useCallback(async (size: number, fixedHeight: number, chainId: string) => {
     if (fixedHeight !== -1) {
       const nextHeight = fixedHeight - size
 
       if (nextHeight <= 0) {
-        return "DONE"
+        return []
       }
 
       const {data} = await ExplorerAPI.fetchBlocks(chainId, nextHeight)
       return data
     }
 
-    return "READY"
-  }, [chainId, fixedHeight])
-
-  const [blocks, loading, onScroll] = useScrollUpdate<BlockState>(onUpdate, ref)
+    return null
+  }, [])
+  const [blocks, loading, onScroll] = useScrollUpdate<BlockState>(fetchBlocks, ref)
 
   return (
     <>

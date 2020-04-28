@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from 'react'
-import {useFixedHeight, useUpdateState} from "../reducer"
+import React, {useCallback, useEffect, useState} from 'react'
+import {useUpdateState} from "../reducer"
 import {TransactionSchema} from "../reducer/blockchain"
 import StatCard from "../component/StatCard"
 import {Equalizer, HighlightOff, Speed, Timelapse} from "@material-ui/icons"
@@ -92,21 +92,15 @@ const BlockStats = (props: TransactionStatsProps) => {
 const Transactions = () => {
   const [ref, setRef] = useState<HTMLDivElement | undefined>(undefined)
 
-  const {chainId, fixedHeight} = useFixedHeight()
-
-  const [list, loading, onScroll] = useScrollUpdate<TransactionSchema>(async (size: number) => {
+  const fetchTransactions = useCallback(async (size: number, fixedHeight: number, chainId: string) => {
     if (fixedHeight !== -1) {
       const {data} = await ExplorerAPI.fetchTransactions(chainId, fixedHeight, size)
-
-      if (data.length === 0) {
-        return "DONE"
-      }
-
       return data
     }
 
-    return "READY"
-  }, ref)
+    return null
+  }, [])
+  const [list, loading, onScroll] = useScrollUpdate<TransactionSchema>(fetchTransactions, ref)
 
   return (
     <>

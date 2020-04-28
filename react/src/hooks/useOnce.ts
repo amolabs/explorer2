@@ -11,7 +11,6 @@ const useOnce = (fn: (chainId: string) => void) => {
     const [, pathChainId] = path.split('/')
     if (pathChainId === chainId && updated && !once) {
       setOnce(true)
-      console.log("called")
       fn(chainId)
     }
 
