@@ -58,7 +58,8 @@ CREATE TABLE `s_accounts` (
   `val_pubkey` char(64) DEFAULT NULL,
   `val_power` char(40) NOT NULL DEFAULT '0',
   `eff_stake` char(40) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`chain_id`,`address`)
+  PRIMARY KEY (`chain_id`,`address`),
+  KEY `accounts_val_addr` (`chain_id`,`val_addr`) using BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -207,4 +208,18 @@ CREATE TABLE `s_usages` (
   KEY `s_requests_FK_1` (`chain_id`,`grantee`) USING BTREE,
   CONSTRAINT `s_requests_FK_1_copy` FOREIGN KEY (`chain_id`, `grantee`) REFERENCES `s_accounts` (`chain_id`, `address`),
   CONSTRAINT `s_requests_FK_copy` FOREIGN KEY (`chain_id`, `parcel_id`) REFERENCES `s_parcels` (`chain_id`, `parcel_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- explorer.s_nodes definition
+
+CREATE TABLE `s_nodes` (
+  `chain_id` char(32) NOT NULL,
+  `val_addr` char(40) NOT NULL,
+  `moniker` varchar(40) NOT NULL,
+  `time` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `latest_block_height` int(11) NOT NULL,
+  `catching_up` boolean NOT NULL default false,
+  `n_peers` int(11) NOT NULL default 0,
+  PRIMARY KEY (`chain_id`, `val_addr`),
+  CONSTRAINT `s_nodes_FK` FOREIGN KEY (`chain_id`, `val_addr`) REFERENCES `s_accounts` (`chain_id`, `val_addr`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
