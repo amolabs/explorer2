@@ -100,14 +100,14 @@ def update_nodes(db, nodes):
     cur = db.cursor()
 
     # purge first
-    cur.execute("""DELETE FROM `s_nodes`""")
-    cur.execute("""OPTIMIZE TABLE `s_nodes`""")
+    cur.execute("""DELETE FROM `nodes`""")
+    cur.execute("""OPTIMIZE TABLE `nodes`""")
     cur.fetchall()
 
     # then, insert
     for _, n in nodes.items():
         cur.execute("""
-            INSERT INTO `s_nodes`
+            INSERT INTO `nodes`
                 (`chain_id`, `val_addr`, `moniker`,
                  `latest_block_time`, `latest_block_height`,
                  `catching_up`, `n_peers`)

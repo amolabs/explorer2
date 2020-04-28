@@ -209,9 +209,9 @@ CREATE TABLE `s_usages` (
   CONSTRAINT `s_requests_FK_copy` FOREIGN KEY (`chain_id`, `parcel_id`) REFERENCES `s_parcels` (`chain_id`, `parcel_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- explorer.s_nodes definition
+-- explorer.nodes definition
 
-CREATE TABLE `s_nodes` (
+CREATE TABLE `nodes` (
   `chain_id` char(32) NOT NULL,
   `val_addr` char(40) NOT NULL,
   `moniker` varchar(40) NOT NULL,
