@@ -216,7 +216,7 @@ CREATE TABLE `s_nodes` (
   `chain_id` char(32) NOT NULL,
   `val_addr` char(40) NOT NULL,
   `moniker` varchar(40) NOT NULL,
-  `time` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `latest_block_time` datetime(6) NOT NULL DEFAULT current_timestamp(6),
   `latest_block_height` int(11) NOT NULL,
   `catching_up` boolean NOT NULL default false,
   `n_peers` int(11) NOT NULL default 0,
