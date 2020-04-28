@@ -9,12 +9,6 @@ import requests as r
 
 REQUEST_TIMEOUT = 1 
 
-p = argparse.ArgumentParser('AMO blockchain node inspector')
-p.add_argument('node', type=str, nargs='+')
-
-args = p.parse_args()
-
-
 def neighbors(addr):
     try:
         #print(f'collecting neighbors from {addr}')
@@ -56,43 +50,53 @@ def expand(node):
     node['voting_power'] = node['validator_info']['voting_power']
     return node
 
+def print_nodes(nodes):
+    # this is just for neat display
+    mlen = 0
+    alen = 0
+    monikers = {}
+    for _, n in nodes.items():
+        expand(n)
+        mlen = max(mlen, len(n['moniker']))
+        alen = max(alen, len(n['rpc_addr']))
+        monikers[n['moniker']] = n
+    
+    print()
+    for k in sorted(monikers.keys()):
+        n = monikers[k]
+        print(
+            f'{k:{mlen}} {n["rpc_addr"]:{alen}} {n["sync_info"]["latest_block_height"]:>7} {n["n_peers"]:>3} {n["catching_up_sign"]} {n["voting_power"]:>{20}}'
+        )
 
-cands = []
-for n in args.node:
-    host, port = n.split(':')
-    ip = socket.gethostbyname(host)
-    n_addr = f'{ip}:{port}'
-    cands.append(n_addr)
-
-nodes = {}
-
-print('collecting', end='', flush=True)
-# initial nodes
-while cands:
-    n = cands.pop()
-    if n not in nodes:
-        peek_n = peek(n)
-        if peek_n == {}:  # when cannot reach to node behind firewall via rpc
-            continue
-        nodes[n] = peek_n
-    peers = neighbors(n)
-    for n in peers:
-        if n not in nodes and n not in cands:
-            cands.append(n)
-
-# this is just for neat display
-mlen = 0
-alen = 0
-monikers = {}
-for _, n in nodes.items():
-    expand(n)
-    mlen = max(mlen, len(n['moniker']))
-    alen = max(alen, len(n['rpc_addr']))
-    monikers[n['moniker']] = n
-
-print()
-for k in sorted(monikers.keys()):
-    n = monikers[k]
-    print(
-        f'{k:{mlen}} {n["rpc_addr"]:{alen}} {n["sync_info"]["latest_block_height"]:>7} {n["catching_up_sign"]} {n["voting_power"]:>{20}}'
-    )
+if __name__ == '__main__':
+    # command line args
+    p = argparse.ArgumentParser('AMO blockchain node inspector')
+    p.add_argument('node', type=str, nargs='+')
+    
+    args = p.parse_args()
+    
+    cands = []
+    for n in args.node:
+        host, port = n.split(':')
+        ip = socket.gethostbyname(host)
+        n_addr = f'{ip}:{port}'
+        cands.append(n_addr)
+    
+    nodes = {}
+    
+    print('collecting', end='', flush=True)
+    # initial nodes
+    while cands:
+        n = cands.pop()
+        if n not in nodes:
+            peek_n = peek(n)
+            if peek_n == {}:  # when cannot reach to node behind firewall via rpc
+                continue
+            nodes[n] = peek_n
+        peers = neighbors(n)
+        nodes[n]["n_peers"] = len(peers)
+        for n in peers:
+            if n not in nodes and n not in cands:
+                cands.append(n)
+    
+    print_nodes(nodes) 
