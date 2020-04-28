@@ -8,6 +8,7 @@ import socket
 import requests as r
 from datetime import timezone
 from dateutil.parser import parse as dateparse
+from filelock import FileLock
 
 import dbproxy
 
@@ -15,7 +16,7 @@ REQUEST_TIMEOUT = 1
 
 def neighbors(addr):
     try:
-        #print(f'collecting neighbors from {addr}')
+        if args.verbose: print(f'collecting neighbors from {addr}')
         print('.', end='', flush=True)
         res = r.get(url=f'http://{addr}/net_info', timeout=REQUEST_TIMEOUT)
     except Exception:
@@ -33,7 +34,7 @@ def neighbors(addr):
 
 def peek(addr):
     try:
-        #print(f'collecting information from {addr}')
+        if args.verbose: print(f'collecting information from {addr}')
         print('.', end='', flush=True)
         res = r.get(url=f'http://{addr}/status', timeout=REQUEST_TIMEOUT)
     except Exception:
@@ -82,7 +83,6 @@ def print_nodes(nodes):
         alen = max(alen, len(n['rpc_addr']))
         monikers[n['chain_id'] + '_' + n['moniker']] = n
     
-    print()
     for k in sorted(monikers.keys()):
         n = monikers[k]
         print(f'{n["chain_id"]:{clen}}', end=' ', flush=True)
@@ -124,7 +124,11 @@ def update_nodes(db, nodes):
 if __name__ == '__main__':
     # command line args
     p = argparse.ArgumentParser('AMO blockchain node inspector')
-    p.add_argument('node', type=str, nargs='+')
+    p.add_argument('targets', type=str, nargs='+')
+    p.add_argument("-v", "--verbose", help="verbose output",
+                   default=False, dest='verbose', action='store_true')
+    p.add_argument("-f", "--force", help="force-run even if there is a lock",
+                   default=False, dest='force', action='store_true')
     
     args = p.parse_args()
 
@@ -133,17 +137,28 @@ if __name__ == '__main__':
     if db == None:
         exit(-1)
 
+    # filelock
+    lock = FileLock('nodes')
+    try:
+        lock.acquire()
+    except Exception:
+        if args.force:
+           lock.force_acquire()
+        else:
+            print('lock file exists. exiting.')
+            exit(-1)
+
     cands = []
-    for n in args.node:
-        host, port = n.split(':')
+    for t in args.targets:
+        host, port = t.split(':')
         ip = socket.gethostbyname(host)
         n_addr = f'{ip}:{port}'
         cands.append(n_addr)
 
     nodes = {}
     
-    print('collecting', end='', flush=True)
-    # initial nodes
+    # collecting nodes
+    print(f'collecting', end='', flush=True)
     while cands:
         n = cands.pop()
         if n not in nodes:
@@ -156,6 +171,17 @@ if __name__ == '__main__':
         for n in peers:
             if n not in nodes and n not in cands:
                 cands.append(n)
+    print('done !')
 
-    print_nodes(nodes) 
+    # updating nodes
+    print(f'updating {len(nodes)} nodes', end=' - ', flush=True)
     update_nodes(db, nodes)
+    print('done !')
+
+    if args.verbose: print_nodes(nodes) 
+
+    # close
+    print('closing', end=' - ', flush=True)
+    db.close()
+    lock.release()
+    print('done !')
