@@ -39,15 +39,30 @@ def peek(addr):
 
 
 def expand(node):
-    node['moniker'] = node['node_info']['moniker']
     tcp_addr = node['node_info']['listen_addr'].split('tcp://')[1]
-    node['p2p_addr'] = node['node_info']['id'] + '@' + tcp_addr
     ip_addr = tcp_addr.split(':')[0]
     rpc_port = node['node_info']['other']['rpc_address'].split(
         'tcp://')[1].split(':')[1]
+
+    # to load on db
+    node['chain_id'] = node['node_info']['network']
+    node['val_addr'] = node['validator_info']['address']
+    node['moniker'] = node['node_info']['moniker']
+    node['latest_block_height'] = node['sync_info']['latest_block_height']
+    node['latest_block_time'] = node['sync_info']['latest_block_time']
+    node['catching_up'] = node['sync_info']['catching_up']
+
+    # to print
     node['rpc_addr'] = f'http://{ip_addr}:{rpc_port}'
     node['catching_up_sign'] = '+' if node['sync_info']['catching_up'] else ' '
+    node['p2p_addr'] = node['node_info']['id'] + '@' + tcp_addr
     node['voting_power'] = node['validator_info']['voting_power']
+
+    # clean-up
+    del node['node_info']
+    del node['validator_info']
+    del node['sync_info']
+
     return node
 
 def print_nodes(nodes):
@@ -64,9 +79,12 @@ def print_nodes(nodes):
     print()
     for k in sorted(monikers.keys()):
         n = monikers[k]
-        print(
-            f'{k:{mlen}} {n["rpc_addr"]:{alen}} {n["sync_info"]["latest_block_height"]:>7} {n["n_peers"]:>3} {n["catching_up_sign"]} {n["voting_power"]:>{20}}'
-        )
+        print(f'{k:{mlen}}', end=' ')
+        print(f'{n["rpc_addr"]:{alen}}', end=' ')
+        print(f'{n["latest_block_height"]:>7}', end=' ')
+        print(f'{n["n_peers"]:>3}', end=' ')
+        print(f'{n["catching_up_sign"]}', end=' ')
+        print(f'{n["voting_power"]:>{20}}')
 
 if __name__ == '__main__':
     # command line args
