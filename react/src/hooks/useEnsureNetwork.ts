@@ -2,7 +2,7 @@ import {useEffect, useState} from 'react'
 import {RootState, useUpdateState} from "../reducer"
 import {useSelector} from "react-redux"
 
-const useOnce = (fn: (chainId: string) => void) => {
+const useEnsureNetwork = (fn: (chainId: string) => void) => {
   const {chainId, updated} = useUpdateState()
   const path = useSelector<RootState, string>(state => state.router.location.pathname)
   const [once, setOnce] = useState(false)
@@ -18,4 +18,4 @@ const useOnce = (fn: (chainId: string) => void) => {
 
 }
 
-export default useOnce
+export default useEnsureNetwork

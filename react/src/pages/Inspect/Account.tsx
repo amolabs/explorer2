@@ -10,7 +10,7 @@ import {transactionColumns} from "../../component/columns"
 import useScrollUpdate from "../../hooks/useScrollUpdate"
 import {useDispatch} from "react-redux"
 import {replace} from "connected-react-router"
-import useEnsureNetwork from "../../hooks/useOnce"
+import useEnsureNetwork from "../../hooks/useEnsureNetwork"
 
 const columns = [
   {
