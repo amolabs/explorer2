@@ -114,3 +114,6 @@ db/config.json
 
 .idea/
 .venv
+
+# tags
+tags
