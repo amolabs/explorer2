@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # vim: set sw=4 ts=4 expandtab :
+"""
+state db builder
+"""
 
 # standard imports
 import argparse
@@ -10,10 +13,11 @@ from hashlib import sha256
 import time
 import signal  # for main
 import traceback  # for main
+import sys  # for main
 
 from error import ArgError  # for main
-from filelock import FileLock
 
+import filelock
 import dbproxy
 import tx
 import stats
@@ -33,7 +37,7 @@ class Builder:
 
         self.refresh_roof()
 
-        self.lock = FileLock(f'builder-{self.chain_id}')
+        self.lock = filelock.FileLock(f'builder-{self.chain_id}')
         try:
             self.lock.acquire()
         except Exception:
@@ -321,7 +325,7 @@ def update_val(chain_id, addr, power, cur):
         })
 
 
-def handle(sig, st):
+def handle(sig, stack_frame):
     raise KeyboardInterrupt
 
 
@@ -359,9 +363,9 @@ if __name__ == "__main__":
 
     try:
         builder = Builder(args.chain, force=args.force)
-    except ArgError as e:
-        print(e.message)
-        exit(-1)
+    except ArgError as err:
+        print(err.message)
+        sys.exit(-1)
 
     if args.rebuild:
         builder.clear()
@@ -385,6 +389,7 @@ if __name__ == "__main__":
     except Exception:
         traceback.print_exc()
         builder.close()
+        sys.exit(-1)
     else:
         print('closing builder')
         builder.close()

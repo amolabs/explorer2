@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # vim: set sw=4 ts=4 expandtab :
+"""
+block collector
+"""
 
 # standard imports
 import argparse
@@ -9,13 +12,14 @@ import base64
 import asyncio
 import signal  # for main
 import traceback  # for main
+import sys  # for main
 
 # third-party imports
 import websockets
 import requests
 
 from error import ArgError  # for main
-from filelock import FileLock
+import filelock
 
 import dbproxy
 import block
@@ -35,7 +39,7 @@ class Collector:
 
         self.refresh_remote()
 
-        self.lock = FileLock(f'collector-{self.chain_id}')
+        self.lock = filelock.FileLock(f'collector-{self.chain_id}')
         try:
             self.lock.acquire()
         except Exception:
@@ -262,7 +266,7 @@ class Collector:
                 while True:
                     try:
                         await ws.recv()
-                        # XXX: Response from subscription does not give the
+                        # NOTE: Response from subscription does not give the
                         # block_id of the newly added block. We need another
                         # rpc query to get the block_id. Instead, just call
                         # self.play().
@@ -274,7 +278,7 @@ class Collector:
                         break
 
     def watch(self):
-        # XXX: It is possible that we may wait so long that the DB connection
+        # NOTE: It is possible that we may wait so long that the DB connection
         # is lost due to the timeout. To avoid the situation, close the db
         # connection now, and reconnect when it is needed.
         self.db.close()
@@ -284,7 +288,7 @@ class Collector:
         loop.run_until_complete(self.watch_loop())
 
 
-def handle(sig, st):
+def handle(sig, stack_frame):
     raise KeyboardInterrupt
 
 
@@ -322,9 +326,9 @@ if __name__ == '__main__':
 
     try:
         collector = Collector(node=args.node, force=args.force)
-    except ArgError as e:
-        print(e.message)
-        exit(-1)
+    except ArgError as err:
+        print(err.message)
+        sys.exit(-1)
 
     if args.rebuild:
         collector.clear()
@@ -348,7 +352,7 @@ if __name__ == '__main__':
     except Exception:
         traceback.print_exc()
         collector.close()
-        exit(-1)
+        sys.exit(-1)
     else:
         print('closing collector')
         collector.close()
