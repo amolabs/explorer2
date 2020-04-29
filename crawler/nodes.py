@@ -2,14 +2,18 @@
 # -*- coding: utf-8 -*-
 # vim: set sw=4 ts=4 expandtab :
 
+# standard imports
 import argparse
 import json
 import socket
-import requests as r
+import traceback
 from datetime import timezone
 from dateutil.parser import parse as dateparse
-from filelock import FileLock
 
+# third-party imports
+import requests as r
+
+from filelock import FileLock
 import dbproxy
 
 REQUEST_TIMEOUT = 1 

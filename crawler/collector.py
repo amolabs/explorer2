@@ -2,21 +2,22 @@
 # -*- coding: utf-8 -*-
 # vim: set sw=4 ts=4 expandtab :
 
+# standard imports
 import argparse
 import json
 import base64
+import asyncio
+import signal  # for main
+import traceback  # for main
+
+# third-party imports
+import websockets
 import requests
 
+from error import ArgError  # for main
 from filelock import FileLock
-from error import ArgError
 
-# for main
 import dbproxy
-import asyncio
-import websockets
-import signal
-import traceback
-
 import block
 import tx
 

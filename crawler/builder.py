@@ -2,20 +2,19 @@
 # -*- coding: utf-8 -*-
 # vim: set sw=4 ts=4 expandtab :
 
+# standard imports
 import argparse
 import json
 import base64
 from hashlib import sha256
-
-from filelock import FileLock
-from error import ArgError
-
-# for main
-import dbproxy
 import time
-import signal
-import traceback
+import signal  # for main
+import traceback  # for main
 
+from error import ArgError  # for main
+from filelock import FileLock
+
+import dbproxy
 import tx
 import stats
 import models
