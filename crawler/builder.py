@@ -16,8 +16,8 @@ import traceback  # for main
 import sys  # for main
 
 from error import ArgError  # for main
+from filelock import FileLock, Timeout
 
-import filelock
 import dbproxy
 import tx
 import stats
@@ -25,7 +25,7 @@ import models
 
 
 class Builder:
-    def __init__(self, chain_id, db=None, force=False):
+    def __init__(self, chain_id, db=None):
         if chain_id is None:
             raise ArgError('no chain_id is given.')
         self.chain_id = chain_id
@@ -37,15 +37,14 @@ class Builder:
 
         self.refresh_roof()
 
-        self.lock = filelock.FileLock(f'builder-{self.chain_id}')
+        lock = FileLock(f'/var/tmp/builder-{self.chain_id}.lock')
         try:
-            self.lock.acquire()
-        except Exception:
-            if force:
-                self.lock.force_acquire()
-            else:
-                print('lock file exists. exiting.')
-                exit(-1)
+            lock.acquire(timeout=1)
+        except Timeout:
+            print('another instance is running. exiting.')
+            sys.exit(-1)
+        else:
+            self.lock = lock
 
         cur = self.cursor
         # get current explorer state
@@ -353,16 +352,10 @@ if __name__ == "__main__":
                    default=False,
                    dest='verbose',
                    action='store_true')
-    p.add_argument("-f",
-                   "--force",
-                   help="force-run even if there is a lock",
-                   default=False,
-                   dest='force',
-                   action='store_true')
     args = p.parse_args()
 
     try:
-        builder = Builder(args.chain, force=args.force)
+        builder = Builder(args.chain)
     except ArgError as err:
         print(err.message)
         sys.exit(-1)

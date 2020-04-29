@@ -7,13 +7,14 @@ import argparse
 import json
 import socket
 import traceback
+import sys
 from datetime import timezone
 from dateutil.parser import parse as dateparse
 
 # third-party imports
 import requests as r
+from filelock import FileLock, Timeout
 
-from filelock import FileLock
 import dbproxy
 
 REQUEST_TIMEOUT = 1
@@ -162,15 +163,12 @@ if __name__ == '__main__':
             exit(-1)
 
         # filelock
-        lock = FileLock('nodes')
+        lock = FileLock('/var/tmp/nodes.lock')
         try:
-            lock.acquire()
-        except Exception:
-            if args.force:
-                lock.force_acquire()
-            else:
-                print('lock file exists. exiting.')
-                exit(-1)
+            lock.acquire(timeout=1)
+        except Timeout:
+            print('another instance is running. exiting.')
+            sys.exit(-1)
 
     try:
         cands = []

@@ -19,7 +19,7 @@ import websockets
 import requests
 
 from error import ArgError  # for main
-import filelock
+from filelock import FileLock, Timeout
 
 import dbproxy
 import block
@@ -27,7 +27,7 @@ import tx
 
 
 class Collector:
-    def __init__(self, node, db=None, force=False):
+    def __init__(self, node, db=None):
         if node is None:
             raise ArgError('no node is given.')
         self.node = node
@@ -39,15 +39,14 @@ class Collector:
 
         self.refresh_remote()
 
-        self.lock = filelock.FileLock(f'collector-{self.chain_id}')
+        lock = FileLock(f'/var/tmp/collector-{self.chain_id}.lock')
         try:
-            self.lock.acquire()
-        except Exception:
-            if force:
-                self.lock.force_acquire()
-            else:
-                print('lock file exists. exiting.')
-                exit(-1)
+            lock.acquire(timeout=1)
+        except Timeout:
+            print('another instance is running. exiting.')
+            sys.exit(-1)
+        else:
+            self.lock = lock
 
         # get current explorer state
         cur.execute(
@@ -316,16 +315,10 @@ if __name__ == '__main__':
                    default=False,
                    dest='verbose',
                    action='store_true')
-    p.add_argument("-f",
-                   "--force",
-                   help="force-run even if there is a lock",
-                   default=False,
-                   dest='force',
-                   action='store_true')
     args = p.parse_args()
 
     try:
-        collector = Collector(node=args.node, force=args.force)
+        collector = Collector(node=args.node)
     except ArgError as err:
         print(err.message)
         sys.exit(-1)
