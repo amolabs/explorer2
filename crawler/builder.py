@@ -14,6 +14,7 @@ from error import ArgError
 import dbproxy
 import time
 import signal
+import traceback
 
 import tx
 import stats
@@ -328,16 +329,33 @@ def handle(sig, st):
 if __name__ == "__main__":
     # command line args
     p = argparse.ArgumentParser('AMO blockchain explorer DB builder')
-    p.add_argument("-c", "--chain", help="chain id to build state db",
+    p.add_argument("-c",
+                   "--chain",
+                   help="chain id to build state db",
                    type=str)
-    p.add_argument("-l", "--limit", help="limit number of blocks to play",
-                   type=int, default=100)
-    p.add_argument("-r", "--rebuild", help="rebuild",
-                   default=False, dest='rebuild', action='store_true')
-    p.add_argument("-v", "--verbose", help="verbose output",
-                   default=False, dest='verbose', action='store_true')
-    p.add_argument("-f", "--force", help="force-run even if there is a lock",
-                   default=False, dest='force', action='store_true')
+    p.add_argument("-l",
+                   "--limit",
+                   help="limit number of blocks to play",
+                   type=int,
+                   default=100)
+    p.add_argument("-r",
+                   "--rebuild",
+                   help="rebuild",
+                   default=False,
+                   dest='rebuild',
+                   action='store_true')
+    p.add_argument("-v",
+                   "--verbose",
+                   help="verbose output",
+                   default=False,
+                   dest='verbose',
+                   action='store_true')
+    p.add_argument("-f",
+                   "--force",
+                   help="force-run even if there is a lock",
+                   default=False,
+                   dest='force',
+                   action='store_true')
     args = p.parse_args()
 
     try:
@@ -365,8 +383,8 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print('interrupted. closing builder')
         builder.close()
-    except Exception as e:
-        print('exception occurred', e)
+    except Exception:
+        traceback.print_exc()
         builder.close()
     else:
         print('closing builder')

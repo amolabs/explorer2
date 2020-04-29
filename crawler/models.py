@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # vim: set sw=4 ts=4 expandtab :
 
+
 class Account:
     def __init__(self, chain_id, address, cursor):
         self.chain_id = chain_id
@@ -13,11 +14,11 @@ class Account:
         self.val_power = 0
         self.delegate = 0
         self.del_addr = None
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT * FROM `s_accounts`
             WHERE (`chain_id` = %(chain_id)s AND `address` = %(address)s)
-            """,
-            vars(self))
+            """, vars(self))
         row = cursor.fetchone()
         if row:
             d = dict(zip(cursor.column_names, row))
@@ -30,20 +31,21 @@ class Account:
             self.delegate = int(d['delegate'])
             self.del_addr = d['del_addr']
         else:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO `s_accounts` (`chain_id`, `address`)
                 VALUES (%(chain_id)s, %(address)s)
-                """,
-                vars(self))
+                """, vars(self))
 
     def save(self, cursor):
-        values = vars(self)
+        values = vars(self).copy()
         values['balance'] = str(values['balance'])
         values['stake'] = str(values['stake'])
         values['eff_stake'] = str(values['eff_stake'])
         values['delegate'] = str(values['delegate'])
         values['val_power'] = str(values['val_power'])
-        cursor.execute("""
+        cursor.execute(
+            """
             UPDATE `s_accounts`
             SET
                 `balance` = %(balance)s,
@@ -55,8 +57,8 @@ class Account:
                 `delegate` = %(delegate)s,
                 `del_addr` = %(del_addr)s
             WHERE (`chain_id` = %(chain_id)s AND `address` = %(address)s)
-            """,
-            values)
+            """, values)
+
 
 class Storage:
     def __init__(self, chain_id, storage_id, owner, cursor):
@@ -67,11 +69,11 @@ class Storage:
         self.registration_fee = 0
         self.hosting_fee = 0
         self.active = False
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT * FROM `s_storages`
             WHERE (`chain_id` = %(chain_id)s AND `storage_id` = %(storage_id)s)
-            """,
-            vars(self))
+            """, vars(self))
         row = cursor.fetchone()
         if row:
             d = dict(zip(cursor.column_names, row))
@@ -81,18 +83,19 @@ class Storage:
             self.hosting_fee = int(d['hosting_fee'])
             self.active = d['active']
         else:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO `s_storages`
                     (`chain_id`, `storage_id`, `owner`)
                 VALUES (%(chain_id)s, %(storage_id)s, %(owner)s)
-                """,
-                vars(self))
+                """, vars(self))
 
     def save(self, cursor):
-        values = vars(self)
+        values = vars(self).copy()
         values['registration_fee'] = str(values['registration_fee'])
         values['hosting_fee'] = str(values['hosting_fee'])
-        cursor.execute("""
+        cursor.execute(
+            """
             UPDATE `s_storages`
             SET
                 `owner` = %(owner)s,
@@ -101,24 +104,24 @@ class Storage:
                 `hosting_fee` = %(hosting_fee)s,
                 `active` = %(active)s
             WHERE (`chain_id` = %(chain_id)s AND `storage_id` = %(storage_id)s)
-            """,
-            values)
+            """, values)
+
 
 class Parcel:
     def __init__(self, chain_id, parcel_id, owner, cursor):
         self.chain_id = chain_id
         self.parcel_id = parcel_id
         self.storage_id = int(parcel_id[:8], 16)
-        self.owner = owner # FK
+        self.owner = owner  # FK
         self.custody = ''
         self.proxy_account = None
         self.extra = '{}'
         self.on_sale = False
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT * FROM `s_parcels`
             WHERE (`chain_id` = %(chain_id)s AND `parcel_id` = %(parcel_id)s)
-            """,
-            vars(self))
+            """, vars(self))
         row = cursor.fetchone()
         if row:
             d = dict(zip(cursor.column_names, row))
@@ -128,16 +131,17 @@ class Parcel:
             self.extra = d['extra']
             self.on_sale = d['on_sale']
         else:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO `s_parcels`
                     (`chain_id`, `parcel_id`, `storage_id`, `owner`)
                 VALUES (%(chain_id)s, %(parcel_id)s, %(storage_id)s, %(owner)s)
-                """,
-                vars(self))
+                """, vars(self))
 
     def save(self, cursor):
-        values = vars(self)
-        cursor.execute("""
+        values = vars(self).copy()
+        cursor.execute(
+            """
             UPDATE `s_parcels`
             SET
                 `storage_id` = %(storage_id)s,
@@ -146,8 +150,8 @@ class Parcel:
                 `extra` = %(extra)s,
                 `on_sale` = %(on_sale)s
             WHERE (`chain_id` = %(chain_id)s AND `parcel_id` = %(parcel_id)s)
-            """,
-            values)
+            """, values)
+
 
 class Request:
     def __init__(self, chain_id, parcel_id, buyer, cursor):
@@ -158,13 +162,13 @@ class Request:
         self.dealer = None
         self.dealer_fee = 0
         self.extra = '{}'
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT * FROM `s_requests`
             WHERE (`chain_id` = %(chain_id)s
                 AND `parcel_id` = %(parcel_id)s
                 AND `buyer` = %(buyer)s)
-            """,
-            vars(self))
+            """, vars(self))
         row = cursor.fetchone()
         if row:
             d = dict(zip(cursor.column_names, row))
@@ -173,18 +177,19 @@ class Request:
             self.dealer_fee = int(d.get('dealer_fee'))
             self.extra = d.get('extra', '{}')
         else:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO `s_requests`
                     (`chain_id`, `parcel_id`, `buyer`)
                 VALUES (%(chain_id)s, %(parcel_id)s, %(buyer)s)
-                """,
-                vars(self))
+                """, vars(self))
 
     def save(self, cursor):
-        values = vars(self)
+        values = vars(self).copy()
         values['payment'] = str(values['payment'])
         values['dealer_fee'] = str(values['dealer_fee'])
-        cursor.execute("""
+        cursor.execute(
+            """
             UPDATE `s_requests`
             SET
                 `payment` = %(payment)s,
@@ -194,17 +199,17 @@ class Request:
             WHERE (`chain_id` = %(chain_id)s
                 AND `parcel_id` = %(parcel_id)s
                 AND `buyer` = %(buyer)s)
-            """,
-            values)
+            """, values)
 
     def delete(self, cursor):
-        cursor.execute("""
+        cursor.execute(
+            """
             DELETE FROM `s_requests`
             WHERE (`chain_id` = %(chain_id)s
                 AND `parcel_id` = %(parcel_id)s
                 AND `buyer` = %(buyer)s)
-            """,
-            vars(self))
+            """, vars(self))
+
 
 class Usage:
     def __init__(self, chain_id, parcel_id, grantee, cursor):
@@ -213,29 +218,30 @@ class Usage:
         self.grantee = grantee
         self.custody = ''
         self.extra = '{}'
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT * FROM `s_usages`
             WHERE (`chain_id` = %(chain_id)s
                 AND `parcel_id` = %(parcel_id)s
                 AND `grantee` = %(grantee)s)
-            """,
-            vars(self))
+            """, vars(self))
         row = cursor.fetchone()
         if row:
             d = dict(zip(cursor.column_names, row))
             self.custody = d.get('custody')
             self.extra = d.get('extra', '{}')
         else:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO `s_usages`
                     (`chain_id`, `parcel_id`, `grantee`)
                 VALUES (%(chain_id)s, %(parcel_id)s, %(grantee)s)
-                """,
-                vars(self))
+                """, vars(self))
 
     def save(self, cursor):
-        values = vars(self)
-        cursor.execute("""
+        values = vars(self).copy()
+        cursor.execute(
+            """
             UPDATE `s_usages`
             SET
                 `custody` = %(custody)s,
@@ -243,29 +249,29 @@ class Usage:
             WHERE (`chain_id` = %(chain_id)s
                 AND `parcel_id` = %(parcel_id)s
                 AND `grantee` = %(grantee)s)
-            """,
-            values)
+            """, values)
 
     def delete(self, cursor):
-        cursor.execute("""
+        cursor.execute(
+            """
             DELETE FROM `s_usages`
             WHERE (`chain_id` = %(chain_id)s
                 AND `parcel_id` = %(parcel_id)s
                 AND `grantee` = %(grantee)s)
-            """,
-            vars(self))
+            """, vars(self))
+
 
 class Draft:
     def __init__(self, chain_id, draft_id, proposer, cursor):
         self.chain_id = chain_id
         self.draft_id = draft_id
-        self.proposer = proposer # FK
-        cursor.execute("""
+        self.proposer = proposer  # FK
+        cursor.execute(
+            """
             SELECT * FROM `s_drafts`
             WHERE (`chain_id` = %(chain_id)s
                 AND `draft_id` = %(draft_id)s)
-            """,
-            vars(self))
+            """, vars(self))
         row = cursor.fetchone()
         if row:
             d = dict(zip(cursor.column_names, row))
@@ -279,17 +285,18 @@ class Draft:
             self.tally_approve = d['tally_approve']
             self.tally_reject = d['tally_reject']
         else:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO `s_drafts`
                     (`chain_id`, `draft_id`, `proposer`)
                 VALUES (%(chain_id)s, %(draft_id)s, %(proposer)s)
-                """,
-                vars(self))
+                """, vars(self))
 
     def save(self, cursor):
-        values = vars(self)
+        values = vars(self).copy()
         values['deposit'] = str(values.get('deposit', '0'))
-        cursor.execute("""
+        cursor.execute(
+            """
             UPDATE `s_drafts`
             SET
                 `proposer` = %(proposer)s,
@@ -303,43 +310,44 @@ class Draft:
                 `tally_reject` = %(tally_reject)s
             WHERE (`chain_id` = %(chain_id)s
                 AND `draft_id` = %(draft_id)s)
-            """,
-            values)
+            """, values)
+
 
 class Vote:
     def __init__(self, chain_id, draft_id, voter, cursor):
         self.chain_id = chain_id
         self.draft_id = draft_id
         self.voter = voter
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT * FROM `s_votes`
             WHERE (`chain_id` = %(chain_id)s
                 AND `draft_id` = %(draft_id)s
                 AND `voter` = %(voter)s)
-            """,
-            vars(self))
+            """, vars(self))
         row = cursor.fetchone()
         if row:
             d = dict(zip(cursor.column_names, row))
             self.approve = d.get('approve')
         else:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO `s_votes`
                     (`chain_id`, `draft_id`, `voter`)
                 VALUES (%(chain_id)s, %(draft_id)s, %(voter)s)
-                """,
-                vars(self))
+                """, vars(self))
 
     def save(self, cursor):
-        cursor.execute("""
+        cursor.execute(
+            """
             UPDATE `s_votes`
             SET
                 `approve` = %(approve)s
             WHERE (`chain_id` = %(chain_id)s
                 AND `draft_id` = %(draft_id)s
                 AND `voter` = %(voter)s)
-            """,
-            vars(self))
+            """, vars(self))
+
 
 class UDC:
     def __init__(self, chain_id, udc_id, cursor):
@@ -349,12 +357,12 @@ class UDC:
         self.desc = ''
         self.operators = '[]'
         self.total = 0
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT * FROM `s_udcs`
             WHERE (`chain_id` = %(chain_id)s
                 AND `udc_id` = %(udc_id)s)
-            """,
-            vars(self))
+            """, vars(self))
         row = cursor.fetchone()
         if row:
             d = dict(zip(cursor.column_names, row))
@@ -363,17 +371,18 @@ class UDC:
             self.operators = d.get('operators')
             self.total = int(d.get('total'))
         else:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO `s_udcs`
                     (`chain_id`, `udc_id`)
                 VALUES (%(chain_id)s, %(udc_id)s)
-                """,
-                vars(self))
+                """, vars(self))
 
     def save(self, cursor):
-        values = vars(self)
+        values = vars(self).copy()
         values['total'] = str(values['total'])
-        cursor.execute("""
+        cursor.execute(
+            """
             UPDATE `s_udcs`
             SET
                 `owner` = %(owner)s,
@@ -382,8 +391,8 @@ class UDC:
                 `total` = %(total)s
             WHERE (`chain_id` = %(chain_id)s
                 AND `udc_id` = %(udc_id)s)
-            """,
-            values)
+            """, values)
+
 
 class UDCBalance:
     def __init__(self, chain_id, udc_id, address, cursor):
@@ -392,31 +401,32 @@ class UDCBalance:
         self.address = address
         self.balance = 0
         self.balance_lock = 0
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT * FROM `s_udc_balances`
             WHERE (`chain_id` = %(chain_id)s
                 AND `udc_id` = %(udc_id)s
                 AND `address` = %(address)s)
-            """,
-            vars(self))
+            """, vars(self))
         row = cursor.fetchone()
         if row:
             d = dict(zip(cursor.column_names, row))
             self.balance = int(d.get('balance'))
             self.balance_lock = int(d.get('balance_lock'))
         else:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO `s_udc_balances`
                     (`chain_id`, `udc_id`, `address`)
                 VALUES (%(chain_id)s, %(udc_id)s, %(address)s)
-                """,
-                vars(self))
+                """, vars(self))
 
     def save(self, cursor):
-        values = vars(self)
+        values = vars(self).copy()
         values['balance'] = str(values['balance'])
         values['balance_lock'] = str(values['balance_lock'])
-        cursor.execute("""
+        cursor.execute(
+            """
             UPDATE `s_udc_balances`
             SET
                 `balance` = %(balance)s,
@@ -424,6 +434,4 @@ class UDCBalance:
             WHERE (`chain_id` = %(chain_id)s
                 AND `udc_id` = %(udc_id)s
                 AND `address` = %(address)s)
-            """,
-            values)
-
+            """, values)

@@ -15,6 +15,7 @@ import dbproxy
 import asyncio
 import websockets
 import signal
+import traceback
 
 import block
 import tx
@@ -289,16 +290,33 @@ def handle(sig, st):
 if __name__ == '__main__':
     # command line args
     p = argparse.ArgumentParser('AMO blockchain explorer block collector')
-    p.add_argument("-n", "--node", help="rpc node address to connect",
+    p.add_argument("-n",
+                   "--node",
+                   help="rpc node address to connect",
                    type=str)
-    p.add_argument("-l", "--limit", help="limit number of blocks to collect",
-                   type=int, default=100)
-    p.add_argument("-r", "--rebuild", help="rebuild",
-                   default=False, dest='rebuild', action='store_true')
-    p.add_argument("-v", "--verbose", help="verbose output",
-                   default=False, dest='verbose', action='store_true')
-    p.add_argument("-f", "--force", help="force-run even if there is a lock",
-                   default=False, dest='force', action='store_true')
+    p.add_argument("-l",
+                   "--limit",
+                   help="limit number of blocks to collect",
+                   type=int,
+                   default=100)
+    p.add_argument("-r",
+                   "--rebuild",
+                   help="rebuild",
+                   default=False,
+                   dest='rebuild',
+                   action='store_true')
+    p.add_argument("-v",
+                   "--verbose",
+                   help="verbose output",
+                   default=False,
+                   dest='verbose',
+                   action='store_true')
+    p.add_argument("-f",
+                   "--force",
+                   help="force-run even if there is a lock",
+                   default=False,
+                   dest='force',
+                   action='store_true')
     args = p.parse_args()
 
     try:
@@ -326,8 +344,8 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print('interrupted. closing collector')
         collector.close()
-    except Exception as e:
-        print('exception occurred', e)
+    except Exception:
+        traceback.print_exc()
         collector.close()
         exit(-1)
     else:
