@@ -16,7 +16,8 @@ import requests as r
 from filelock import FileLock
 import dbproxy
 
-REQUEST_TIMEOUT = 1 
+REQUEST_TIMEOUT = 1
+
 
 def neighbors(addr):
     try:
@@ -52,7 +53,8 @@ def expand(node):
     ip_addr = tcp_addr.split(':')[0]
     rpc_port = node['node_info']['other']['rpc_address'].split(
         'tcp://')[1].split(':')[1]
-    lbt = dateparse(node['sync_info']['latest_block_time']) .astimezone(tz=timezone.utc)
+    lbt = dateparse(node['sync_info']['latest_block_time'])\
+        .astimezone(tz=timezone.utc)
 
     # to load on db
     node['chain_id'] = node['node_info']['network']
@@ -75,6 +77,7 @@ def expand(node):
 
     return node
 
+
 def print_nodes(nodes):
     # this is just for neat display
     clen = 0
@@ -86,7 +89,7 @@ def print_nodes(nodes):
         mlen = max(mlen, len(n['moniker']))
         alen = max(alen, len(n['rpc_addr']))
         monikers[n['chain_id'] + '_' + n['moniker']] = n
-    
+
     for k in sorted(monikers.keys()):
         n = monikers[k]
         print(f'{n["chain_id"]:{clen}}', end=' ', flush=True)
@@ -96,6 +99,7 @@ def print_nodes(nodes):
         print(f'{n["n_peers"]:>3}', end=' ', flush=True)
         print(f'{n["catching_up_sign"]}', end=' ', flush=True)
         print(f'{n["voting_power"]:>{20}}', flush=True)
+
 
 def update_nodes(db, nodes):
     if len(nodes) == 0:
@@ -110,7 +114,8 @@ def update_nodes(db, nodes):
 
     # then, insert
     for _, n in nodes.items():
-        cur.execute("""
+        cur.execute(
+            """
             INSERT INTO `nodes`
                 (`chain_id`, `val_addr`, `moniker`,
                  `latest_block_time`, `latest_block_height`,
@@ -129,13 +134,25 @@ if __name__ == '__main__':
     # command line args
     p = argparse.ArgumentParser(description='AMO blockchain node inspector')
     p.add_argument('targets', type=str, nargs='+')
-    p.add_argument("-v", "--verbose", help="verbose output",
-                   default=False, dest='verbose', action='store_true')
-    p.add_argument("-f", "--force", help="force-run even if there is a lock",
-                   default=False, dest='force', action='store_true')
-    p.add_argument("-d", "--dry-run", help="do not update DB",
-                   default=False, dest='dry', action='store_true')
-    
+    p.add_argument("-v",
+                   "--verbose",
+                   help="verbose output",
+                   default=False,
+                   dest='verbose',
+                   action='store_true')
+    p.add_argument("-f",
+                   "--force",
+                   help="force-run even if there is a lock",
+                   default=False,
+                   dest='force',
+                   action='store_true')
+    p.add_argument("-d",
+                   "--dry-run",
+                   help="do not update DB",
+                   default=False,
+                   dest='dry',
+                   action='store_true')
+
     args = p.parse_args()
 
     if not args.dry:
@@ -162,9 +179,9 @@ if __name__ == '__main__':
             ip = socket.gethostbyname(host)
             n_addr = f'{ip}:{port}'
             cands.append(n_addr)
-    
+
         nodes = {}
-        
+
         # collecting nodes
         print(f'collecting', end=' - ', flush=True)
         while cands:
@@ -194,13 +211,14 @@ if __name__ == '__main__':
             print('closing db. releasing lock.')
             db.close()
             lock.release()
-    except Exception as exc:
-        print('exception occurred', exc)
+    except Exception:
+        traceback.print_exc()
         if not args.dry:
+            print('closing db. releasing lock.')
             db.close()
             lock.release()
     else:
-        print('closing db. releasing lock.')
         if not args.dry:
+            print('closing db. releasing lock.')
             db.close()
             lock.release()
