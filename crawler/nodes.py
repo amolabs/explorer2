@@ -80,23 +80,23 @@ def expand(node):
 
 def print_nodes(nodes):
     # this is just for neat display
-    clen = 0
+    # clen = 0
     mlen = 0
     alen = 0
     monikers = {}
     for _, n in nodes.items():
-        clen = max(clen, len(n['chain_id']))
+        # clen = max(clen, len(n['chain_id']))
         mlen = max(mlen, len(n['moniker']))
         alen = max(alen, len(n['rpc_addr']))
         monikers[n['chain_id'] + '_' + n['moniker']] = n
 
     for k in sorted(monikers.keys()):
         n = monikers[k]
-        print(f'{n["chain_id"]:{clen}}', end=' ', flush=True)
+        # print(f'{n["chain_id"]:{clen}}', end=' ', flush=True)
         print(f'{n["moniker"]:{mlen}}', end=' ', flush=True)
         print(f'{n["rpc_addr"]:{alen}}', end=' ', flush=True)
-        print(f'{n["latest_block_height"]:>7}', end=' ', flush=True)
         print(f'{n["n_peers"]:>3}', end=' ', flush=True)
+        print(f'{n["latest_block_height"]:>7}', end=' ', flush=True)
         print(f'{n["catching_up_sign"]}', end=' ', flush=True)
         print(f'{n["voting_power"]:>{20}}', flush=True)
 
@@ -203,7 +203,7 @@ if __name__ == '__main__':
             print(f'updating {len(nodes)} nodes', end=' - ', flush=True)
             update_nodes(db, nodes)
             print('done !')
-        if args.verbose:
+        if args.dry or args.verbose:
             print_nodes(nodes)
     except KeyboardInterrupt:
         print('interrupted.')
