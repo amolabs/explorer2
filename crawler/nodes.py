@@ -129,6 +129,8 @@ if __name__ == '__main__':
                    default=False, dest='verbose', action='store_true')
     p.add_argument("-f", "--force", help="force-run even if there is a lock",
                    default=False, dest='force', action='store_true')
+    p.add_argument("-d", "--dry-run", help="do not update DB",
+                   default=False, dest='dry', action='store_true')
     
     args = p.parse_args()
 
@@ -175,11 +177,12 @@ if __name__ == '__main__':
         print('done !')
     
         # updating nodes
-        print(f'updating {len(nodes)} nodes', end=' - ', flush=True)
-        update_nodes(db, nodes)
-        print('done !')
-    
-        if args.verbose: print_nodes(nodes) 
+        if not args.dry:
+            print(f'updating {len(nodes)} nodes', end=' - ', flush=True)
+            update_nodes(db, nodes)
+            print('done !')
+        if args.verbose:
+            print_nodes(nodes)
     except KeyboardInterrupt:
         print('interrupted. closing db. releasing lock.')
         db.close()
