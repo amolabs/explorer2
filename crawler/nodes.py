@@ -115,15 +115,15 @@ def update_nodes(db, nodes):
                 (%(chain_id)s, %(val_addr)s, %(moniker)s,
                  %(latest_block_time)s, %(latest_block_height)s,
                  %(catching_up)s, %(n_peers)s)
-            """,
-            n)
+            """, n)
 
     db.commit()
     cur.close()
 
+
 if __name__ == '__main__':
     # command line args
-    p = argparse.ArgumentParser('AMO blockchain node inspector')
+    p = argparse.ArgumentParser(description='AMO blockchain node inspector')
     p.add_argument('targets', type=str, nargs='+')
     p.add_argument("-v", "--verbose", help="verbose output",
                    default=False, dest='verbose', action='store_true')
@@ -136,7 +136,7 @@ if __name__ == '__main__':
 
     # db connection
     db = dbproxy.connect_db()
-    if db == None:
+    if db is None:
         exit(-1)
 
     # filelock
@@ -145,7 +145,7 @@ if __name__ == '__main__':
         lock.acquire()
     except Exception:
         if args.force:
-           lock.force_acquire()
+            lock.force_acquire()
         else:
             print('lock file exists. exiting.')
             exit(-1)
@@ -175,7 +175,7 @@ if __name__ == '__main__':
                 if n not in nodes and n not in cands:
                     cands.append(n)
         print('done !')
-    
+
         # updating nodes
         if not args.dry:
             print(f'updating {len(nodes)} nodes', end=' - ', flush=True)
@@ -187,8 +187,8 @@ if __name__ == '__main__':
         print('interrupted. closing db. releasing lock.')
         db.close()
         lock.release()
-    except Exception as e:
-        print('exception occurred', e)
+    except Exception as exc:
+        print('exception occurred', exc)
         db.close()
         lock.release()
     else:
