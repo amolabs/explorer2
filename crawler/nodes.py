@@ -134,21 +134,22 @@ if __name__ == '__main__':
     
     args = p.parse_args()
 
-    # db connection
-    db = dbproxy.connect_db()
-    if db is None:
-        exit(-1)
-
-    # filelock
-    lock = FileLock('nodes')
-    try:
-        lock.acquire()
-    except Exception:
-        if args.force:
-            lock.force_acquire()
-        else:
-            print('lock file exists. exiting.')
+    if not args.dry:
+        # db connection
+        db = dbproxy.connect_db()
+        if db is None:
             exit(-1)
+
+        # filelock
+        lock = FileLock('nodes')
+        try:
+            lock.acquire()
+        except Exception:
+            if args.force:
+                lock.force_acquire()
+            else:
+                print('lock file exists. exiting.')
+                exit(-1)
 
     try:
         cands = []
@@ -184,14 +185,18 @@ if __name__ == '__main__':
         if args.verbose:
             print_nodes(nodes)
     except KeyboardInterrupt:
-        print('interrupted. closing db. releasing lock.')
-        db.close()
-        lock.release()
+        print('interrupted.')
+        if not args.dry:
+            print('closing db. releasing lock.')
+            db.close()
+            lock.release()
     except Exception as exc:
         print('exception occurred', exc)
-        db.close()
-        lock.release()
+        if not args.dry:
+            db.close()
+            lock.release()
     else:
         print('closing db. releasing lock.')
-        db.close()
-        lock.release()
+        if not args.dry:
+            db.close()
+            lock.release()
