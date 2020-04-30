@@ -23,27 +23,30 @@ REQUEST_TIMEOUT = 1
 def neighbors(addr):
     try:
         if args.verbose: print(f'collecting neighbors from {addr}')
-        if args.verbose: print('.', end='', flush=True)
+        else: print('.', end='', flush=True)
         res = r.get(url=f'http://{addr}/net_info', timeout=REQUEST_TIMEOUT)
     except Exception:
         return []
     peers = json.loads(res.text)['result']['peers']
     ps = []
     for p in peers:
-        tcp_addr = p['node_info']['listen_addr'].split('tcp://')[1]
-        ip = tcp_addr.split(':')[0]
+        ip = p['remote_ip']
+        #p2p_addr = p['node_info']['listen_addr'].split('tcp://')[1]
+        #ip = p2p_addr.split(':')[0]
+        #p2p_port = p2p_addr.split(':')[1]
         rpc_addr = p['node_info']['other']['rpc_address'].split('tcp://')[1]
-        port = rpc_addr.split(':')[1]
-        ps.append(f'{ip}:{port}')
+        rpc_port = rpc_addr.split(':')[1]
+        ps.append(f'{ip}:{rpc_port}')
     return ps
 
 
 def peek(addr):
     try:
         if args.verbose: print(f'collecting information from {addr}')
-        if args.verbose: print('.', end='', flush=True)
+        else: print('.', end='', flush=True)
         res = r.get(url=f'http://{addr}/status', timeout=REQUEST_TIMEOUT)
     except Exception:
+        print(f'{addr} is unreachable')
         return {}
     node = json.loads(res.text)['result']
     return node
@@ -178,23 +181,32 @@ if __name__ == '__main__':
             n_addr = f'{ip}:{port}'
             cands.append(n_addr)
 
-        nodes = {}
-
+        known = {}
         # collecting nodes
-        print(f'collecting', end=' - ', flush=True)
+        if not args.verbose:
+            print('collecting', end='', flush=True)
+        # traveral
         while cands:
             n = cands.pop()
-            if n not in nodes:
-                peek_n = peek(n)
-                if peek_n == {}:  # when cannot reach to node behind firewall via rpc
-                    continue
-                nodes[n] = expand(peek_n)
             peers = neighbors(n)
-            nodes[n]["n_peers"] = len(peers)
+            if n not in known:
+                known[n] = {'n_peers': len(peers)}
             for n in peers:
-                if n not in nodes and n not in cands:
+                if n not in known and n not in cands:
                     cands.append(n)
-        print('done !')
+
+        nodes = {}
+        # collect info
+        # TODO: do this in parallel using asyncio
+        for n in known:
+            node_info = known[n]
+            peek_n = peek(n)
+            if peek_n == {}:  # unreachable
+                continue
+            node_info.update(expand(peek_n))
+            nodes[n] = node_info
+        if not args.verbose:
+            print(' done')
 
         # updating nodes
         if not args.dry:
