@@ -167,6 +167,7 @@ class Builder:
         if limit == 0:
             limit = self.roof - self.height
         acc = 0
+        self.db.autocommit = False
         for i in range(limit):
             if self.play_block() is True:
                 acc += 1
@@ -178,6 +179,9 @@ class Builder:
                         print('.', end='', flush=True)
                 if h % 1000 == 0:
                     self.print_log(f'block height {h}')
+            if i % 20 == 0:
+                self.db.commit()
+        self.db.commit()
         if verbose:
             print(flush=True)
         self.print_log(f'{acc} blocks played')
