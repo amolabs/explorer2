@@ -269,11 +269,10 @@ class Builder:
             for val in vals:
                 b = base64.b64decode(val['pub_key']['data'])
                 val_addr = sha256(b).hexdigest()[:40].upper()
-                if val['val_power'] == '0':
+                if 'power' not in val or val['power'] == '0':
                     delete_val(self.chain_id, val_addr, cursor)
                 else:
-                    update_val(self.chain_id, val_addr, val['val_power'],
-                               cursor)
+                    update_val(self.chain_id, val_addr, val['power'], cursor)
 
     def _save_height(self, cursor):
         cursor.execute(
