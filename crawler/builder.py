@@ -41,7 +41,7 @@ class Builder:
         try:
             lock.acquire(timeout=1)
         except Timeout:
-            print('another instance is running. exiting.')
+            self.print_log('another instance is running. exiting.')
             sys.exit(-1)
         else:
             self.lock = lock
@@ -72,13 +72,14 @@ class Builder:
         if 'lock' in v: del v['lock']
         return v
 
-    def stat(self):
-        print(
-            f'[builder] chain: {self.chain_id}, local {self.height}, remote {self.roof}',
-            flush=True)
+    def print_log(self, msg):
+        print(f'[builder] [{self.chain_id}] {msg}', flush=True)
+
+    def print_stat(self):
+        self.print_log(f'local {self.height}, remote {self.roof}')
 
     def clear(self):
-        print('REBUILD state db')
+        self.print_log('REBUILD state db')
         cur = self.db.cursor()
 
         cur.execute(
@@ -176,10 +177,10 @@ class Builder:
                     else:
                         print('.', end='', flush=True)
                 if h % 1000 == 0:
-                    print(f'block height {h}', flush=True)
+                    self.print_log(f'block height {h}')
         if verbose:
-            print()
-        print(f'{acc} blocks played')
+            print(flush=True)
+        self.print_log(f'{acc} blocks played')
 
     def play_genesis(self):
         cur = self.db.cursor()
@@ -286,13 +287,13 @@ class Builder:
         self.lock.release()
 
     def watch(self):
-        print(f'Waiting for new block from db')
+        self.print_log(f'Waiting for new block from db')
         while True:
             time.sleep(2)
             self.refresh_roof()
             if self.roof - self.height > 0:
                 self.play(0, args.verbose)
-                self.stat()
+                self.print_stat()
 
 
 def delete_val(chain_id, addr, cur):
@@ -357,7 +358,7 @@ if __name__ == "__main__":
     try:
         builder = Builder(args.chain)
     except ArgError as err:
-        print(err.message)
+        print(err)
         sys.exit(-1)
 
     if args.rebuild:
@@ -365,24 +366,24 @@ if __name__ == "__main__":
 
     try:
         signal.signal(signal.SIGTERM, handle)
-        builder.stat()
+        builder.print_stat()
         builder.play(args.limit, args.verbose)
-        builder.stat()
+        builder.print_stat()
         if args.limit == 0:
             builder.refresh_roof()
             while builder.roof - builder.height > 0:
                 builder.play(0, args.verbose)
-                builder.stat()
+                builder.print_stat()
                 builder.refresh_roof()
-            print('No more blocks.')
+            builder.print_log('No more blocks.')
             builder.watch()
     except KeyboardInterrupt:
-        print('interrupted. closing builder')
+        builder.print_log('interrupted. closing builder')
         builder.close()
     except Exception:
         traceback.print_exc()
         builder.close()
         sys.exit(-1)
     else:
-        print('closing builder')
+        builder.print_log('closing builder')
         builder.close()

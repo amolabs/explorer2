@@ -43,7 +43,7 @@ class Collector:
         try:
             lock.acquire(timeout=1)
         except Timeout:
-            print('another instance is running. exiting.')
+            self.print_log('another instance is running. exiting.')
             sys.exit(-1)
         else:
             self.lock = lock
@@ -69,13 +69,14 @@ class Collector:
         if 'lock' in v: del v['lock']
         return v
 
-    def stat(self):
-        print(
-            f'[collector] chain: {self.chain_id}, local {self.height}, remote {self.remote_height}',
-            flush=True)
+    def print_log(self, msg):
+        print(f'[collector] [{self.chain_id}] {msg}', flush=True)
+
+    def print_stat(self):
+        self.print_log(f'local {self.height}, remote {self.remote_height}')
 
     def clear(self):
-        print('REBUILD block db')
+        self.print_log('REBUILD block db')
         cur = self.db.cursor()
         cur.execute(
             """DELETE FROM `c_genesis`
@@ -104,7 +105,7 @@ class Collector:
         try:
             r = requests.get(f'{self.node}/status')
         except Exception:
-            print('unable to get node status')
+            self.print_log('unable to get node status')
             exit(-1)
         dat = json.loads(r.text)
         self.remote_height = int(
@@ -154,7 +155,7 @@ class Collector:
             blks = self.collect_block_metas(self.http_sess, batch_base + 1,
                                             batch)
             if len(blks) == 0:
-                print('No more blocks')
+                self.print_log('No more blocks')
                 break
             self.db.autocommit = False
             for blk in blks:
@@ -167,8 +168,8 @@ class Collector:
 
         # closing
         if verbose:
-            print()
-        print(f'{acc} blocks collected')
+            print(flush=True)
+        self.print_log(f'{acc} blocks collected')
         self.cursor.close()
         self.cursor = None
 
@@ -180,7 +181,7 @@ class Collector:
             else:
                 print('.', end='', flush=True)
         if h % 1000 == 0:
-            print(f'block height {h}', flush=True)
+            self.print_log(f'block height {h}')
 
         blk.save(self.cursor)  # for FK contraint
         if blk.num_txs > 0:
@@ -282,7 +283,8 @@ class Collector:
         # connection now, and reconnect when it is needed.
         self.db.close()
         self.ws_server = args.node.replace('http:', 'ws:') + '/websocket'
-        print(f'Waiting for new block from websocket: {self.ws_server}')
+        self.print_log(
+            f'Waiting for new block from websocket: {self.ws_server}')
         loop = asyncio.get_event_loop()
         loop.run_until_complete(self.watch_loop())
 
@@ -320,7 +322,7 @@ if __name__ == '__main__':
     try:
         collector = Collector(node=args.node)
     except ArgError as err:
-        print(err.message)
+        print(err)
         sys.exit(-1)
 
     if args.rebuild:
@@ -328,24 +330,24 @@ if __name__ == '__main__':
 
     try:
         signal.signal(signal.SIGTERM, handle)
-        collector.stat()
+        collector.print_stat()
         collector.play(args.limit, args.verbose)
-        collector.stat()
+        collector.print_stat()
         if args.limit == 0:
             collector.refresh_remote()
             while collector.remote_height - collector.height > 0:
                 collector.play(0, args.verbose)
-                collector.stat()
+                collector.print_stat()
                 collector.refresh_remote()
-            print('No more blocks.')
+            collector.print_log('No more blocks.')
             collector.watch()
     except KeyboardInterrupt:
-        print('interrupted. closing collector')
+        collector.print_log('interrupted. closing collector')
         collector.close()
     except Exception:
         traceback.print_exc()
         collector.close()
         sys.exit(-1)
     else:
-        print('closing collector')
+        collector.print_log('closing collector')
         collector.close()
