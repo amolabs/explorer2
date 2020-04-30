@@ -206,7 +206,7 @@ class Collector:
                 blk.num_txs = num
                 blk.num_txs_valid = num_valid
                 blk.num_txs_invalid = num_invalid
-                blk.update_num_txs(self.cursor)
+                blk.update(self.cursor)
 
     def collect_block(self, s, height):
         r = s.get(f'{self.node}/block?height={height}')

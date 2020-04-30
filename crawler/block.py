@@ -78,13 +78,15 @@ class Block:
                 %(incentives)s, %(validator_updates)s)
             """, self._vars())
 
-    def update_num_txs(self, cursor):
+    def update(self, cursor):
         cursor.execute(
             """
             UPDATE `c_blocks` SET
                 `num_txs` = %(num_txs)s,
                 `num_txs_valid` = %(num_txs_valid)s,
-                `num_txs_invalid` = %(num_txs_invalid)s
+                `num_txs_invalid` = %(num_txs_invalid)s,
+                `incentives` = %(incentives)s,
+                `validator_updates` = %(validator_updates)s
             WHERE
                 `chain_id` = %(chain_id)s and `height` = %(height)s
             """, self._vars())
