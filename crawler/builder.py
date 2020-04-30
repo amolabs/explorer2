@@ -179,7 +179,7 @@ class Builder:
                         print('.', end='', flush=True)
                 if h % 1000 == 0:
                     self.print_log(f'block height {h}')
-            if i % 20 == 0:
+            if i > 0 and i % 50 == 0:
                 self.db.commit()
         self.db.commit()
         if verbose:
@@ -223,7 +223,6 @@ class Builder:
         # close
         self.height += 1
         self._save_height(cur)
-        self.db.commit()
         cur.close()
 
         return True
