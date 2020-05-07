@@ -1,4 +1,4 @@
-import React, {useCallback, useMemo, useState} from 'react'
+import React, {useCallback, useMemo, useRef} from 'react'
 import {
   AutoSizer,
   CellMeasurer,
@@ -113,7 +113,7 @@ function InfinityTable<T>(props: Props<T>) {
   const classes = useInfinityScrollStyle()
 
   const breakMD = useMediaQuery('(max-width: 960px)')
-  const [recentWidth, setRecentWidth] = useState<number | undefined>(undefined)
+  const recentWidth = useRef<number>()
   const {chainId} = useUpdateState()
 
   const cache = useMemo(() => {
@@ -206,11 +206,10 @@ function InfinityTable<T>(props: Props<T>) {
             <div className={classes.wrapper}>
               <AutoSizer disableHeight>
                 {({width}) => {
-                  if (width !== recentWidth) {
-                    // FIXME Do not use setState in this scope
+                  if (width !== recentWidth.current) {
                     // This logic prevents wrong rendering after width of window changed
                     // https://codesandbox.io/s/qlqkx2mrz4?file=/window-scroller.js:725-959
-                    setRecentWidth(width)
+                    recentWidth.current = width
                     cache.clearAll()
                   }
 

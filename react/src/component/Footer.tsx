@@ -71,7 +71,7 @@ const Footer = () => {
         }
       </div>
       <h3 className={classes.logo}>
-        (C) AMO Labs 2020
+        (C) 2020 AMO Labs Pte Ltd. All rights reserved.
       </h3>
     </div>
   )
