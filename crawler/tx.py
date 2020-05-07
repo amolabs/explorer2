@@ -12,6 +12,7 @@ import models
 
 class Tx:
     """form a tx"""
+
     def __init__(self, chain_id, height, index):
         self.chain_id = chain_id
         self.height = height

@@ -11,6 +11,9 @@ class Block:
     def __init__(self, chain_id, height):
         self.chain_id = chain_id
         self.height = int(height)
+        self.txs = []
+        self.txs_results = []
+        self.validator_updates = []
 
     def _vars(self):
         v = vars(self).copy()

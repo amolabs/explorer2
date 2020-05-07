@@ -67,9 +67,12 @@ class Builder:
 
     def _vars(self):
         v = vars(self).copy()
-        if 'db' in v: del v['db']
-        if 'cursor' in v: del v['cursor']
-        if 'lock' in v: del v['lock']
+        if 'db' in v:
+            del v['db']
+        if 'cursor' in v:
+            del v['cursor']
+        if 'lock' in v:
+            del v['lock']
         return v
 
     def print_log(self, msg):
