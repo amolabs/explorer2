@@ -7,11 +7,15 @@ async function getOne(chain_id, address) {
     var query_var;
     // NOTE: unfortunately, mariadb 10.4 does not support JSON_ARRAYAGG().
     var query_str = "SELECT \
-        `val_addr` `address`, `val_pubkey` `pubkey`, \
-        `val_power` `power`, \
-        `address` `owner`, `stake`, `eff_stake` \
-      FROM `s_accounts` \
-      WHERE `chain_id` = ? AND `val_addr` = ?";
+        a.`val_addr` a.`dress`, a.`val_pubkey` `pubkey`, \
+        a.`val_power` `power`, \
+        a.`address` `owner`, a.`stake`, a.`eff_stake`, \
+        n.`moniker`, n.`latest_block_time`, n.`latest_block_height` \
+        n.`catching_up`, n.`n_peers` \
+      FROM `s_accounts` a \
+      LEFT JOIN `nodes` n \
+      ON a.`chain_id` = n.`chain_id` AND a.`val_addr` = n.`val_addr` \
+      WHERE a.`stake` > 0 AND a.`chain_id` = ? AND a.`val_addr` = ?";
     query_var = [chain_id, address];
     var val = {};
     db.query(query_str, query_var, function (err, rows, fields) {
@@ -28,12 +32,16 @@ async function getList(chain_id, from, num) {
     from = Number(from);
     num = Number(num);
     var query_str = "SELECT \
-        `val_addr` `address`, `val_pubkey` `pubkey`, \
-        `val_power` `power`, \
-        `address` `owner`, `stake`, `eff_stake` \
-      FROM `s_accounts` \
-      WHERE `chain_id` = ? AND `val_addr` IS NOT NULL \
-      ORDER BY `eff_stake` DESC LIMIT ?,?";
+        a.`val_addr` a.`dress`, a.`val_pubkey` `pubkey`, \
+        a.`val_power` `power`, \
+        a.`dress` `owner`, a.`stake`, a.`eff_stake`, \
+        n.`moniker`, n.`latest_block_time`, n.`latest_block_height` \
+        n.`catching_up`, n.`n_peers` \
+      FROM `s_accounts` a \
+        LEFT JOIN `nodes` n \
+        ON a.`chain_id` = n.`chain_id` AND a.`val_addr` = n.`val_addr` \
+      WHERE a.`chain_id` = ? AND a.`val_addr` IS NOT NULL \
+      ORDER BY a.`eff_stake` DESC LIMIT ?,?";
     var query_var = [chain_id, from, num];
     db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
