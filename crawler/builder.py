@@ -221,6 +221,7 @@ class Builder:
 
         self.play_block_txs(cur)
         self.play_block_incentives(cur)
+        self.play_block_penalties(cur)
         self.play_block_val_updates(cur)
 
         # close
@@ -260,6 +261,24 @@ class Builder:
                 recp = models.Account(self.chain_id, inc['address'], cursor)
                 recp.balance += int(inc['amount'])
                 asset_stat.active_coins += int(inc['amount'])
+                recp.save(cursor)
+        asset_stat.save(cursor)
+
+    def play_block_penalties(self, cursor):
+        # block incentives
+        cursor.execute(
+            """
+            SELECT `penalties` FROM `c_blocks`
+            WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s + 1)
+            """, self._vars())
+        row = cursor.fetchone()
+        asset_stat = stats.Asset(self.chain_id, cursor)
+        if row:
+            penalties = json.loads(row[0])
+            for pen in penalties:
+                recp = models.Account(self.chain_id, pen['address'], cursor)
+                recp.balance -= int(pen['amount'])
+                asset_stat.active_coins -= int(pen['amount'])
                 recp.save(cursor)
         asset_stat.save(cursor)
 

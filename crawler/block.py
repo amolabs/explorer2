@@ -38,6 +38,7 @@ class Block:
         self.txs = []
         self.txs_results = []
         self.incentives = '[]'  # hmmm...
+        self.penalties = '[]'  # hmmm...
         self.validator_updates = []
 
     def read_results(self, raw):
@@ -74,11 +75,12 @@ class Block:
             """
             INSERT INTO `c_blocks`
                 (`chain_id`, `height`, `time`, `hash`,
-                    `interval`, `proposer`, `incentives`, `validator_updates`)
+                    `interval`, `proposer`,
+                    `incentives`, `validator_updates`, `penalties`)
             VALUES
                 (%(chain_id)s, %(height)s, %(time)s, %(hash)s,
                 %(interval)s, %(proposer)s,
-                %(incentives)s, %(validator_updates)s)
+                %(incentives)s, %(validator_updates)s, %(penalties)s)
             """, self._vars())
 
     def update(self, cursor):
@@ -89,7 +91,8 @@ class Block:
                 `num_txs_valid` = %(num_txs_valid)s,
                 `num_txs_invalid` = %(num_txs_invalid)s,
                 `incentives` = %(incentives)s,
-                `validator_updates` = %(validator_updates)s
+                `validator_updates` = %(validator_updates)s,
+                `penalties` = %(penalties)s
             WHERE
                 `chain_id` = %(chain_id)s and `height` = %(height)s
             """, self._vars())

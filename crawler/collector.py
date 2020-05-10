@@ -13,6 +13,7 @@ import asyncio
 import signal  # for main
 import traceback  # for main
 import sys  # for main
+import time
 
 # third-party imports
 import websockets
@@ -186,32 +187,30 @@ class Collector:
                 print('.', end='', flush=True)
         if h % 1000 == 0:
             self.print_log(f'block height {h}')
-
         blk.save(self.cursor)  # for FK contraint
-        if blk.num_txs > 0:
-            blk = self.collect_block(self.http_sess, h)
 
-            num = 0
-            num_valid = 0
-            num_invalid = 0
-            for i in range(len(blk.txs) if blk.txs else 0):
-                tx_body = blk.txs[i]
-                tx_result = blk.txs_results[i]
-                t = tx.Tx(blk.chain_id, blk.height, i)
-                t.parse_body(tx_body)
-                t.set_result(tx_result)
-                if tx_result['code'] == 0:
-                    num_valid += 1
-                else:
-                    num_invalid += 1
-                num += 1
-                t.save(self.cursor)
+        blk = self.collect_block(self.http_sess, h)
+        num = 0
+        num_valid = 0
+        num_invalid = 0
+        for i in range(len(blk.txs) if blk.txs else 0):
+            tx_body = blk.txs[i]
+            tx_result = blk.txs_results[i]
+            t = tx.Tx(blk.chain_id, blk.height, i)
+            t.parse_body(tx_body)
+            t.set_result(tx_result)
+            if tx_result['code'] == 0:
+                num_valid += 1
+            else:
+                num_invalid += 1
+            num += 1
+            t.save(self.cursor)
 
-            if num_valid > 0 or num_invalid > 0:
-                blk.num_txs = num
-                blk.num_txs_valid = num_valid
-                blk.num_txs_invalid = num_invalid
-                blk.update(self.cursor)
+        if num_valid > 0 or num_invalid > 0:
+            blk.num_txs = num
+            blk.num_txs_valid = num_valid
+            blk.num_txs_invalid = num_invalid
+            blk.update(self.cursor)
 
     def collect_block(self, s, height):
         r = s.get(f'{self.node}/block?height={height}')
@@ -220,9 +219,15 @@ class Collector:
                           dat['block']['header']['height'])
         blk.read(dat)
 
-        r = s.get(f'{self.node}/block_results?height={height}')
-        dat = json.loads(r.text)['result']
-        blk.read_results(dat)
+        try:
+            r = s.get(f'{self.node}/block_results?height={height}')
+            dat = json.loads(r.text)['result']
+            blk.read_results(dat)
+        except KeyError:
+            time.sleep(1)
+            r = s.get(f'{self.node}/block_results?height={height}')
+            dat = json.loads(r.text)['result']
+            blk.read_results(dat)
 
         q = f'"{height}"'.encode('latin1').hex()
         r = s.get(f'{self.node}/abci_query?path="/inc_block"&data=0x{q}')
@@ -232,6 +237,15 @@ class Collector:
         else:
             incs = base64.b64decode(b)
         blk.incentives = incs
+
+        q = f'"{height}"'.encode('latin1').hex()
+        r = s.get(f'{self.node}/abci_query?path="/pen_block"&data=0x{q}')
+        b = json.loads(r.text)['result']['response']['value']
+        if b is None:
+            pens = json.dumps([])
+        else:
+            pens = base64.b64decode(b)
+        blk.penalties = pens
 
         return blk
 
