@@ -85,61 +85,11 @@ class Builder:
         self.print_log('REBUILD state db')
         cur = self.db.cursor()
 
-        cur.execute(
-            """DELETE FROM `s_requests`
-            WHERE (`chain_id` = %(chain_id)s)
-            """, self._vars())
-        cur.execute("""OPTIMIZE TABLE `s_requests`""")
-        cur.fetchall()
-
-        cur.execute(
-            """DELETE FROM `s_usages`
-            WHERE (`chain_id` = %(chain_id)s)
-            """, self._vars())
-        cur.execute("""OPTIMIZE TABLE `s_usages`""")
-        cur.fetchall()
-
-        cur.execute(
-            """DELETE FROM `s_parcels`
-            WHERE (`chain_id` = %(chain_id)s)
-            """, self._vars())
-        cur.execute("""OPTIMIZE TABLE `s_parcels`""")
-        cur.fetchall()
-
-        cur.execute(
-            """DELETE FROM `s_storages`
-            WHERE (`chain_id` = %(chain_id)s)
-            """, self._vars())
-        cur.execute("""OPTIMIZE TABLE `s_storages`""")
-        cur.fetchall()
-
-        cur.execute(
-            """DELETE FROM `s_votes`
-            WHERE (`chain_id` = %(chain_id)s)
-            """, self._vars())
-        cur.execute("""OPTIMIZE TABLE `s_votes`""")
-        cur.fetchall()
-
-        cur.execute(
-            """DELETE FROM `s_drafts`
-            WHERE (`chain_id` = %(chain_id)s)
-            """, self._vars())
-        cur.execute("""OPTIMIZE TABLE `s_drafts`""")
-        cur.fetchall()
-
-        cur.execute(
-            """DELETE FROM `s_accounts`
-            WHERE (`chain_id` = %(chain_id)s)
-            """, self._vars())
-        cur.execute("""OPTIMIZE TABLE `s_accounts`""")
-        cur.fetchall()
-
-        cur.execute(
-            """DELETE FROM `asset_stat`
-            WHERE (`chain_id` = %(chain_id)s)
-            """, self._vars())
-        cur.execute("""OPTIMIZE TABLE `asset_stat`""")
-        cur.fetchall()
+        for t in dbproxy.s_tables:
+            cur.execute(
+                f"DELETE FROM `{t}` WHERE `chain_id` = '{self.chain_id}'")
+            cur.execute("""OPTIMIZE TABLE `{t}`""")
+            cur.fetchall()
 
         self.height = 0
         self._save_height(cur)

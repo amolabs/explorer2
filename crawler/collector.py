@@ -83,24 +83,13 @@ class Collector:
     def clear(self):
         self.print_log('REBUILD block db')
         cur = self.db.cursor()
-        cur.execute(
-            """DELETE FROM `c_genesis`
-            WHERE (`chain_id` = %(chain_id)s)
-            """, self._vars())
-        cur.execute("""OPTIMIZE TABLE `c_genesis`""")
-        cur.fetchall()
-        cur.execute(
-            """DELETE FROM `c_txs`
-            WHERE (`chain_id` = %(chain_id)s)
-            """, self._vars())
-        cur.execute("""OPTIMIZE TABLE `c_txs`""")
-        cur.fetchall()
-        cur.execute(
-            """DELETE FROM `c_blocks`
-            WHERE (`chain_id` = %(chain_id)s)
-            """, self._vars())
-        cur.execute("""OPTIMIZE TABLE `c_blocks`""")
-        cur.fetchall()
+
+        for t in dbproxy.c_tables:
+            cur.execute(
+                f"DELETE FROM `{t}` WHERE `chain_id` = '{self.chain_id}'")
+            cur.execute("""OPTIMIZE TABLE `{t}`""")
+            cur.fetchall()
+
         self.height = 0
         self.db.commit()
         cur.close()
