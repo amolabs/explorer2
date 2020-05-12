@@ -222,15 +222,25 @@ class Builder:
             WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s + 1)
             """, self._vars())
         row = cursor.fetchone()
-        asset_stat = stats.Asset(self.chain_id, cursor)
         if row:
+            asset_stat = stats.Asset(self.chain_id, cursor)
             penalties = json.loads(row[0])
             for pen in penalties:
                 recp = models.Account(self.chain_id, pen['address'], cursor)
-                recp.balance -= int(pen['amount'])
-                asset_stat.active_coins -= int(pen['amount'])
-                recp.save(cursor)
-        asset_stat.save(cursor)
+                if recp.stake > 0:  # staker
+                    recp.stake -= int(pen['amount'])
+                    recp.eff_stake -= int(pen['amount'])
+                    asset_stat.stakes -= int(pen['amount'])
+                    recp.save(cursor)
+                elif recp.delegate > 0:  # delegator
+                    recp.delegate -= int(pen['amount'])
+                    staker = models.Account(self.chain_id, recp.del_addr,
+                                            cursor)
+                    staker.eff_stake -= int(pen['amount'])
+                    asset_stat.delegates -= int(pen['amount'])
+                    recp.save(cursor)
+                    staker.save(cursor)
+            asset_stat.save(cursor)
 
     def play_block_val_updates(self, cursor):
         # validator updates
