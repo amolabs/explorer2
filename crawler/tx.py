@@ -50,6 +50,10 @@ class Tx:
     def play(self, cursor):
         if self.code != 0:
             return
+        sender = models.Account(self.chain_id, self.sender, cursor)
+        sender.balance -= int(self.fee)
+        # NOTE: fee will be added to the balance of the block proposer as part
+        # of block incentive in block.play_incentives().
         processor.get(self.type, tx_unknown)(self, cursor)
 
     """Save to DB
