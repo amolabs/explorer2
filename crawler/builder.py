@@ -102,7 +102,7 @@ class Builder:
         # get current explorer collector state
         cur.execute(
             """
-            SELECT `height` FROM `explorer`.`c_blocks` cb
+            SELECT `height` FROM `c_blocks` cb
             WHERE cb.`chain_id` = %(chain_id)s
             ORDER BY cb.`height` DESC LIMIT 1
             """, self._vars())
