@@ -208,6 +208,8 @@ class Collector:
                           dat['block']['header']['height'])
         blk.read(dat)
 
+        # NOTE: there seems to be some peculiar timing problem when getting
+        # block results.
         try:
             r = s.get(f'{self.node}/block_results?height={height}')
             dat = json.loads(r.text)['result']
