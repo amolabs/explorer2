@@ -59,7 +59,7 @@ async function getTxStat(chain_id, num_txs) {
         AVG(`t`.`height` - `t`.`last_height`) AS `avg_binding_lag`, \
         10000 AS `max_binding_lag` \
       FROM ( \
-        SELECT * FROM `explorer`.`c_txs` \
+        SELECT * FROM `c_txs` \
         WHERE `chain_id` = ? \
         ORDER BY `height` DESC, `index` DESC " + limit + " \
       ) t";
