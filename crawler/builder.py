@@ -8,8 +8,6 @@ state db builder
 # standard imports
 import argparse
 import json
-import base64
-from hashlib import sha256
 import time
 import signal  # for main
 import traceback  # for main
@@ -19,7 +17,7 @@ from error import ArgError  # for main
 from filelock import FileLock, Timeout
 
 import dbproxy
-import tx
+import block
 import stats
 import models
 
@@ -147,118 +145,36 @@ class Builder:
             WHERE (`chain_id` = %(chain_id)s)
             """, self._vars())
         row = cur.fetchone()
-        asset_stat = stats.Asset(self.chain_id, cur)
         if row:
+            asset_stat = stats.Asset(self.chain_id, cur)
             genesis = json.loads(row[0])['app_state']
             for item in genesis['balances']:
                 acc = models.Account(self.chain_id, item['owner'], cur)
                 acc.balance = int(item['amount'])
                 asset_stat.active_coins += int(item['amount'])
                 acc.save(cur)
+            asset_stat.save(cur)
         else:
             return False  # TODO: return error
-
-        # stat
-        asset_stat.save(cur)
 
         self.db.commit()
         cur.close()
 
     def play_block(self):
         cur = self.db.cursor()
-        if self.height + 1 > self.roof:
+        target = self.height + 1
+        if target > self.roof:
             return False
 
-        self.play_block_txs(cur)
-        self.play_block_incentives(cur)
-        self.play_block_penalties(cur)
-        self.play_block_val_updates(cur)
+        blk = block.Block(self.chain_id, target)
+        blk.play(cur)
 
         # close
-        self.height += 1
+        self.height = target
         self._save_height(cur)
         cur.close()
 
         return True
-
-    def play_block_txs(self, cursor):
-        # txs
-        cursor.execute(
-            """
-            SELECT * FROM `c_txs`
-            WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s + 1)
-            """, self._vars())
-        rows = cursor.fetchall()
-        cols = cursor.column_names
-        for row in rows:
-            d = dict(zip(cols, row))
-            t = tx.Tx(self.chain_id, d['height'], d['index'])
-            t.read(d)
-            t.play(cursor)
-
-    def play_block_incentives(self, cursor):
-        # block incentives
-        cursor.execute(
-            """
-            SELECT `incentives` FROM `c_blocks`
-            WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s + 1)
-            """, self._vars())
-        row = cursor.fetchone()
-        asset_stat = stats.Asset(self.chain_id, cursor)
-        if row:
-            incentives = json.loads(row[0])
-            for inc in incentives:
-                recp = models.Account(self.chain_id, inc['address'], cursor)
-                recp.balance += int(inc['amount'])
-                asset_stat.active_coins += int(inc['amount'])
-                recp.save(cursor)
-        asset_stat.save(cursor)
-
-    def play_block_penalties(self, cursor):
-        # block incentives
-        cursor.execute(
-            """
-            SELECT `penalties` FROM `c_blocks`
-            WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s + 1)
-            """, self._vars())
-        row = cursor.fetchone()
-        if row:
-            asset_stat = stats.Asset(self.chain_id, cursor)
-            penalties = json.loads(row[0])
-            for pen in penalties:
-                recp = models.Account(self.chain_id, pen['address'], cursor)
-                if recp.stake > 0:  # staker
-                    recp.stake -= int(pen['amount'])
-                    recp.eff_stake -= int(pen['amount'])
-                    asset_stat.stakes -= int(pen['amount'])
-                    recp.save(cursor)
-                elif recp.delegate > 0:  # delegator
-                    recp.delegate -= int(pen['amount'])
-                    staker = models.Account(self.chain_id, recp.del_addr,
-                                            cursor)
-                    staker.eff_stake -= int(pen['amount'])
-                    asset_stat.delegates -= int(pen['amount'])
-                    recp.save(cursor)
-                    staker.save(cursor)
-            asset_stat.save(cursor)
-
-    def play_block_val_updates(self, cursor):
-        # validator updates
-        cursor.execute(
-            """
-            SELECT `validator_updates` FROM `c_blocks`
-            WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s + 1)
-            """, self._vars())
-        row = cursor.fetchone()
-        if row:
-            vals = json.loads(row[0])
-            for val in vals:
-                b = base64.b64decode(val['pub_key']['data'])
-                val_addr = sha256(b).hexdigest()[:40].upper()
-                if 'power' not in val or val['power'] == '0':
-                    delete_val(self.chain_id, val_addr, cursor)
-                else:
-                    update_val(self.chain_id, val_addr, val['power'], cursor)
 
     def _save_height(self, cursor):
         cursor.execute(
@@ -279,35 +195,6 @@ class Builder:
             if self.roof - self.height > 0:
                 self.play(0, args.verbose)
                 self.print_stat()
-
-
-def delete_val(chain_id, addr, cur):
-    cur.execute(
-        """
-        UPDATE `s_accounts`
-        SET
-            `val_addr` = NULL,
-            `val_pubkey` = NULL,
-            `val_power` = '0'
-        WHERE (`chain_id` = %(chain_id)s AND `val_addr` = %(val_addr)s)
-        """, {
-            'chain_id': chain_id,
-            'val_addr': addr
-        })
-
-
-def update_val(chain_id, addr, power, cur):
-    cur.execute(
-        """
-        UPDATE `s_accounts`
-        SET
-            `val_power` = %(val_power)s
-        WHERE (`chain_id` = %(chain_id)s AND `val_addr` = %(val_addr)s)
-        """, {
-            'chain_id': chain_id,
-            'val_addr': addr,
-            'val_power': str(power)
-        })
 
 
 def handle(sig, stack_frame):

@@ -2,8 +2,14 @@
 # vim: set sw=4 ts=4 expandtab :
 
 import json
+import base64
+from hashlib import sha256
 from datetime import timezone
 from dateutil.parser import parse as dateparse
+
+import tx
+import stats
+import models
 
 
 class Block:
@@ -55,6 +61,91 @@ class Block:
 
     """cursor: db cursor"""
 
+    def play(self, cursor):
+        self.play_txs(cursor)
+        self.play_incentives(cursor)
+        self.play_penalties(cursor)
+        self.play_val_updates(cursor)
+
+    def play_txs(self, cursor):
+        # txs
+        cursor.execute(
+            """
+            SELECT * FROM `c_txs`
+            WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s)
+            """, self._vars())
+        rows = cursor.fetchall()
+        cols = cursor.column_names
+        for row in rows:
+            d = dict(zip(cols, row))
+            t = tx.Tx(self.chain_id, d['height'], d['index'])
+            t.read(d)
+            t.play(cursor)
+
+    def play_incentives(self, cursor):
+        # block incentives
+        cursor.execute(
+            """
+            SELECT `incentives` FROM `c_blocks`
+            WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s)
+            """, self._vars())
+        row = cursor.fetchone()
+        if row:
+            asset_stat = stats.Asset(self.chain_id, cursor)
+            incentives = json.loads(row[0])
+            for inc in incentives:
+                recp = models.Account(self.chain_id, inc['address'], cursor)
+                recp.balance += int(inc['amount'])
+                asset_stat.active_coins += int(inc['amount'])
+                recp.save(cursor)
+            asset_stat.save(cursor)
+
+    def play_penalties(self, cursor):
+        # block incentives
+        cursor.execute(
+            """
+            SELECT `penalties` FROM `c_blocks`
+            WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s)
+            """, self._vars())
+        row = cursor.fetchone()
+        if row:
+            asset_stat = stats.Asset(self.chain_id, cursor)
+            penalties = json.loads(row[0])
+            for pen in penalties:
+                recp = models.Account(self.chain_id, pen['address'], cursor)
+                if recp.stake > 0:  # staker
+                    recp.stake -= int(pen['amount'])
+                    recp.eff_stake -= int(pen['amount'])
+                    asset_stat.stakes -= int(pen['amount'])
+                    recp.save(cursor)
+                elif recp.delegate > 0:  # delegator
+                    recp.delegate -= int(pen['amount'])
+                    staker = models.Account(self.chain_id, recp.del_addr,
+                                            cursor)
+                    staker.eff_stake -= int(pen['amount'])
+                    asset_stat.delegates -= int(pen['amount'])
+                    recp.save(cursor)
+                    staker.save(cursor)
+            asset_stat.save(cursor)
+
+    def play_val_updates(self, cursor):
+        # validator updates
+        cursor.execute(
+            """
+            SELECT `validator_updates` FROM `c_blocks`
+            WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s)
+            """, self._vars())
+        row = cursor.fetchone()
+        if row:
+            vals = json.loads(row[0])
+            for val in vals:
+                b = base64.b64decode(val['pub_key']['data'])
+                val_addr = sha256(b).hexdigest()[:40].upper()
+                if 'power' not in val or val['power'] == '0':
+                    delete_val(self.chain_id, val_addr, cursor)
+                else:
+                    update_val(self.chain_id, val_addr, val['power'], cursor)
+
     def save(self, cursor):
         dt = self.time.astimezone(tz=timezone.utc)
         self.time = dt.replace(tzinfo=None).isoformat()
@@ -96,3 +187,32 @@ class Block:
             WHERE
                 `chain_id` = %(chain_id)s and `height` = %(height)s
             """, self._vars())
+
+
+def delete_val(chain_id, addr, cur):
+    cur.execute(
+        """
+        UPDATE `s_accounts`
+        SET
+            `val_addr` = NULL,
+            `val_pubkey` = NULL,
+            `val_power` = '0'
+        WHERE (`chain_id` = %(chain_id)s AND `val_addr` = %(val_addr)s)
+        """, {
+            'chain_id': chain_id,
+            'val_addr': addr
+        })
+
+
+def update_val(chain_id, addr, power, cur):
+    cur.execute(
+        """
+        UPDATE `s_accounts`
+        SET
+            `val_power` = %(val_power)s
+        WHERE (`chain_id` = %(chain_id)s AND `val_addr` = %(val_addr)s)
+        """, {
+            'chain_id': chain_id,
+            'val_addr': addr,
+            'val_power': str(power)
+        })
