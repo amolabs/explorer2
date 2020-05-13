@@ -107,6 +107,33 @@ class Block:
             events = json.loads(raw)
             for ev in events:
                 ev = util.parse_event(ev)
+                # TODO: refactor
+                if ev['type'] == 'draft':
+                    draft = models.Draft(self.chain_id, int(ev['attr']['id']),
+                                         None, cursor)
+                    close_count_old = draft.close_count
+                    util.from_dict(draft, json.loads(ev['attr']['draft']))
+                    draft.deposit = int(draft.deposit)
+                    draft.tally_quorum = int(draft.tally_quorum)
+                    draft.tally_approve = int(draft.tally_approve)
+                    draft.tally_reject = int(draft.tally_reject)
+                    if close_count_old > 0 and draft.close_count == 0:
+                        draft.closed_at = self.height
+                        # TODO: this is not correct
+                        # TODO: use another events regarding balance change
+                        proposer = models.Account(self.chain_id,
+                                                  draft.proposer, cursor)
+                        proposer.balance += draft.deposit
+                        proposer.save(cursor)
+                    draft.save(cursor)
+                if ev['type'] == 'config':
+                    cursor.execute(
+                        """
+                        UPDATE `s_drafts` SET `applied_at` = %(height)s
+                        WHERE `chain_id` = %(chain_id)s
+                        ORDER BY `draft_id` DESC LIMIT 1
+                        """, self._vars())
+
     def play_txs(self, cursor):
         # txs
         cursor.execute(

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # vim: set sw=4 ts=4 expandtab :
 
+import json
+
 
 class Account:
     def __init__(self, chain_id, address, cursor):
@@ -282,8 +284,12 @@ class Draft:
             self.close_count = d['close_count']
             self.apply_count = d['apply_count']
             self.deposit = int(d['deposit'])
-            self.tally_approve = d['tally_approve']
-            self.tally_reject = d['tally_reject']
+            self.tally_quorum = int(d['tally_quorum'])
+            self.tally_approve = int(d['tally_approve'])
+            self.tally_reject = int(d['tally_reject'])
+            self.proposed_at = d['proposed_at']
+            self.closed_at = d['closed_at']
+            self.applied_at = d['applied_at']
         else:
             cursor.execute(
                 """
@@ -294,7 +300,11 @@ class Draft:
 
     def save(self, cursor):
         values = vars(self).copy()
-        values['deposit'] = str(values.get('deposit', '0'))
+        values['deposit'] = str(values.get('deposit', 0))
+        values['tally_quorum'] = str(values.get('tally_quorum', 0))
+        values['tally_approve'] = str(values.get('tally_approve', 0))
+        values['tally_reject'] = str(values.get('tally_reject', 0))
+        values['config'] = json.dumps(self.config)
         cursor.execute(
             """
             UPDATE `s_drafts`
@@ -306,8 +316,12 @@ class Draft:
                 `close_count` = %(close_count)s,
                 `apply_count` = %(apply_count)s,
                 `deposit` = %(deposit)s,
+                `tally_quorum` = %(tally_quorum)s,
                 `tally_approve` = %(tally_approve)s,
-                `tally_reject` = %(tally_reject)s
+                `tally_reject` = %(tally_reject)s,
+                `proposed_at` = %(proposed_at)s,
+                `closed_at` = %(closed_at)s,
+                `applied_at` = %(applied_at)s
             WHERE (`chain_id` = %(chain_id)s
                 AND `draft_id` = %(draft_id)s)
             """, values)

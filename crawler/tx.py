@@ -62,9 +62,20 @@ class Tx:
         self.play_events(cursor)
 
     def play_events(self, cursor):
-        events = json.loads(self.events)
-        for ev in events:
+        for ev in self.events:
             ev = util.parse_event(ev)
+            # TODO: refactor
+            if ev['type'] == 'draft':
+                draft = models.Draft(self.chain_id, int(ev['attr']['id']),
+                                     None, cursor)
+                util.from_dict(draft, json.loads(ev['attr']['draft']))
+                draft.save(cursor)
+                # TODO: use another events regarding balance change
+                proposer = models.Account(self.chain_id, draft.proposer,
+                                          cursor)
+                proposer.balance -= draft.deposit
+                proposer.save(cursor)
+
     """Save to DB
 
     :param cursor: db cursor opened with conn.cursor()
@@ -355,22 +366,19 @@ def tx_burn(tx, cursor):
 
 def tx_propose(tx, cursor):
     payload = json.loads(tx.payload)
-    payload['deposit'] = int(payload.get('deposit', '0'))
 
-    proposer = models.Account(tx.chain_id, tx.sender, cursor)
     draft = models.Draft(tx.chain_id, payload['draft_id'], tx.sender, cursor)
-
-    proposer.balance -= payload['deposit']
-    proposer.save(cursor)
-
     draft.config = json.dumps(payload['config'])
     draft.desc = payload['desc']
     draft.open_count = 0
     draft.close_count = 0
     draft.apply_count = 0
-    draft.deposit = payload['deposit']
+    draft.deposit = 0
     draft.tally_approve = 0
     draft.tally_reject = 0
+    draft.proposed_at = tx.height
+    draft.closed_at = 0
+    draft.applied_at = 0
     draft.save(cursor)
 
 
