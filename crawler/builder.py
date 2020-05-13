@@ -120,16 +120,17 @@ class Builder:
         acc = 0
         self.db.autocommit = False
         for i in range(limit):
-            if self.play_block() is True:
-                acc += 1
-                h = self.height
-                if verbose:
-                    if h % 50 == 0:
-                        print('.', flush=True)
-                    else:
-                        print('.', end='', flush=True)
-                if h % 1000 == 0:
-                    self.print_log(f'block height {h}')
+            if self.play_next_block() is False:
+                break
+            acc += 1
+            h = self.height
+            if verbose:
+                if h % 50 == 0:
+                    print('.', flush=True)
+                else:
+                    print('.', end='', flush=True)
+            if h % 1000 == 0:
+                self.print_log(f'block height {h}')
             if i > 0 and i % 50 == 0:
                 self.db.commit()
         self.db.commit()
@@ -161,7 +162,7 @@ class Builder:
         self.db.commit()
         cur.close()
 
-    def play_block(self):
+    def play_next_block(self):
         cur = self.db.cursor()
         target = self.height + 1
         if target > self.roof:
