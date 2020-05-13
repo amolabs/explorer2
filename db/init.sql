@@ -21,8 +21,11 @@ CREATE TABLE `c_blocks` (
   `proposer` char(40) NOT NULL,
   `num_txs_valid` int(11) NOT NULL DEFAULT 0,
   `num_txs_invalid` int(11) NOT NULL DEFAULT 0,
-  `incentives` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`incentives`)),
-  `validator_updates` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`validator_updates`)),
+  `incentives` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '[]' CHECK (json_valid(`incentives`)),
+  `validator_updates` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '[]' CHECK (json_valid(`validator_updates`)),
+  `penalties` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '[]' CHECK (json_valid(`penalties`)),
+  `events_begin` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '[]',
+  `events_end` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '[]' CHECK (json_valid(`events_end`)),
   PRIMARY KEY (`chain_id`,`height`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -90,6 +93,7 @@ CREATE TABLE `c_txs` (
   `payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
   `last_height` int(11) NOT NULL,
   `tx_bytes` int(11) NOT NULL,
+  `events` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '[]' CHECK (json_valid(`events`)),
   PRIMARY KEY (`chain_id`,`height`,`index`),
   KEY `txs_hash` (`chain_id`,`hash`) USING BTREE,
   KEY `txs_sender` (`chain_id`,`sender`) USING BTREE,
