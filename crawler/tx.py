@@ -17,9 +17,11 @@ class Tx:
         self.chain_id = chain_id
         self.height = height
         self.index = index
+        self.events = []
 
     def _vars(self):
         v = vars(self).copy()
+        v['events'] = json.dumps(self.events)
         return v
 
     def parse_body(self, body):
@@ -37,6 +39,7 @@ class Tx:
     def set_result(self, result):
         self.code = result['code']
         self.info = result['info']
+        self.events = result['events']
 
     def read(self, d):
         self.type = d['type']
@@ -67,11 +70,13 @@ class Tx:
             INSERT INTO `c_txs`
                 (`chain_id`, `height`, `index`, `hash`, `tx_bytes`,
                 `code`, `info`,
-                `type`, `sender`, `fee`, `last_height`, `payload`)
+                `type`, `sender`, `fee`, `last_height`, `payload`,
+                `events`)
             VALUES
                 (%(chain_id)s, %(height)s, %(index)s, %(hash)s, %(tx_bytes)s,
                 %(code)s, %(info)s,
-                %(type)s, %(sender)s, %(fee)s, %(last_height)s, %(payload)s
+                %(type)s, %(sender)s, %(fee)s, %(last_height)s, %(payload)s,
+                %(events)s
                 )
             """, self._vars())
 

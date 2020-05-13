@@ -146,8 +146,9 @@ class Builder:
             """, self._vars())
         row = cur.fetchone()
         if row:
-            asset_stat = stats.Asset(self.chain_id, cur)
             genesis = json.loads(row[0])['app_state']
+            # genesis balances
+            asset_stat = stats.Asset(self.chain_id, cur)
             for item in genesis['balances']:
                 acc = models.Account(self.chain_id, item['owner'], cur)
                 acc.balance = int(item['amount'])

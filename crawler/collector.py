@@ -176,9 +176,11 @@ class Collector:
                 print('.', end='', flush=True)
         if h % 1000 == 0:
             self.print_log(f'block height {h}')
-        blk.save(self.cursor)  # for FK contraint
 
         blk = self.collect_block(self.http_sess, h)
+        # save before processing txs for FK contraint of c_txs table
+        blk.save(self.cursor)
+
         num = 0
         num_valid = 0
         num_invalid = 0
@@ -199,7 +201,7 @@ class Collector:
             blk.num_txs = num
             blk.num_txs_valid = num_valid
             blk.num_txs_invalid = num_invalid
-            blk.update(self.cursor)
+            blk.update_num_txs(self.cursor)
 
     def collect_block(self, s, height):
         r = s.get(f'{self.node}/block?height={height}')

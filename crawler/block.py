@@ -19,13 +19,17 @@ class Block:
         self.height = int(height)
         self.txs = []
         self.txs_results = []
+        self.events_begin = []
+        self.events_end = []
         self.validator_updates = []
 
     def _vars(self):
         v = vars(self).copy()
         del v['txs']
         del v['txs_results']
-        v['validator_updates'] = json.dumps(v['validator_updates'])
+        v['events_begin'] = json.dumps(self.events_begin)
+        v['events_end'] = json.dumps(self.events_end)
+        v['validator_updates'] = json.dumps(self.validator_updates)
         return v
 
     def read(self, raw):
@@ -48,7 +52,11 @@ class Block:
         self.validator_updates = []
 
     def read_results(self, raw):
+        if raw['begin_block_events']:
+            self.events_begin = raw['begin_block_events']
         self.txs_results = raw['txs_results']
+        if raw['end_block_events']:
+            self.events_end = raw['end_block_events']
         self.validator_updates = raw['validator_updates']
         if self.validator_updates is None:
             self.validator_updates = []
@@ -167,14 +175,17 @@ class Block:
             INSERT INTO `c_blocks`
                 (`chain_id`, `height`, `time`, `hash`,
                     `interval`, `proposer`,
-                    `incentives`, `validator_updates`, `penalties`)
+                    `incentives`, `validator_updates`, `penalties`,
+                    `events_begin`, `events_end`)
             VALUES
                 (%(chain_id)s, %(height)s, %(time)s, %(hash)s,
                 %(interval)s, %(proposer)s,
-                %(incentives)s, %(validator_updates)s, %(penalties)s)
+                %(incentives)s, %(validator_updates)s, %(penalties)s,
+                %(events_begin)s, %(events_end)s
+                )
             """, self._vars())
 
-    def update(self, cursor):
+    def update_num_txs(self, cursor):
         cursor.execute(
             """
             UPDATE `c_blocks` SET
@@ -183,7 +194,9 @@ class Block:
                 `num_txs_invalid` = %(num_txs_invalid)s,
                 `incentives` = %(incentives)s,
                 `validator_updates` = %(validator_updates)s,
-                `penalties` = %(penalties)s
+                `penalties` = %(penalties)s,
+                `events_begin` = %(events_begin)s,
+                `events_end` = %(events_end)s
             WHERE
                 `chain_id` = %(chain_id)s and `height` = %(height)s
             """, self._vars())
