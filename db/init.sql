@@ -210,15 +210,26 @@ CREATE TABLE `s_usages` (
   CONSTRAINT `s_requests_FK_copy` FOREIGN KEY (`chain_id`, `parcel_id`) REFERENCES `s_parcels` (`chain_id`, `parcel_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- explorer.nodes definition
+-- explorer.nodes definition (insert, update)
 
 CREATE TABLE `nodes` (
   `chain_id` char(32) NOT NULL,
-  `val_addr` char(40) NOT NULL,
+  `node_id` char(40) NOT NULL,
   `moniker` varchar(40) NOT NULL,
+  `ip_addr` int(11) unsigned NOT NULL default 0,
+  PRIMARY KEY (`chain_id`, `node_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- explorer.node_info definition (insert)
+
+CREATE TABLE `node_info` (
+  `chain_id` char(32) NOT NULL,
+  `node_id` char(40) NOT NULL,
+  `n_peers` int(11) NOT NULL default 0,
+  `val_addr` char(40) NOT NULL,
   `latest_block_time` datetime(6) NOT NULL DEFAULT current_timestamp(6),
   `latest_block_height` int(11) NOT NULL,
   `catching_up` boolean NOT NULL default false,
-  `n_peers` int(11) NOT NULL default 0,
-  PRIMARY KEY (`chain_id`, `val_addr`)
+  PRIMARY KEY (`chain_id`, `node_id`, `latest_block_height`),
+  CONSTRAINT `nodes_FK` FOREIGN KEY (`chain_id`, `node_id`) REFERENCES `nodes` (`chain_id`, `node_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
