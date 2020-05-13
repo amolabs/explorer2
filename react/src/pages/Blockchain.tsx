@@ -42,7 +42,8 @@ const columns = [
   {
     key: 'time',
     format: (s: string) => {
-      return moment(s).fromNow()
+      const diff = Math.abs(moment().diff(moment(s)))
+      return diff < 60000 ? `${Math.floor(diff / 1000)} seconds ago` : moment(s).fromNow()
     }
   }
 ]
