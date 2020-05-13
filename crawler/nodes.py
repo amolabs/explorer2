@@ -17,7 +17,7 @@ from filelock import FileLock, Timeout
 
 import dbproxy
 
-REQUEST_TIMEOUT = 1
+REQUEST_TIMEOUT = 5 
 
 
 def neighbors(addr):
@@ -46,7 +46,7 @@ def peek(addr):
         else: print('.', end='', flush=True)
         res = r.get(url=f'http://{addr}/status', timeout=REQUEST_TIMEOUT)
     except Exception:
-        print(f'{addr} is unreachable')
+        if args.verbose: print(f'{addr} is unreachable')
         return {}
     node = json.loads(res.text)['result']
     return node
@@ -62,10 +62,12 @@ def expand(node):
 
     # to load on db
     node['chain_id'] = node['node_info']['network']
-    node['val_addr'] = node['validator_info']['address']
     node['moniker'] = node['node_info']['moniker']
-    node['latest_block_height'] = node['sync_info']['latest_block_height']
+    node['node_id'] = node['node_info']['id']
+    node['ip_addr'] = ip_addr
+    node['val_addr'] = node['validator_info']['address']
     node['latest_block_time'] = lbt
+    node['latest_block_height'] = node['sync_info']['latest_block_height']
     node['catching_up'] = node['sync_info']['catching_up']
 
     # to print
@@ -111,23 +113,27 @@ def update_nodes(db, nodes):
 
     cur = db.cursor()
 
-    # purge first
-    cur.execute("""DELETE FROM `nodes`""")
-    cur.execute("""OPTIMIZE TABLE `nodes`""")
-    cur.fetchall()
-
-    # then, insert
     for _, n in nodes.items():
+        # insert or update into explorer.nodes
         cur.execute(
             """
             INSERT INTO `nodes`
-                (`chain_id`, `val_addr`, `moniker`,
-                 `latest_block_time`, `latest_block_height`,
-                 `catching_up`, `n_peers`)
+                (`chain_id`, `node_id`, `moniker`, `ip_addr`)
             VALUES
-                (%(chain_id)s, %(val_addr)s, %(moniker)s,
-                 %(latest_block_time)s, %(latest_block_height)s,
-                 %(catching_up)s, %(n_peers)s)
+                (%(chain_id)s, %(node_id)s, %(moniker)s, INET_ATON(%(ip_addr)s))
+            ON DUPLICATE KEY UPDATE 
+                `moniker` = %(moniker)s, `ip_addr` = INET_ATON(%(ip_addr)s)
+            """, n)
+
+        # insert(append) into explorer.node_info
+        cur.execute(
+            """
+            INSERT IGNORE INTO `node_info`
+                (`chain_id`, `node_id`, `n_peers`, `val_addr`,
+                 `latest_block_time`, `latest_block_height`, `catching_up`)
+            VALUES
+                (%(chain_id)s, %(node_id)s, %(n_peers)s, %(val_addr)s,
+                 %(latest_block_time)s, %(latest_block_height)s, %(catching_up)s)
             """, n)
 
     db.commit()
