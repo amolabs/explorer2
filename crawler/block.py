@@ -7,6 +7,7 @@ from hashlib import sha256
 from datetime import timezone
 from dateutil.parser import parse as dateparse
 
+import util
 import tx
 import stats
 import models
@@ -70,11 +71,42 @@ class Block:
     """cursor: db cursor"""
 
     def play(self, cursor):
+        self.play_events_begin(cursor)
         self.play_txs(cursor)
+        self.play_events_end(cursor)
         self.play_incentives(cursor)
         self.play_penalties(cursor)
         self.play_val_updates(cursor)
 
+    def play_events_begin(self, cursor):
+        # events
+        cursor.execute(
+            """
+            SELECT events_begin FROM `c_blocks`
+            WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s)
+            """, self._vars())
+        rows = cursor.fetchall()
+        # cols = cursor.column_names
+        for row in rows:
+            (raw,) = row
+            events = json.loads(raw)
+            for ev in events:
+                ev = util.parse_event(ev)
+
+    def play_events_end(self, cursor):
+        # events
+        cursor.execute(
+            """
+            SELECT events_end FROM `c_blocks`
+            WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s)
+            """, self._vars())
+        rows = cursor.fetchall()
+        # cols = cursor.column_names
+        for row in rows:
+            (raw,) = row
+            events = json.loads(raw)
+            for ev in events:
+                ev = util.parse_event(ev)
     def play_txs(self, cursor):
         # txs
         cursor.execute(

@@ -6,6 +6,7 @@ from hashlib import sha256
 import base64
 import hashlib
 
+import util
 import stats
 import models
 
@@ -58,7 +59,12 @@ class Tx:
         # NOTE: fee will be added to the balance of the block proposer as part
         # of block incentive in block.play_incentives().
         processor.get(self.type, tx_unknown)(self, cursor)
+        self.play_events(cursor)
 
+    def play_events(self, cursor):
+        events = json.loads(self.events)
+        for ev in events:
+            ev = util.parse_event(ev)
     """Save to DB
 
     :param cursor: db cursor opened with conn.cursor()
