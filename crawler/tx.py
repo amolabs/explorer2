@@ -50,6 +50,7 @@ class Tx:
         self.payload = d['payload']
         self.code = d['code']
         self.info = d['info']
+        self.events = json.loads(d['events'])
 
     def play(self, cursor):
         if self.code != 0:
