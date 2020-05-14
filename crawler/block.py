@@ -119,12 +119,6 @@ class Block:
                     draft.tally_reject = int(draft.tally_reject)
                     if close_count_old > 0 and draft.close_count == 0:
                         draft.closed_at = self.height
-                        # TODO: this is not correct
-                        # TODO: use another events regarding balance change
-                        proposer = models.Account(self.chain_id,
-                                                  draft.proposer, cursor)
-                        proposer.balance += draft.deposit
-                        proposer.save(cursor)
                     draft.save(cursor)
                 if ev['type'] == 'config':
                     cursor.execute(
@@ -133,6 +127,12 @@ class Block:
                         WHERE `chain_id` = %(chain_id)s
                         ORDER BY `draft_id` DESC LIMIT 1
                         """, self._vars())
+                if ev['type'] == 'balance':
+                    recp = models.Account(self.chain_id,
+                                          ev['attr']['address'].strip('"'),
+                                          cursor)
+                    recp.balance += int(ev['attr']['amount'].strip('"'))
+                    recp.save(cursor)
 
     def play_txs(self, cursor):
         # txs
