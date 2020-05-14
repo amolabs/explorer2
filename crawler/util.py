@@ -9,8 +9,8 @@ def parse_event(d):
     ev['type'] = d['type']
     ev['attr'] = {}
     for att in d['attributes']:
-        k = base64.b64decode(att['key']).decode('utf-8')
-        v = base64.b64decode(att['value']).decode('utf-8')
+        k = base64.b64decode(att['key']).decode('latin1')
+        v = base64.b64decode(att['value']).decode('latin1')
         ev['attr'][k] = v
     return ev
 
