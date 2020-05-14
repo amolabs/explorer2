@@ -291,6 +291,16 @@ class Draft:
             self.closed_at = d['closed_at']
             self.applied_at = d['applied_at']
         else:
+            self.open_count = 0
+            self.close_count = 0
+            self.apply_count = 0
+            self.deposit = 0
+            self.tally_quorum = 0
+            self.tally_approve = 0
+            self.tally_reject = 0
+            self.proposed_at = 0
+            self.closed_at = 0
+            self.applied_at = 0
             cursor.execute(
                 """
                 INSERT INTO `s_drafts`

@@ -70,6 +70,10 @@ class Tx:
                 draft = models.Draft(self.chain_id, int(ev['attr']['id']),
                                      None, cursor)
                 util.from_dict(draft, json.loads(ev['attr']['draft']))
+                draft.deposit = int(draft.deposit)
+                draft.tally_quorum = int(draft.tally_quorum)
+                draft.tally_approve = int(draft.tally_approve)
+                draft.tally_reject = int(draft.tally_reject)
                 draft.save(cursor)
                 # TODO: use another events regarding balance change
                 proposer = models.Account(self.chain_id, draft.proposer,
@@ -371,15 +375,7 @@ def tx_propose(tx, cursor):
     draft = models.Draft(tx.chain_id, payload['draft_id'], tx.sender, cursor)
     draft.config = json.dumps(payload['config'])
     draft.desc = payload['desc']
-    draft.open_count = 0
-    draft.close_count = 0
-    draft.apply_count = 0
-    draft.deposit = 0
-    draft.tally_approve = 0
-    draft.tally_reject = 0
     draft.proposed_at = tx.height
-    draft.closed_at = 0
-    draft.applied_at = 0
     draft.save(cursor)
 
 
