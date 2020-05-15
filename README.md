@@ -113,6 +113,10 @@ NOTE: Each tx is identified by a block height and an index within the block.
     - `num_blks`: stat range as a number of blocks (default all, CAUTION!)
 - **GET /chain/{chain_id}/drafts/{draft_id}**
   - get one draft
+- **GET /chain/{chain_id}/drafts/{draft_id}/votes**
+  - get list of votes for the draft
+- **GET /chain/{chain_id}/drafts/{draft_id}/votes?absent**
+  - get list of absent votes for the draft
 
 #### Config
 - **GET /chain/{chain_id}/config** (N/A)

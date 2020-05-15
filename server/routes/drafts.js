@@ -7,8 +7,7 @@ const stat = require('../models/stat');
 router.get('/', function(req, res) {
   const chain_id = res.locals.chain_id;
   if ('stat' in req.query) {
-    var num_blks = req.query.num_blks || 0;
-    stat.getDraftStat(chain_id, num_blks)
+    stat.getDraftStat(chain_id)
       .then((row) => {
         res.status(200);
         res.send(row);
@@ -46,6 +45,30 @@ router.get('/:draft_id([0-9]+)', function(req, res) {
         res.send('not found');
       }
     })
+    .catch((err) => {
+      res.status(500);
+      res.send(err);
+    });
+});
+
+router.get('/:draft_id([0-9]+)/votes', function(req, res) {
+  const chain_id = res.locals.chain_id;
+  const draft_id = req.params.draft_id;
+  var prom;
+  if ('absent' in req.query) {
+    prom = draft.getVotesAbsent(chain_id, draft_id);
+  } else {
+    prom = draft.getVotes(chain_id, draft_id);
+  }
+  prom.then((rows) => {
+    if (rows) {
+      res.status(200);
+      res.send(rows);
+    } else {
+      res.status(404);
+      res.send('not found');
+    }
+  })
     .catch((err) => {
       res.status(500);
       res.send(err);
