@@ -119,6 +119,15 @@ class Block:
                     draft.tally_reject = int(draft.tally_reject)
                     if close_count_old > 0 and draft.close_count == 0:
                         draft.closed_at = self.height
+                        cursor.execute(
+                            """
+                            UPDATE `s_votes` v LEFT JOIN `s_accounts` a
+                                ON v.voter = a.address
+                            SET v.`tally` = a.`eff_stake`
+                            WHERE (v.`chain_id` = %(chain_id)s
+                                AND v.`draft_id` = %(draft_id)s)
+                            """, {'chain_id': self.chain_id,
+                                  'draft_id': draft.draft_id})
                     draft.save(cursor)
                 if ev['type'] == 'config':
                     cursor.execute(
