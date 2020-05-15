@@ -57,7 +57,7 @@ async function searchHash(chain_id, hash) {
 
 async function getList(chain_id, top, from, num) {
   return new Promise(function(resolve, reject) {
-    top = Number(top);
+    top = Number(top); // TODO: rename it to anchor
     from = Number(from);
     num = Number(num);
     var query_str;
