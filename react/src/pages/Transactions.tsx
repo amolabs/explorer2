@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useState} from 'react'
-import {useUpdateState} from "../reducer"
+import {useChainId} from "../reducer"
 import {TransactionSchema} from "../reducer/blockchain"
 import StatCard from "../component/StatCard"
 import {Equalizer, HighlightOff, Speed, Timelapse} from "@material-ui/icons"
@@ -26,7 +26,7 @@ const BlockStats = (props: TransactionStatsProps) => {
     num_txs_valid: 0,
     tx_height: 1
   })
-  const {chainId} = useUpdateState()
+  const chainId = useChainId()
 
   const onSizeChange = (txs: number) => {
     ExplorerAPI

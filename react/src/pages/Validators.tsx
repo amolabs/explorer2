@@ -4,7 +4,7 @@ import {Grid} from "@material-ui/core"
 import ExplorerAPI from "../ExplorerAPI"
 import {AccountBalance, AllInclusive, CompareArrows} from "@material-ui/icons"
 import CollapseTable from "../component/CollapseTable"
-import {useUpdateState} from "../reducer"
+import {useChainId} from "../reducer"
 import {AMO} from "../util"
 import {Link} from "react-router-dom"
 
@@ -37,7 +37,7 @@ const columns = [
 ]
 
 const Validators = () => {
-  const {chainId} = useUpdateState()
+  const chainId = useChainId()
   const [stat, setStat] = useState<ValidatorStat>({
     num_validators: 0,
     avg_blk_incentive: '0',

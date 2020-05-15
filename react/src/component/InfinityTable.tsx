@@ -13,7 +13,8 @@ import {
 import {makeStyles} from "@material-ui/styles"
 import {Backdrop, CircularProgress, Grid, Paper, TableCell, Theme, useMediaQuery} from "@material-ui/core"
 import clsx from "clsx"
-import {useUpdateState} from "../reducer"
+import {RootState} from "../reducer"
+import {shallowEqual, useSelector} from "react-redux"
 
 const useInfinityScrollStyle = makeStyles((theme: Theme) => ({
   wrapper: {
@@ -89,19 +90,19 @@ const useInfinityScrollStyle = makeStyles((theme: Theme) => ({
   },
 }))
 
-type Column = {
+interface Column<T> {
   key: string
   label: string
   width: number
   flexGrow?: number
   columnData?: {
-    format?: (v: any, chainId: string) => React.ReactNode
+    format?: (v: any, chainId: string, rowData: T) => React.ReactNode
   }
 }
 
 interface Props<T> {
   onScroll: (params: { scrollLeft: number, scrollTop: number }) => void
-  columns: Column[]
+  columns: Column<T>[]
   rowKey: string
   data: T[],
   loading: UseScrollLoading
@@ -114,7 +115,7 @@ function InfinityTable<T>(props: Props<T>) {
 
   const breakMD = useMediaQuery('(max-width: 960px)')
   const recentWidth = useRef<number>()
-  const {chainId} = useUpdateState()
+  const chainId = useSelector<RootState, string>(state => state.blockchain.chainId, shallowEqual)
 
   const cache = useMemo(() => {
     return new CellMeasurerCache({
@@ -123,7 +124,7 @@ function InfinityTable<T>(props: Props<T>) {
     })
   }, [])
 
-  const cellRenderer: TableCellRenderer = useCallback(({cellData, columnIndex, columnData, parent}) => {
+  const cellRenderer: TableCellRenderer = useCallback(({cellData, columnIndex, columnData, parent, rowData}) => {
     const format = columnData ? columnData['format'] : undefined
 
     return (
@@ -137,7 +138,7 @@ function InfinityTable<T>(props: Props<T>) {
           className={clsx(classes.tableCell, classes.flexContainer)}
           style={{height: `60px`, textAlign: 'center'}}
         >
-          {format ? format(cellData, chainId) : cellData}
+          {format ? format(cellData, chainId, rowData) : cellData}
         </TableCell>
       </CellMeasurer>
     )
@@ -162,7 +163,7 @@ function InfinityTable<T>(props: Props<T>) {
                   {c.label}
                 </div>
                 <div className={classes.collapsedCellBody}>
-                  {c.columnData?.format ? c.columnData.format(rowData[c.key], chainId) : rowData[c.key]}
+                  {c.columnData?.format ? c.columnData.format(rowData[c.key], chainId, rowData) : rowData[c.key]}
                 </div>
               </div>
             ))}

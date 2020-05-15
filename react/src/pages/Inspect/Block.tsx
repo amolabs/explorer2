@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react'
 import {Link, useParams} from 'react-router-dom'
 import {BlockState, initialBlock} from "../../reducer/blocks"
-import {useUpdateState} from "../../reducer"
+import {useChainId} from "../../reducer"
 import ExplorerAPI from "../../ExplorerAPI"
 import InformationCard from "../../component/InformationCard"
 import CollapseTable from "../../component/CollapseTable"
@@ -34,8 +34,8 @@ const columns = [
   {
     key: 'time',
     header: 'Time',
-    format: (time: string) => {
-      return `${moment(time).fromNow()} (${moment(time).format("YYYY-MM-DD HH:mm:ss.SSS ZZ")})`
+    format: (time: string, chainId: string, data: BlockState) => {
+      return `${moment(time).fromNow()} (${moment(time).format("YYYY-MM-DD HH:mm:ss.SSS ZZ")}) (+${data.interval.toFixed(3)} sec)`
     }
   },
   {
@@ -90,7 +90,7 @@ const PAGE_SIZE = 14
 const Block = () => {
   const [block, setBlock] = useState<BlockState>(initialBlock)
   const [transactions, setTransactions] = useState<TransactionSchema[]>([])
-  const {chainId} = useUpdateState()
+  const chainId = useChainId()
 
   const [blockLoading, setBlockLoading] = useState(true)
   const [txLoading, setTxLoading] = useState(true)
@@ -120,7 +120,7 @@ const Block = () => {
           }
         })
         .catch(() => {
-          dispatch(replace(`/${chainId}/inspect/404`, { type: 'BLOCK', search: height }))
+          dispatch(replace(`/${chainId}/inspect/404`, {type: 'BLOCK', search: height}))
         })
     }
   }, [chainId, height, dispatch])

@@ -2,7 +2,7 @@ import React from 'react'
 import StatCard from "./StatCard"
 import {CollapsedTableColumn} from "./CollapseTable"
 import {makeStyles, Theme} from "@material-ui/core/styles"
-import {useUpdateState} from "../reducer"
+import {useChainId} from "../reducer"
 import Skeleton from "@material-ui/lab/Skeleton"
 
 const useStyle = makeStyles((theme: Theme) => ({
@@ -31,7 +31,7 @@ const useStyle = makeStyles((theme: Theme) => ({
 type InformationCardProps<T extends StringMap> = {
   title?: React.ReactNode,
   divider?: boolean
-  columns: CollapsedTableColumn[],
+  columns: CollapsedTableColumn<T>[],
   data: T,
   loading?: boolean
   setRef?: (instance?: HTMLDivElement) => void
@@ -39,7 +39,7 @@ type InformationCardProps<T extends StringMap> = {
 
 const InformationCard = function <T extends StringMap>(props: InformationCardProps<T>) {
   const classes = useStyle()
-  const {chainId} = useUpdateState()
+  const chainId = useChainId()
 
   const {
     title,
@@ -62,15 +62,15 @@ const InformationCard = function <T extends StringMap>(props: InformationCardPro
       {
         loading ? (
           <div className={classes.loading}>
-            <Skeleton animation="wave" />
-            <Skeleton animation="wave" />
-            <Skeleton animation="wave" />
-            <Skeleton animation="wave" />
-            <Skeleton animation="wave" />
+            <Skeleton animation="wave"/>
+            <Skeleton animation="wave"/>
+            <Skeleton animation="wave"/>
+            <Skeleton animation="wave"/>
+            <Skeleton animation="wave"/>
           </div>
         ) : (
           columns.map((c, i) => {
-            const value = c.format ? c.format(data[c.key], chainId) : data[c.key]
+            const value = c.format ? c.format(data[c.key], chainId, data) : data[c.key]
 
             return (
               <div className={classes.wrapper} key={c.key}>

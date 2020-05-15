@@ -1,6 +1,6 @@
-import React, {useCallback, useEffect, useState} from 'react'
+import React, {useCallback, useEffect, useMemo, useState} from 'react'
 import {BlockState} from "../reducer/blocks"
-import {useUpdateState} from "../reducer"
+import {useChainId} from "../reducer"
 import {Grid} from "@material-ui/core"
 import InfinityTable from "../component/InfinityTable"
 import ExplorerAPI from '../ExplorerAPI'
@@ -30,7 +30,14 @@ const columns = [
     key: 'time',
     label: 'Time',
     width: 100,
-    flexGrow: 5
+    flexGrow: 5,
+    columnData: {
+      format: (time: string, chainId: string, data: BlockState) => {
+        return (
+          `${time} (+${data.interval.toFixed(3)} sec)`
+        )
+      }
+    }
   },
   {
     key: 'proposer',
@@ -68,25 +75,35 @@ const BlocksStatView = (props: BlocksStatProps) => {
     avg_blk_tx_bytes: 0,
     avg_interval: 0
   })
-  const {chainId} = useUpdateState()
+  const chainId = useChainId()
 
-  const onSizeChange = (lastBlocks: number) => {
+  const onSizeChange = useCallback((lastBlocks: number) => {
     ExplorerAPI
       .fetchBlocksStats(chainId, lastBlocks)
       .then(({data}) => {
         setBlocksStat(data)
       })
-  }
+  }, [chainId])
 
   useEffect(() => {
     onSizeChange(100)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chainId])
 
+  const title = useMemo(() => {
+    return (
+      <SizeTitle
+        target="Block"
+        values={LastOptions}
+        onSizeChange={onSizeChange}
+      />
+    )
+  }, [onSizeChange])
+
   return (
     <>
       <StatCard
-        title={<SizeTitle target="Block" values={LastOptions} onSizeChange={onSizeChange}/>}
+        title={title}
         size="large"
         setRef={props.setRef}
       >

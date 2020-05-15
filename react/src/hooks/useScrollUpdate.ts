@@ -1,6 +1,7 @@
 import {useCallback, useEffect, useState} from "react"
 import {AxiosError} from "axios"
-import {useFixedHeight} from "../reducer"
+import {useChainId} from "../reducer"
+import ExplorerAPI from "../ExplorerAPI"
 
 type useScrollUpdateReturn<T> = [
   T[], UseScrollLoading, (params: { scrollTop: number }) => void
@@ -13,7 +14,17 @@ export default function useScrollUpdate<T>(
 ): useScrollUpdateReturn<T> {
   const [list, setList] = useState<T[]>([])
   const [loading, setLoading] = useState<UseScrollLoading>('READY')
-  const {fixedHeight, chainId} = useFixedHeight()
+  const chainId = useChainId()
+
+  const [fixedHeight, setFixedHeight] = useState(-1)
+
+  useEffect(() => {
+    ExplorerAPI
+      .fetchBlockchain(chainId, 1, 0)
+      .then(({data}) => {
+        setFixedHeight(data.last_height)
+      })
+  }, [chainId])
 
   const fetch = useCallback(() => {
     if (loading === 'READY') {
@@ -50,14 +61,14 @@ export default function useScrollUpdate<T>(
           setLoading('READY')
         })
     }
-  }, [list, loading, fetcher, fetchSize, fixedHeight, chainId])
+  }, [list, loading, fixedHeight, chainId, fetchSize, fetcher])
 
-  const onScroll = (params: { scrollTop: number }) => {
+  const onScroll = useCallback((params: { scrollTop: number }) => {
     const height = 200 + document.documentElement.clientHeight + params.scrollTop + (ref?.clientHeight || 0)
     if ((height >= document.body.scrollHeight)) {
       fetch()
     }
-  }
+  }, [fetch, ref])
 
   useEffect(() => {
     if (fixedHeight !== -1 && list.length === 0 && loading === 'READY') {

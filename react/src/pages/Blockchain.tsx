@@ -24,6 +24,11 @@ const columns = [
   },
   {
     key: 'hash',
+    format: (hash: string) => {
+      return (
+        `${hash.slice(0, 40)}...`
+      )
+    }
   },
   {
     key: 'num_txs',
@@ -41,9 +46,9 @@ const columns = [
   },
   {
     key: 'time',
-    format: (s: string) => {
+    format: (s: string, chainId: string, rowData: BlockState) => {
       const diff = Math.abs(moment().diff(moment(s)))
-      return diff < 60000 ? `${Math.floor(diff / 1000)} seconds ago` : moment(s).fromNow()
+      return `${diff < 60000 ? `${Math.floor(diff / 1000)} seconds ago` : moment(s).fromNow()} (+${rowData.interval.toFixed(3)} sec)`
     }
   }
 ]
