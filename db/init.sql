@@ -161,6 +161,7 @@ CREATE TABLE `s_votes` (
   `draft_id` int(11) NOT NULL,
   `voter` char(40) NOT NULL,
   `approve` tinyint(1) NOT NULL DEFAULT 0,
+  `tally` char(40) NOT NULL DEFAULT '0',
   PRIMARY KEY (`chain_id`,`draft_id`,`voter`),
   KEY `s_storages_FK` (`chain_id`,`voter`) USING BTREE,
   CONSTRAINT `s_votes_FK` FOREIGN KEY (`chain_id`, `draft_id`) REFERENCES `s_drafts` (`chain_id`, `draft_id`),
