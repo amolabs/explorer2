@@ -28,6 +28,11 @@ const columns = [
   },
   {
     key: 'stake',
+    header: 'Stake',
+    format: AMO
+  },
+  {
+    key: 'eff_stake',
     header: 'Effective stake',
     format: AMO
   },

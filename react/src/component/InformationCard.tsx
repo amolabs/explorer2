@@ -62,11 +62,7 @@ const InformationCard = function <T extends StringMap>(props: InformationCardPro
       {
         loading ? (
           <div className={classes.loading}>
-            <Skeleton animation="wave"/>
-            <Skeleton animation="wave"/>
-            <Skeleton animation="wave"/>
-            <Skeleton animation="wave"/>
-            <Skeleton animation="wave"/>
+            {columns.map((v, i) => <Skeleton key={i} animation="wave"/>)}
           </div>
         ) : (
           columns.map((c, i) => {

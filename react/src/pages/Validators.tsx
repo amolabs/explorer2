@@ -21,11 +21,8 @@ const columns = [
     }
   },
   {
-    key: 'stake',
-    header: 'Stake',
-    format: (stake: string) => {
-      return AMO(Number(stake))
-    }
+    key: 'eff_stake',
+    header: 'Eff. Stake',
   },
   {
     key: 'power',
@@ -57,15 +54,25 @@ const Validators = () => {
   const [validators, setValidators] = useState<ValidatorAccount[]>([])
 
   useEffect(() => {
-    ExplorerAPI
-      .fetchValidators(chainId, 0)
-      .then(({data}) => {
-        setValidators(data)
-        setLoading(false)
-      })
-      .catch(() => {
-        setLoading(false)
-      })
+    if (stat.avg_eff_stake !== 0) {
+      ExplorerAPI
+        .fetchValidators(chainId, 0)
+        .then(({data}) => {
+          const validators = data.map((v) => {
+            const percent = ((Number(v.eff_stake) / stat.total_eff_stakes) * 100).toFixed(2)
+            return {
+              ...v,
+              eff_stake: `${AMO(Number(v.eff_stake))} (${percent}%)`
+            }
+          })
+
+          setValidators(validators)
+          setLoading(false)
+        })
+        .catch(() => {
+          setLoading(false)
+        })
+    }
   }, [stat, chainId])
 
   return (
