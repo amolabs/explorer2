@@ -86,6 +86,16 @@ const fetchBlockchain = (chainId: string, blocks: number = 1000, txs: number = 1
     .get(`/chain/${chainId}?num_blks=${blocks}&num_txs=${txs}`)
 }
 
+const fetchDrafts = (chainId: string, from: number, size: number = 20): Result<Draft[]> => {
+  return client
+    .get(`/chain/${chainId}/drafts`)
+}
+
+const fetchDraft = (chainId: string, draftId: number): Result<Draft> => {
+  return client
+    .get(`/chain/${chainId}/drafts/${draftId}`)
+}
+
 export default {
   fetchBlocks,
   fetchBlocksStats,
@@ -101,4 +111,6 @@ export default {
   fetchBlockchain,
   fetchTxStat,
   fetchDelegators,
+  fetchDrafts,
+  fetchDraft
 }

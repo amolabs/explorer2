@@ -9,6 +9,7 @@ import StatCard from "../component/StatCard"
 import {History, Timeline, TrendingUp, ViewModule} from "@material-ui/icons"
 import SizeTitle, {LastOptions} from "../component/SizeTitle"
 import useScrollUpdate from "../hooks/useScrollUpdate"
+import moment from 'moment'
 
 const columns = [
   {
@@ -34,7 +35,7 @@ const columns = [
     columnData: {
       format: (time: string, chainId: string, data: BlockState) => {
         return (
-          `${time} (+${data.interval.toFixed(3)} sec)`
+          `${moment(time).format("YYYY-MM-DD HH:mm:ss.SSS ZZ")} (+${data.interval.toFixed(3)} sec)`
         )
       }
     }
@@ -113,10 +114,11 @@ const BlocksStatView = (props: BlocksStatProps) => {
         >
           <StatCard
             icon={TrendingUp}
-            title="Last block height"
+            title="Transaction per Second"
             color="#9179F2"
+            suffix="txs / s"
           >
-            {blocksStat.last_height}
+            {(blocksStat.avg_num_txs / blocksStat.avg_interval).toFixed(2)}
           </StatCard>
           <StatCard
             icon={History}

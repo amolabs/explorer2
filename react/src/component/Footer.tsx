@@ -14,7 +14,11 @@ const useStyle = makeStyles((theme: Theme) => ({
     backgroundColor: '#182026',
     alignItems: 'center',
     color: 'white',
-    lineHeight: '30px'
+    lineHeight: '30px',
+    [theme.breakpoints.down('md')]: {
+      flexDirection: 'column',
+      padding: '1rem 0'
+    }
   },
   link: {
     lineHeight: '24px',
@@ -27,7 +31,7 @@ const useStyle = makeStyles((theme: Theme) => ({
     display: 'flex',
     height: '30px',
     alignItems: 'center',
-    color: '#E1E8ED'
+    color: '#E1E8ED',
   },
   logo: {
     fontSize: '0.9rem',

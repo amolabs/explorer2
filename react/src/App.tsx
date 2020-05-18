@@ -19,7 +19,7 @@ import {
 import {makeStyles, ThemeProvider} from "@material-ui/core/styles"
 import {useDispatch, useSelector} from "react-redux"
 import {setNetwork, UPDATE_BLOCKCHAIN} from "./reducer/blockchain"
-import Blockchain from "./pages/Blockchain"
+import Dashboard from "./pages/Dashboard"
 import {Search} from "@material-ui/icons"
 import {Redirect, Route, RouteProps, Switch} from "react-router-dom"
 import {push, replace} from "connected-react-router"
@@ -29,6 +29,7 @@ import Blocks from "./pages/Blocks"
 import Inspect from "./pages/Inspect"
 import Validators from "./pages/Validators"
 import Footer from "./component/Footer"
+import Governance from "./pages/Governance"
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -60,7 +61,7 @@ const routers: RouteProps[] = [
   {
     path: '/:chainId',
     exact: true,
-    component: Blockchain
+    component: Dashboard
   },
   {
     path: '/:chainId/inspect',
@@ -78,6 +79,10 @@ const routers: RouteProps[] = [
     path: '/:chainId/validators',
     component: Validators
   },
+  {
+    path: '/:chainId/governance',
+    component: Governance
+  }
 ]
 
 const urls = routers.map((r) => (r.path as string).replace(/\/:chainId\/?/, '/'))
@@ -88,6 +93,7 @@ const tabList = [
   'blocks',
   'transactions',
   'validators',
+  'governance'
 ]
 
 const supportedNetworks = [

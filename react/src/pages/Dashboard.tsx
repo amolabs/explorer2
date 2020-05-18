@@ -124,7 +124,7 @@ const ValidatorStats = () => {
   )
 }
 
-const Blockchain = () => {
+const Dashboard = () => {
   const blockState = useSelector<RootState, any>(state => state.blockchain.blockState)
 
   return (
@@ -155,16 +155,17 @@ const Blockchain = () => {
           </StatCard>
           <StatCard
             icon={Timeline}
-            title="Number of Transaction"
+            title="Transaction per Second"
+            suffix='txs / s'
             color='#62D96B'
             size="small"
           >
-            {blockState.num_txs}
+            {(blockState.avg_num_txs / blockState.avg_interval).toFixed(2)}
           </StatCard>
           <StatCard
             icon={Receipt}
             title="Transaction per Block"
-            suffix='/ blk'
+            suffix='txs / blk'
             color='#FFC940'
             size="small"
           >
@@ -193,4 +194,4 @@ const Blockchain = () => {
   )
 }
 
-export default Blockchain
+export default Dashboard

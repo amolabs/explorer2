@@ -94,7 +94,6 @@ const cardSize: { [k: string]: Partial<Record<Breakpoint, boolean | GridSize>> }
 const StatCard = (props: PropsWithChildren<Props>) => {
   const classes = useStyles()
   const size = props.size || 'small'
-  // const color = props.color || '#42a5f5'
   const color = '#182026'
   const iconTheme: React.CSSProperties = {
     boxShadow: `0 4px 20px 0 rgba(0, 0, 0, .14), 0 7px 10px -5px ${color}`,

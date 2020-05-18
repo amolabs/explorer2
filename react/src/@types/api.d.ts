@@ -66,9 +66,42 @@ type ValidatorStat = {
   num_validators: number
 }
 
-type IncentiveStat = {
-  avgIncentive: number,
-  avgReward: number,
-  avgTxFee: number,
-  estInterest: number
+// https://github.com/amolabs/docs/blob/master/protocol.md#top-level-data
+interface DraftConfig {
+  max_validators?: number
+  weight_validator?: number
+  weight_delegator?: number
+  min_staking_unit?: string
+  blk_reward?: string
+  tx_reward?: string
+  penalty_ratio_m?: number
+  penalty_ratio_l?: number
+  laziness_counter_window?: number
+  laziness_threshold?: number
+  block_binding_window?: number
+  lockup_period?: number
+  draft_open_count?: number
+  draft_close_count?: number
+  draft_apply_count?: number
+  draft_deposit?: string
+  draft_quorum_rate?: number
+  draft_pass_rate?: number
+  draft_refund_rate?: number
+  upgrade_protocol_height?: number
+  upgrade_protocol_version?: number
+}
+
+interface Draft {
+  chain_id: string
+  draft_id: number
+  proposer: string
+  config: DraftConfig
+  desc: string
+  open_count: number
+  close_count: number
+  apply_count: number
+  deposit: string
+  tally_approve: string
+  tally_reject: string
+  tally_deposit: string
 }
