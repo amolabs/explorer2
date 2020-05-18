@@ -29,7 +29,6 @@ import Blocks from "./pages/Blocks"
 import Inspect from "./pages/Inspect"
 import Validators from "./pages/Validators"
 import Footer from "./component/Footer"
-import Governance from "./pages/Governance"
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -78,10 +77,6 @@ const routers: RouteProps[] = [
   {
     path: '/:chainId/validators',
     component: Validators
-  },
-  {
-    path: '/:chainId/governance',
-    component: Governance
   }
 ]
 
@@ -93,7 +88,6 @@ const tabList = [
   'blocks',
   'transactions',
   'validators',
-  'governance'
 ]
 
 const supportedNetworks = [
