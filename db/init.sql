@@ -230,6 +230,7 @@ CREATE TABLE `node_info` (
   `latest_block_time` datetime(6) NOT NULL DEFAULT current_timestamp(6),
   `latest_block_height` int(11) NOT NULL,
   `catching_up` boolean NOT NULL default false,
+  `elapsed` float(8,6) NOT NULL default 0,
   PRIMARY KEY (`chain_id`, `node_id`, `latest_block_height`),
   CONSTRAINT `nodes_FK` FOREIGN KEY (`chain_id`, `node_id`) REFERENCES `nodes` (`chain_id`, `node_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

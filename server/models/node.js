@@ -6,7 +6,8 @@ async function getOne(chain_id, node_id) {
     var query_str = "SELECT \
         n.`node_id`, n.`moniker`, \
         INET_NTOA(n.`ip_addr`) `ip_addr`, i.`n_peers`, i.`val_addr`, \
-        i.`latest_block_height`, i.`latest_block_time`, i.`catching_up` \
+        i.`latest_block_height`, i.`latest_block_time`, \
+        i.`catching_up`, i.`elapsed` \
       FROM \
         `nodes` n, `node_info` i \
         JOIN ( \
@@ -38,7 +39,8 @@ async function getList(chain_id, from, num) {
         var query_str = "SELECT \
             n.`node_id`, n.`moniker`, \
             INET_NTOA(n.`ip_addr`) `ip_addr`, i.`n_peers`, i.`val_addr`, \
-            i.`latest_block_height`, i.`latest_block_time`, i.`catching_up` \
+            i.`latest_block_height`, i.`latest_block_time`, \
+            i.`catching_up`, i.`elapsed` \
           FROM \
             `nodes` n, `node_info` i \
             JOIN ( \
@@ -74,7 +76,8 @@ async function getHistory(chain_id, node_id, anchor, from, num) {
           query_str = "SELECT \
             n.`node_id`, n.`moniker`, \
             INET_NTOA(n.`ip_addr`) `ip_addr`, i.`n_peers`, i.`val_addr`, \
-            i.`latest_block_height`, i.`latest_block_time`, i.`catching_up` \
+            i.`latest_block_height`, i.`latest_block_time`, \
+            i.`catching_up`, i.`elapsed` \
         FROM \
             `nodes` n \
             JOIN `node_info` i ON n.`chain_id` = i.`chain_id` \

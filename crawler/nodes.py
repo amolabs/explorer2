@@ -54,6 +54,7 @@ async def peek(addr):
         if args.verbose: print(f'{addr} is unreachable')
         return {}
     node = json.loads(res.text)['result']
+    node['elapsed'] = res.elapsed.total_seconds()
     return node
 
 
@@ -129,7 +130,8 @@ def print_nodes(nodes):
         print(f'{n["n_peers"]:>3}', end=' ', flush=True)
         print(f'{n["latest_block_height"]:>7}', end=' ', flush=True)
         print(f'{n["catching_up_sign"]}', end=' ', flush=True)
-        print(f'{n["voting_power"]:>{20}}', flush=True)
+        print(f'{n["voting_power"]:>{20}}', end=' ', flush=True)
+        print(f'{n["elapsed"]}s', flush=True)
 
 
 def update_nodes(db, nodes):
@@ -155,10 +157,12 @@ def update_nodes(db, nodes):
             """
             INSERT IGNORE INTO `node_info`
                 (`chain_id`, `node_id`, `n_peers`, `val_addr`,
-                 `latest_block_time`, `latest_block_height`, `catching_up`)
+                 `latest_block_time`, `latest_block_height`,
+                 `catching_up`, `elapsed`)
             VALUES
                 (%(chain_id)s, %(node_id)s, %(n_peers)s, %(val_addr)s,
-                 %(latest_block_time)s, %(latest_block_height)s, %(catching_up)s)
+                 %(latest_block_time)s, %(latest_block_height)s,
+                 %(catching_up)s, %(elapsed)s)
             """, n)
 
     db.commit()
