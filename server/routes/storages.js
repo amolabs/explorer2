@@ -4,9 +4,16 @@ var router = express.Router();
 const storage = require('../models/storage');
 
 router.get('/', function(req, res) {
-  //const chain_id = res.locals.chain_id;
-  res.status(200);
-  res.send([]);
+  const chain_id = res.locals.chain_id;
+  storage.getList(chain_id)
+    .then((rows) => {
+      res.status(200);
+      res.send(rows);
+    })
+    .catch((err) => {
+      res.status(500);
+      res.send(err);
+    });
 });
 
 router.get('/:storage([0-9]+)', function(req, res) {
