@@ -244,8 +244,6 @@ if __name__ == '__main__':
             print('done !')
         if args.dry or args.verbose:
             print_nodes(nodes)
-
-        if args.verbose:
             print(time() - tt)
 
     except KeyboardInterrupt:
