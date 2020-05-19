@@ -49,8 +49,7 @@ async def peek(addr):
         else: print('.', end='', flush=True)
         f = functools.partial(r.get, url=f'http://{addr}/status', timeout=REQUEST_TIMEOUT)
         res = await loop.run_in_executor(None, f)
-    except Exception as e:
-        print(e)
+    except Exception:
         if args.verbose: print(f'{addr} is unreachable')
         return {}
     node = json.loads(res.text)['result']
