@@ -8,6 +8,9 @@ import json
 import socket
 import traceback
 import sys
+import functools
+import asyncio
+from time import time
 from datetime import timezone
 from dateutil.parser import parse as dateparse
 
@@ -40,12 +43,14 @@ def neighbors(addr):
     return ps
 
 
-def peek(addr):
+async def peek(addr):
     try:
         if args.verbose: print(f'collecting information from {addr}')
         else: print('.', end='', flush=True)
-        res = r.get(url=f'http://{addr}/status', timeout=REQUEST_TIMEOUT)
-    except Exception:
+        f = functools.partial(r.get, url=f'http://{addr}/status', timeout=REQUEST_TIMEOUT)
+        res = await loop.run_in_executor(None, f)
+    except Exception as e:
+        print(e)
         if args.verbose: print(f'{addr} is unreachable')
         return {}
     node = json.loads(res.text)['result']
@@ -82,6 +87,26 @@ def expand(node):
     del node['sync_info']
 
     return node
+
+
+async def inspect(nodes, n):
+    node_info = known[n]
+    peek_n = await peek(n)
+    if peek_n == {}:  # unreachable
+        return
+    node_info.update(expand(peek_n))
+    nodes[n] = node_info
+
+
+async def collect_info(known):
+    nodes = {}
+    futures = [asyncio.ensure_future(inspect(nodes, n)) for n in known]
+    await asyncio.gather(*futures)
+
+    if not args.verbose:
+        print(' done')
+
+    return nodes
 
 
 def print_nodes(nodes):
@@ -180,6 +205,8 @@ if __name__ == '__main__':
             sys.exit(-1)
 
     try:
+        tt = time()
+
         cands = []
         for t in args.targets:
             host, port = t.split(':')
@@ -201,18 +228,10 @@ if __name__ == '__main__':
                 if n not in known and n not in cands:
                     cands.append(n)
 
-        nodes = {}
-        # collect info
-        # TODO: do this in parallel using asyncio
-        for n in known:
-            node_info = known[n]
-            peek_n = peek(n)
-            if peek_n == {}:  # unreachable
-                continue
-            node_info.update(expand(peek_n))
-            nodes[n] = node_info
-        if not args.verbose:
-            print(' done')
+        # parallel
+        global loop
+        loop = asyncio.get_event_loop()
+        nodes = loop.run_until_complete(collect_info(known))
 
         # updating nodes
         if not args.dry:
@@ -221,20 +240,28 @@ if __name__ == '__main__':
             print('done !')
         if args.dry or args.verbose:
             print_nodes(nodes)
+
+        if args.verbose:
+            print(time() - tt)
+
     except KeyboardInterrupt:
         print('interrupted.')
         if not args.dry:
             print('closing db. releasing lock.')
             db.close()
             lock.release()
-    except Exception:
+            loop.close()
+    except Exception as e:
+        print(e)
         traceback.print_exc()
         if not args.dry:
             print('closing db. releasing lock.')
             db.close()
             lock.release()
+            loop.close()
     else:
         if not args.dry:
             print('closing db. releasing lock.')
             db.close()
             lock.release()
+            loop.close()
