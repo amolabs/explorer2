@@ -8,6 +8,9 @@ import json
 import socket
 import traceback
 import sys
+import functools
+import asyncio
+from time import time
 from datetime import timezone
 from dateutil.parser import parse as dateparse
 
@@ -17,7 +20,7 @@ from filelock import FileLock, Timeout
 
 import dbproxy
 
-REQUEST_TIMEOUT = 1
+REQUEST_TIMEOUT = 5 
 
 
 def neighbors(addr):
@@ -40,15 +43,17 @@ def neighbors(addr):
     return ps
 
 
-def peek(addr):
+async def peek(addr):
     try:
         if args.verbose: print(f'collecting information from {addr}')
         else: print('.', end='', flush=True)
-        res = r.get(url=f'http://{addr}/status', timeout=REQUEST_TIMEOUT)
+        f = functools.partial(r.get, url=f'http://{addr}/status', timeout=REQUEST_TIMEOUT)
+        res = await loop.run_in_executor(None, f)
     except Exception:
-        print(f'{addr} is unreachable')
+        if args.verbose: print(f'{addr} is unreachable')
         return {}
     node = json.loads(res.text)['result']
+    node['elapsed'] = res.elapsed.total_seconds()
     return node
 
 
@@ -62,10 +67,12 @@ def expand(node):
 
     # to load on db
     node['chain_id'] = node['node_info']['network']
-    node['val_addr'] = node['validator_info']['address']
     node['moniker'] = node['node_info']['moniker']
-    node['latest_block_height'] = node['sync_info']['latest_block_height']
+    node['node_id'] = node['node_info']['id']
+    node['ip_addr'] = ip_addr
+    node['val_addr'] = node['validator_info']['address']
     node['latest_block_time'] = lbt
+    node['latest_block_height'] = node['sync_info']['latest_block_height']
     node['catching_up'] = node['sync_info']['catching_up']
 
     # to print
@@ -80,6 +87,26 @@ def expand(node):
     del node['sync_info']
 
     return node
+
+
+async def inspect(nodes, n):
+    node_info = known[n]
+    peek_n = await peek(n)
+    if peek_n == {}:  # unreachable
+        return
+    node_info.update(expand(peek_n))
+    nodes[n] = node_info
+
+
+async def collect_info(known):
+    nodes = {}
+    futures = [asyncio.ensure_future(inspect(nodes, n)) for n in known]
+    await asyncio.gather(*futures)
+
+    if not args.verbose:
+        print(' done')
+
+    return nodes
 
 
 def print_nodes(nodes):
@@ -102,7 +129,8 @@ def print_nodes(nodes):
         print(f'{n["n_peers"]:>3}', end=' ', flush=True)
         print(f'{n["latest_block_height"]:>7}', end=' ', flush=True)
         print(f'{n["catching_up_sign"]}', end=' ', flush=True)
-        print(f'{n["voting_power"]:>{20}}', flush=True)
+        print(f'{n["voting_power"]:>{20}}', end=' ', flush=True)
+        print(f'{n["elapsed"]}s', flush=True)
 
 
 def update_nodes(db, nodes):
@@ -111,23 +139,29 @@ def update_nodes(db, nodes):
 
     cur = db.cursor()
 
-    # purge first
-    cur.execute("""DELETE FROM `nodes`""")
-    cur.execute("""OPTIMIZE TABLE `nodes`""")
-    cur.fetchall()
-
-    # then, insert
     for _, n in nodes.items():
+        # insert or update into explorer.nodes
         cur.execute(
             """
             INSERT INTO `nodes`
-                (`chain_id`, `val_addr`, `moniker`,
-                 `latest_block_time`, `latest_block_height`,
-                 `catching_up`, `n_peers`)
+                (`chain_id`, `node_id`, `moniker`, `ip_addr`)
             VALUES
-                (%(chain_id)s, %(val_addr)s, %(moniker)s,
+                (%(chain_id)s, %(node_id)s, %(moniker)s, INET_ATON(%(ip_addr)s))
+            ON DUPLICATE KEY UPDATE 
+                `moniker` = %(moniker)s, `ip_addr` = INET_ATON(%(ip_addr)s)
+            """, n)
+
+        # insert(append) into explorer.node_info
+        cur.execute(
+            """
+            INSERT IGNORE INTO `node_info`
+                (`chain_id`, `node_id`, `n_peers`, `val_addr`,
+                 `latest_block_time`, `latest_block_height`,
+                 `catching_up`, `elapsed`)
+            VALUES
+                (%(chain_id)s, %(node_id)s, %(n_peers)s, %(val_addr)s,
                  %(latest_block_time)s, %(latest_block_height)s,
-                 %(catching_up)s, %(n_peers)s)
+                 %(catching_up)s, %(elapsed)s)
             """, n)
 
     db.commit()
@@ -174,6 +208,8 @@ if __name__ == '__main__':
             sys.exit(-1)
 
     try:
+        tt = time()
+
         cands = []
         for t in args.targets:
             host, port = t.split(':')
@@ -195,18 +231,10 @@ if __name__ == '__main__':
                 if n not in known and n not in cands:
                     cands.append(n)
 
-        nodes = {}
-        # collect info
-        # TODO: do this in parallel using asyncio
-        for n in known:
-            node_info = known[n]
-            peek_n = peek(n)
-            if peek_n == {}:  # unreachable
-                continue
-            node_info.update(expand(peek_n))
-            nodes[n] = node_info
-        if not args.verbose:
-            print(' done')
+        # parallel
+        global loop
+        loop = asyncio.get_event_loop()
+        nodes = loop.run_until_complete(collect_info(known))
 
         # updating nodes
         if not args.dry:
@@ -215,20 +243,26 @@ if __name__ == '__main__':
             print('done !')
         if args.dry or args.verbose:
             print_nodes(nodes)
+            print(time() - tt)
+
     except KeyboardInterrupt:
         print('interrupted.')
         if not args.dry:
             print('closing db. releasing lock.')
             db.close()
             lock.release()
-    except Exception:
+            loop.close()
+    except Exception as e:
+        print(e)
         traceback.print_exc()
         if not args.dry:
             print('closing db. releasing lock.')
             db.close()
             lock.release()
+            loop.close()
     else:
         if not args.dry:
             print('closing db. releasing lock.')
             db.close()
             lock.release()
+            loop.close()
