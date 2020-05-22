@@ -148,6 +148,12 @@ class Block:
                                           cursor)
                     recp.balance -= int(ev['attr']['amount'].strip('"'))
                     recp.save(cursor)
+                if ev['type'] == 'draft_deposit':
+                    recp = models.Account(self.chain_id,
+                                          ev['attr']['address'].strip('"'),
+                                          cursor)
+                    recp.balance += int(ev['attr']['amount'].strip('"'))
+                    recp.save(cursor)
 
     def play_txs(self, cursor):
         # txs
