@@ -129,6 +129,12 @@ class Block:
                             """, {'chain_id': self.chain_id,
                                   'draft_id': draft.draft_id})
                     draft.save(cursor)
+                if ev['type'] == 'stake_unlock':
+                    recp = models.Account(self.chain_id,
+                                          ev['attr']['address'].strip('"'),
+                                          cursor)
+                    recp.balance += int(ev['attr']['amount'].strip('"'))
+                    recp.save(cursor)
                 if ev['type'] == 'config':
                     cursor.execute(
                         """
