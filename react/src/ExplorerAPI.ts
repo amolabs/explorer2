@@ -2,7 +2,7 @@ import Axios, {AxiosResponse} from "axios"
 import {BlockState} from "./reducer/blocks"
 import {TransactionSchema} from "./reducer/blockchain"
 
-const defaultURL = "https://explorer.amolabs.io/api"
+const defaultURL = "http://52.231.92.127:3000"
 
 const client = Axios.create({
   baseURL: defaultURL

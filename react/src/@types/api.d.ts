@@ -95,7 +95,7 @@ interface Draft {
   chain_id: string
   draft_id: number
   proposer: string
-  config: DraftConfig
+  config: string | object
   desc: string
   open_count: number
   close_count: number
@@ -104,4 +104,6 @@ interface Draft {
   tally_approve: string
   tally_reject: string
   tally_deposit: string
+  status: string
+  proposed_at: number
 }

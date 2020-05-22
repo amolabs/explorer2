@@ -9,7 +9,7 @@ type useScrollUpdateReturn<T> = [
 
 export default function useScrollUpdate<T>(
   fetcher: (size: number, fixedHeight: number, chainId: string) => Promise<T[] | null>,
-  ref: HTMLDivElement | undefined,
+  topAreaRef: HTMLDivElement | undefined,
   fetchSize: number = 20
 ): useScrollUpdateReturn<T> {
   const [list, setList] = useState<T[]>([])
@@ -64,11 +64,11 @@ export default function useScrollUpdate<T>(
   }, [list, loading, fixedHeight, chainId, fetchSize, fetcher])
 
   const onScroll = useCallback((params: { scrollTop: number }) => {
-    const height = 200 + document.documentElement.clientHeight + params.scrollTop + (ref?.clientHeight || 0)
+    const height = 200 + document.documentElement.clientHeight + params.scrollTop + (topAreaRef?.clientHeight || 0)
     if ((height >= document.body.scrollHeight)) {
       fetch()
     }
-  }, [fetch, ref])
+  }, [fetch, topAreaRef])
 
   useEffect(() => {
     if (fixedHeight !== -1 && list.length === 0 && loading === 'READY') {

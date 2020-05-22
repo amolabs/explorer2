@@ -130,7 +130,7 @@ function CollapseTable<T extends Record<string, any>>(props: Props<T>) {
                   {
                     columns.map((c, i) => (
                       <TableCell key={c.key} align="center">
-                        {c.header || c.key.toUpperCase()}
+                        {c.header || c.key.charAt(0).toUpperCase() + c.key.slice(1)}
                       </TableCell>
                     ))
                   }

@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react'
 import StatCard from "../component/StatCard"
-import {AccountBalance, AccountBalanceWallet, History, Receipt, Timeline, ViewHeadline} from "@material-ui/icons"
+import {AccountBalance, AccountBalanceWallet, History, TrendingUp, ViewHeadline} from "@material-ui/icons"
 import {useDispatch, useSelector} from "react-redux"
 import {RootState} from "../reducer"
 import {GraphState} from "../reducer/blockchain"
@@ -154,16 +154,16 @@ const Dashboard = () => {
             {blockState.avg_interval.toFixed(2)}
           </StatCard>
           <StatCard
-            icon={Timeline}
+            icon={TrendingUp}
             title="Transaction per Second"
             suffix='txs / s'
             color='#62D96B'
             size="small"
           >
-            {(blockState.avg_num_txs / blockState.avg_interval).toFixed(2)}
+            {((blockState.avg_num_txs / blockState.avg_interval) || 0).toFixed(2)}
           </StatCard>
           <StatCard
-            icon={Receipt}
+            icon={TrendingUp}
             title="Transaction per Block"
             suffix='txs / blk'
             color='#FFC940'

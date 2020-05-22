@@ -29,6 +29,7 @@ import Blocks from "./pages/Blocks"
 import Inspect from "./pages/Inspect"
 import Validators from "./pages/Validators"
 import Footer from "./component/Footer"
+import Governance from "./pages/Governance"
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -77,6 +78,10 @@ const routers: RouteProps[] = [
   {
     path: '/:chainId/validators',
     component: Validators
+  },
+  {
+    path: '/:chainId/governance',
+    component: Governance
   }
 ]
 
@@ -88,6 +93,7 @@ const tabList = [
   'blocks',
   'transactions',
   'validators',
+  'governance'
 ]
 
 const supportedNetworks = [
@@ -151,7 +157,7 @@ const ExplorerBar = () => {
       } else if (length === 64) {
         dispatch(replace(`/${chainId}/inspect/tx/${searchText}`))
       } else {
-        if(/^([0-9]+)$/.test(searchText)) {
+        if (/^([0-9]+)$/.test(searchText)) {
           dispatch(replace(`/${chainId}/inspect/block/${searchText}`))
         } else {
           dispatch(replace(`/${chainId}/inspect/404`))

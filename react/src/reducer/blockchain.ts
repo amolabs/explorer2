@@ -58,8 +58,6 @@ export type TransactionSchema = typeof initialTransactions
 
 export const UPDATE_BLOCKCHAIN = 'UPDATE_BLOCKCHAIN'
 
-export const UPDATE_RECENT_TXS = 'UPDATE_RECENT_TXS'
-
 export const NEW_BLOCKCHAIN = 'NEW_BLOCKCHAIN'
 
 export const NEW_RECENT_TXS = 'NEW_RECENT_TXS'
@@ -68,11 +66,6 @@ export const SET_NETWORK = 'SET_NETWORK'
 
 export const newBlockchainState = (payload: BlockchainState) => ({
   type: NEW_BLOCKCHAIN,
-  payload
-})
-
-export const newRecentTxs = (payload: TransactionSchema[]) => ({
-  type: NEW_RECENT_TXS,
   payload
 })
 
@@ -100,8 +93,7 @@ type actions =
   NewBlockchainStateAction |
   NewRecentTransactions |
   SetNetwork |
-  Action<typeof UPDATE_BLOCKCHAIN> |
-  Action<typeof UPDATE_RECENT_TXS>
+  Action<typeof UPDATE_BLOCKCHAIN>
 
 export default (state: BlockchainInitialState = initialState, action: actions) => {
   switch (action.type) {

@@ -29,7 +29,7 @@ const SizeTitle = (props: Props) => {
     <span>
       {target} stat in last
       &nbsp;
-      <Select value={value} onChange={onChange}>
+      <Select value={value} onChange={onChange} variant={"outlined"}>
         {values.map((v, i) => (
           <MenuItem value={v} key={i}>{v}</MenuItem>
         ))}

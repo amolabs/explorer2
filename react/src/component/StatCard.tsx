@@ -35,7 +35,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     margin: '0',
     marginTop: '0',
     paddingTop: '10px',
-    marginBottom: '0'
+    marginBottom: '0',
   },
   stat: {
     color: theme.palette.text.primary,
@@ -135,10 +135,15 @@ const StatCard = (props: PropsWithChildren<Props>) => {
           }
           {
             title && (
-              <h1 className={classes.title} style={{
-                fontSize: size === 'small' ? '14px' : '22px',
-                textAlign: titleAlign || 'right'
-              }}>
+              <h1
+                className={classes.title}
+                style={{
+                  fontSize: size === 'small' ? '14px' : '22px',
+                  textAlign: titleAlign || 'right',
+                  lineHeight: size === 'large' ? '56px' : '30px',
+                  fontFamily: 'Open Sans'
+                }}
+              >
                 {props.title}
               </h1>
             )

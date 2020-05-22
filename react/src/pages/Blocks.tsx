@@ -6,7 +6,7 @@ import InfinityTable from "../component/InfinityTable"
 import ExplorerAPI from '../ExplorerAPI'
 import {Link} from "react-router-dom"
 import StatCard from "../component/StatCard"
-import {History, Timeline, TrendingUp, ViewModule} from "@material-ui/icons"
+import {History, TrendingUp, ViewModule} from "@material-ui/icons"
 import SizeTitle, {LastOptions} from "../component/SizeTitle"
 import useScrollUpdate from "../hooks/useScrollUpdate"
 import moment from 'moment'
@@ -113,14 +113,6 @@ const BlocksStatView = (props: BlocksStatProps) => {
           spacing={2}
         >
           <StatCard
-            icon={TrendingUp}
-            title="Transaction per Second"
-            color="#9179F2"
-            suffix="txs / s"
-          >
-            {(blocksStat.avg_num_txs / blocksStat.avg_interval).toFixed(2)}
-          </StatCard>
-          <StatCard
             icon={History}
             title="Average interval"
             suffix="s / blk"
@@ -129,19 +121,27 @@ const BlocksStatView = (props: BlocksStatProps) => {
             {blocksStat.avg_interval.toFixed(2)}
           </StatCard>
           <StatCard
-            icon={Timeline}
-            title="Average # of txs"
-            suffix="txs / blk"
-            color="#62D96B"
-          >
-            {blocksStat.avg_num_txs.toFixed(2)}
-          </StatCard>
-          <StatCard
             icon={ViewModule}
             title="Average tx bytes"
             suffix="B / blk"
           >
             {blocksStat.avg_blk_tx_bytes}
+          </StatCard>
+          <StatCard
+            icon={TrendingUp}
+            title="Transaction per Second"
+            color="#9179F2"
+            suffix="txs / s"
+          >
+            {((blocksStat.avg_num_txs / blocksStat.avg_interval) || 0).toFixed(2)}
+          </StatCard>
+          <StatCard
+            icon={TrendingUp}
+            title="Transaction per Block"
+            suffix="txs / blk"
+            color="#62D96B"
+          >
+            {blocksStat.avg_num_txs.toFixed(2)}
           </StatCard>
         </Grid>
       </StatCard>
