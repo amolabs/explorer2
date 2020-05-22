@@ -136,11 +136,17 @@ class Block:
                         WHERE `chain_id` = %(chain_id)s
                         ORDER BY `draft_id` DESC LIMIT 1
                         """, self._vars())
-                if ev['type'] == 'balance':
+                if ev['type'] == 'incentive':
                     recp = models.Account(self.chain_id,
                                           ev['attr']['address'].strip('"'),
                                           cursor)
                     recp.balance += int(ev['attr']['amount'].strip('"'))
+                    recp.save(cursor)
+                if ev['type'] == 'penalty':
+                    recp = models.Account(self.chain_id,
+                                          ev['attr']['address'].strip('"'),
+                                          cursor)
+                    recp.balance -= int(ev['attr']['amount'].strip('"'))
                     recp.save(cursor)
 
     def play_txs(self, cursor):
