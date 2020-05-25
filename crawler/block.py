@@ -92,6 +92,18 @@ class Block:
             events = json.loads(raw)
             for ev in events:
                 ev = util.parse_event(ev)
+                if ev['type'] == 'protocol_upgrade':
+                    # do something or nothing
+                    vs = self._vars()
+                    vs['protocol_version'] = ev['version']
+                    cursor.execute(
+                        """
+                        INSERT INTO `s_protocol`
+                            (`chain_id`, `height`, `version`)
+                        VALUES
+                            (%(chain_id)s, %(height)s, %(protocol_version)s)
+                        """, vs)
+
 
     def play_events_end(self, cursor):
         # events

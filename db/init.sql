@@ -9,6 +9,16 @@ CREATE TABLE `asset_stat` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
+-- explorer.s_protocol definition
+
+CREATE TABLE `s_protocol` (
+  `chain_id` char(32) NOT NULL,
+  `height` int(11) NOT NULL,
+  `version` int(11) NOT NULL,
+  PRIMARY KEY (`chain_id`,`heiht`,`version`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 -- explorer.c_blocks definition
 
 CREATE TABLE `c_blocks` (
