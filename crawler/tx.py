@@ -126,6 +126,7 @@ def tx_stake(tx, cursor):
 
     sender = models.Account(tx.chain_id, tx.sender, cursor)
     sender.stake += payload['amount']
+    sender.stake_locked += payload['amount']
     sender.eff_stake += payload['amount']
     sender.balance -= payload['amount']
     sender.val_pubkey = payload['validator']

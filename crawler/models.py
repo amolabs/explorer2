@@ -10,6 +10,7 @@ class Account:
         self.address = address
         self.balance = 0
         self.stake = 0
+        self.stake_locked = 0 # stake_unlocked = stake - stake_locked
         self.eff_stake = 0
         self.val_addr = None
         self.val_pubkey = None
@@ -26,6 +27,7 @@ class Account:
             d = dict(zip(cursor.column_names, row))
             self.balance = int(d['balance'])
             self.stake = int(d['stake'])
+            self.stake_locked = int(d['stake_locked'])
             self.eff_stake = int(d['eff_stake'])
             self.val_addr = d['val_addr']
             self.val_pubkey = d['val_pubkey']
@@ -43,6 +45,7 @@ class Account:
         values = vars(self).copy()
         values['balance'] = str(values['balance'])
         values['stake'] = str(values['stake'])
+        values['stake_locked'] = str(values['stake_locked'])
         values['eff_stake'] = str(values['eff_stake'])
         values['delegate'] = str(values['delegate'])
         values['val_power'] = str(values['val_power'])
@@ -52,6 +55,7 @@ class Account:
             SET
                 `balance` = %(balance)s,
                 `stake` = %(stake)s,
+                `stake_locked` = %(stake_locked)s,
                 `eff_stake` = %(eff_stake)s,
                 `val_addr` = %(val_addr)s,
                 `val_pubkey` = %(val_pubkey)s,

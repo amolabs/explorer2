@@ -63,6 +63,7 @@ CREATE TABLE `s_accounts` (
   `address` char(40) NOT NULL,
   `balance` char(40) NOT NULL DEFAULT '0',
   `stake` char(40) NOT NULL DEFAULT '0',
+  `stake_locked` char(40) NOT NULL DEFAULT '0',
   `val_addr` char(40) DEFAULT NULL,
   `delegate` char(40) NOT NULL DEFAULT '0',
   `del_addr` char(40) DEFAULT NULL,

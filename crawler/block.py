@@ -145,7 +145,7 @@ class Block:
                     recp = models.Account(self.chain_id,
                                           ev['attr']['address'].strip('"'),
                                           cursor)
-                    recp.balance += int(ev['attr']['amount'].strip('"'))
+                    recp.stake_locked -= int(ev['attr']['amount'].strip('"'))
                     recp.save(cursor)
                 if ev['type'] == 'config':
                     cursor.execute(
