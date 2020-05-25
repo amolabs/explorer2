@@ -276,8 +276,7 @@ class Block:
                     `events_begin`, `events_end`)
             VALUES
                 (%(chain_id)s, %(height)s, %(time)s, %(hash)s,
-                %(interval)s, %(proposer)s,
-                %(incentives)s, %(validator_updates)s, %(penalties)s,
+                %(interval)s, %(proposer)s, %(validator_updates)s,
                 %(events_begin)s, %(events_end)s
                 )
             """, self._vars())
@@ -289,7 +288,6 @@ class Block:
                 `num_txs` = %(num_txs)s,
                 `num_txs_valid` = %(num_txs_valid)s,
                 `num_txs_invalid` = %(num_txs_invalid)s,
-                `incentives` = %(incentives)s,
                 `validator_updates` = %(validator_updates)s,
                 `penalties` = %(penalties)s,
                 `events_begin` = %(events_begin)s,
