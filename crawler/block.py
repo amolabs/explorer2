@@ -272,8 +272,7 @@ class Block:
             """
             INSERT INTO `c_blocks`
                 (`chain_id`, `height`, `time`, `hash`,
-                    `interval`, `proposer`,
-                    `incentives`, `validator_updates`, `penalties`,
+                    `interval`, `proposer`, validator_updates`,
                     `events_begin`, `events_end`)
             VALUES
                 (%(chain_id)s, %(height)s, %(time)s, %(hash)s,
