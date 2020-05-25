@@ -152,6 +152,16 @@ class Block:
                         ORDER BY `draft_id` DESC LIMIT 1
                         """, self._vars())
                 if ev['type'] == 'incentive':
+                    vs = self._vars()
+                    vs['address'] = ev['attr']['address'].strip('"')
+                    vs['amount'] = ev['attr']['amount'].strip('"')
+                    cursor.execute(
+                        """
+                        INSERT INTO `s_incentives`
+                            (`chain_id`, `height`, `address`, `amount`)
+                        VALUES
+                            (%(chain_id)s, %(height)s, %(address)s, %(amount)s)
+                        """, vs)
                     recp = models.Account(self.chain_id,
                                           ev['attr']['address'].strip('"'),
                                           cursor)
@@ -159,6 +169,16 @@ class Block:
                     asset_stat.active_coins += int(ev['attr']['amount'].strip('"'))
                     recp.save(cursor)
                 if ev['type'] == 'penalty':
+                    vs = self._vars()
+                    vs['address'] = ev['attr']['address'].strip('"')
+                    vs['amount'] = ev['attr']['amount'].strip('"')
+                    cursor.execute(
+                        """
+                        INSERT INTO `s_penalties`
+                            (`chain_id`, `height`, `address`, `amount`)
+                        VALUES
+                            (%(chain_id)s, %(height)s, %(address)s, %(amount)s)
+                        """, vs)
                     recp = models.Account(self.chain_id,
                                           ev['attr']['address'].strip('"'),
                                           cursor)

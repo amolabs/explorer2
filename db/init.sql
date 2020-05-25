@@ -87,6 +87,32 @@ CREATE TABLE `s_udcs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
+-- explorer.s_incentives definition
+
+CREATE TABLE `s_incentives` (
+  `chain_id` char(32) NOT NULL,
+  `height` int(11) NOT NULL,
+  `address` char(40) NOT NULL,
+  `amount` char(40) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`chain_id`,`height`,`address`),
+  CONSTRAINT `inc_block_FK` FOREIGN KEY (`chain_id`, `height`) REFERENCES `c_blocks` (`chain_id`, `height`),
+  CONSTRAINT `inc_account_FK` FOREIGN KEY (`chain_id`, `address`) REFERENCES `s_accounts` (`chain_id`, `address`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- explorer.s_penalties definition
+
+CREATE TABLE `s_penalties` (
+  `chain_id` char(32) NOT NULL,
+  `height` int(11) NOT NULL,
+  `address` char(40) NOT NULL,
+  `amount` char(40) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`chain_id`,`height`,`address`),
+  CONSTRAINT `pen_block_FK` FOREIGN KEY (`chain_id`, `height`) REFERENCES `c_blocks` (`chain_id`, `height`),
+  CONSTRAINT `pen_account_FK` FOREIGN KEY (`chain_id`, `address`) REFERENCES `s_accounts` (`chain_id`, `address`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 -- explorer.c_txs definition
 
 CREATE TABLE `c_txs` (
