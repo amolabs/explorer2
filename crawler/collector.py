@@ -212,15 +212,16 @@ class Collector:
 
         # NOTE: there seems to be some peculiar timing problem when getting
         # block results.
-        try:
-            r = s.get(f'{self.node}/block_results?height={height}')
-            dat = json.loads(r.text)['result']
-            blk.read_results(dat)
-        except KeyError:
-            time.sleep(1)
-            r = s.get(f'{self.node}/block_results?height={height}')
-            dat = json.loads(r.text)['result']
-            blk.read_results(dat)
+        try_count = 0
+        while try_count < 3:
+            try:
+                r = s.get(f'{self.node}/block_results?height={height}')
+                dat = json.loads(r.text)['result']
+                blk.read_results(dat)
+                break
+            except KeyError:
+                try_count += 1
+                pass
 
         return blk
 
