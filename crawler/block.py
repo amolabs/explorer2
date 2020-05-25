@@ -48,8 +48,6 @@ class Block:
         self.num_txs = int(raw['num_txs'])
         self.txs = []
         self.txs_results = []
-        self.incentives = '[]'  # hmmm...
-        self.penalties = '[]'  # hmmm...
         self.validator_updates = []
 
     def read_results(self, raw):
@@ -74,8 +72,6 @@ class Block:
         self.play_events_begin(cursor)
         self.play_txs(cursor)
         self.play_events_end(cursor)
-        self.play_incentives(cursor)
-        self.play_penalties(cursor)
         self.play_val_updates(cursor)
 
     def play_events_begin(self, cursor):
@@ -95,7 +91,7 @@ class Block:
                 if ev['type'] == 'protocol_upgrade':
                     # do something or nothing
                     vs = self._vars()
-                    vs['protocol_version'] = ev['version']
+                    vs['protocol_version'] = ev['attr']['version']
                     cursor.execute(
                         """
                         INSERT INTO `s_protocol`
@@ -117,6 +113,7 @@ class Block:
         for row in rows:
             (raw,) = row
             events = json.loads(raw)
+            asset_stat = stats.Asset(self.chain_id, cursor)
             for ev in events:
                 ev = util.parse_event(ev)
                 # TODO: refactor
@@ -159,19 +156,32 @@ class Block:
                                           ev['attr']['address'].strip('"'),
                                           cursor)
                     recp.balance += int(ev['attr']['amount'].strip('"'))
+                    asset_stat.active_coins += int(ev['attr']['amount'].strip('"'))
                     recp.save(cursor)
                 if ev['type'] == 'penalty':
                     recp = models.Account(self.chain_id,
                                           ev['attr']['address'].strip('"'),
                                           cursor)
-                    recp.balance -= int(ev['attr']['amount'].strip('"'))
-                    recp.save(cursor)
+                    if recp.stake > 0: # staker
+                        recp.stake -= int(ev['attr']['amount'].strip('"'))
+                        recp.eff_stake -= int(ev['attr']['amount'].strip('"'))
+                        asset_stat.stakes -= int(ev['attr']['amount'].strip('"'))
+                        recp.save(cursor)
+                    elif recp.delegate > 0: # delegator
+                        recp.delegate -= int(ev['attr']['amount'].strip('"'))
+                        staker = models.Account(self.chain_id, recp.del_addr,
+                                                cursor)
+                        staker.eff_take -= int(ev['attr']['amount'].strip('"'))
+                        asset_stat.delegates -= int(ev['attr']['amount'].strip('"'))
+                        recp.save(cursor)
+                        stake.save(cursor)
                 if ev['type'] == 'draft_deposit':
                     recp = models.Account(self.chain_id,
                                           ev['attr']['address'].strip('"'),
                                           cursor)
                     recp.balance += int(ev['attr']['amount'].strip('"'))
                     recp.save(cursor)
+                asset_stat.save(cursor)
 
     def play_txs(self, cursor):
         # txs
@@ -187,52 +197,6 @@ class Block:
             t = tx.Tx(self.chain_id, d['height'], d['index'])
             t.read(d)
             t.play(cursor)
-
-    def play_incentives(self, cursor):
-        # block incentives
-        cursor.execute(
-            """
-            SELECT `incentives` FROM `c_blocks`
-            WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s)
-            """, self._vars())
-        row = cursor.fetchone()
-        if row:
-            asset_stat = stats.Asset(self.chain_id, cursor)
-            incentives = json.loads(row[0])
-            for inc in incentives:
-                recp = models.Account(self.chain_id, inc['address'], cursor)
-                recp.balance += int(inc['amount'])
-                asset_stat.active_coins += int(inc['amount'])
-                recp.save(cursor)
-            asset_stat.save(cursor)
-
-    def play_penalties(self, cursor):
-        # block incentives
-        cursor.execute(
-            """
-            SELECT `penalties` FROM `c_blocks`
-            WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s)
-            """, self._vars())
-        row = cursor.fetchone()
-        if row:
-            asset_stat = stats.Asset(self.chain_id, cursor)
-            penalties = json.loads(row[0])
-            for pen in penalties:
-                recp = models.Account(self.chain_id, pen['address'], cursor)
-                if recp.stake > 0:  # staker
-                    recp.stake -= int(pen['amount'])
-                    recp.eff_stake -= int(pen['amount'])
-                    asset_stat.stakes -= int(pen['amount'])
-                    recp.save(cursor)
-                elif recp.delegate > 0:  # delegator
-                    recp.delegate -= int(pen['amount'])
-                    staker = models.Account(self.chain_id, recp.del_addr,
-                                            cursor)
-                    staker.eff_stake -= int(pen['amount'])
-                    asset_stat.delegates -= int(pen['amount'])
-                    recp.save(cursor)
-                    staker.save(cursor)
-            asset_stat.save(cursor)
 
     def play_val_updates(self, cursor):
         # validator updates
@@ -272,7 +236,7 @@ class Block:
             """
             INSERT INTO `c_blocks`
                 (`chain_id`, `height`, `time`, `hash`,
-                    `interval`, `proposer`, validator_updates`,
+                    `interval`, `proposer`, `validator_updates`,
                     `events_begin`, `events_end`)
             VALUES
                 (%(chain_id)s, %(height)s, %(time)s, %(hash)s,
@@ -289,7 +253,6 @@ class Block:
                 `num_txs_valid` = %(num_txs_valid)s,
                 `num_txs_invalid` = %(num_txs_invalid)s,
                 `validator_updates` = %(validator_updates)s,
-                `penalties` = %(penalties)s,
                 `events_begin` = %(events_begin)s,
                 `events_end` = %(events_end)s
             WHERE
