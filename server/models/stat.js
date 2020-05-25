@@ -100,10 +100,8 @@ async function getValidatorStat(chain_id, num_blks) {
       stat = rows[0];
 
       // another query
-      /*
-      query_str = "SELECT \
-        JSON_EXTRACT(`incentives`, '$[*].amount') AS `amounts` \
-        FROM `c_blocks` WHERE `chain_id` = ? \
+      query_str = "SELECT AVG(`amount`) as `avg` \
+        FROM `s_incentives` WHERE `chain_id` = ? \
         ORDER BY `height` DESC \
         LIMIT ?";
       query_var = [chain_id, num_blks];
@@ -111,23 +109,10 @@ async function getValidatorStat(chain_id, num_blks) {
         if (err) {
           return reject(err);
         }
-        sum = BigInt(0);
-        rows.forEach(row => {
-          if (!row.amounts) {
-            return;
-          }
-          l = JSON.parse(row.amounts);
-          l.forEach(a => {
-            sum += BigInt(a);
-          });
-        });
-        stat.avg_blk_incentive = (sum / BigInt(num_blks)).toString();
+        stat.avg_blk_incentive = rows[0].avg.toString();
 
         resolve(stat);
       });
-      */
-      stat.avg_blk_incentive = (0).toString();
-      resolve(stat);
     });
   });
 }
