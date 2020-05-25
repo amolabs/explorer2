@@ -222,24 +222,6 @@ class Collector:
             dat = json.loads(r.text)['result']
             blk.read_results(dat)
 
-        q = f'"{height}"'.encode('latin1').hex()
-        r = s.get(f'{self.node}/abci_query?path="/inc_block"&data=0x{q}')
-        b = json.loads(r.text)['result']['response']['value']
-        if b is None:
-            incs = json.dumps([])
-        else:
-            incs = base64.b64decode(b)
-        blk.incentives = incs
-
-        q = f'"{height}"'.encode('latin1').hex()
-        r = s.get(f'{self.node}/abci_query?path="/pen_block"&data=0x{q}')
-        b = json.loads(r.text)['result']['response']['value']
-        if b is None:
-            pens = json.dumps([])
-        else:
-            pens = base64.b64decode(b)
-        blk.penalties = pens
-
         return blk
 
     def collect_block_metas(self, s, start, num):

@@ -92,6 +92,18 @@ class Block:
             events = json.loads(raw)
             for ev in events:
                 ev = util.parse_event(ev)
+                if ev['type'] == 'protocol_upgrade':
+                    # do something or nothing
+                    vs = self._vars()
+                    vs['protocol_version'] = ev['version']
+                    cursor.execute(
+                        """
+                        INSERT INTO `s_protocol`
+                            (`chain_id`, `height`, `version`)
+                        VALUES
+                            (%(chain_id)s, %(height)s, %(protocol_version)s)
+                        """, vs)
+
 
     def play_events_end(self, cursor):
         # events
@@ -129,6 +141,12 @@ class Block:
                             """, {'chain_id': self.chain_id,
                                   'draft_id': draft.draft_id})
                     draft.save(cursor)
+                if ev['type'] == 'stake_unlock':
+                    recp = models.Account(self.chain_id,
+                                          ev['attr']['address'].strip('"'),
+                                          cursor)
+                    recp.stake_locked -= int(ev['attr']['amount'].strip('"'))
+                    recp.save(cursor)
                 if ev['type'] == 'config':
                     cursor.execute(
                         """
@@ -136,7 +154,19 @@ class Block:
                         WHERE `chain_id` = %(chain_id)s
                         ORDER BY `draft_id` DESC LIMIT 1
                         """, self._vars())
-                if ev['type'] == 'balance':
+                if ev['type'] == 'incentive':
+                    recp = models.Account(self.chain_id,
+                                          ev['attr']['address'].strip('"'),
+                                          cursor)
+                    recp.balance += int(ev['attr']['amount'].strip('"'))
+                    recp.save(cursor)
+                if ev['type'] == 'penalty':
+                    recp = models.Account(self.chain_id,
+                                          ev['attr']['address'].strip('"'),
+                                          cursor)
+                    recp.balance -= int(ev['attr']['amount'].strip('"'))
+                    recp.save(cursor)
+                if ev['type'] == 'draft_deposit':
                     recp = models.Account(self.chain_id,
                                           ev['attr']['address'].strip('"'),
                                           cursor)
