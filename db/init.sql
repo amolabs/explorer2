@@ -15,7 +15,7 @@ CREATE TABLE `s_protocol` (
   `chain_id` char(32) NOT NULL,
   `height` int(11) NOT NULL,
   `version` int(11) NOT NULL,
-  PRIMARY KEY (`chain_id`,`heiht`,`version`)
+  PRIMARY KEY (`chain_id`,`height`,`version`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
