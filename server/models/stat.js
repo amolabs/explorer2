@@ -100,6 +100,7 @@ async function getValidatorStat(chain_id, num_blks) {
       stat = rows[0];
 
       // another query
+      /*
       query_str = "SELECT \
         JSON_EXTRACT(`incentives`, '$[*].amount') AS `amounts` \
         FROM `c_blocks` WHERE `chain_id` = ? \
@@ -124,6 +125,9 @@ async function getValidatorStat(chain_id, num_blks) {
 
         resolve(stat);
       });
+      */
+      stat.avg_blk_incentive = (0).toString();
+      resolve(stat);
     });
   });
 }
