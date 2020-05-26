@@ -8,10 +8,9 @@ import mysql.connector
 from mysql.connector import Error as DBError
 
 c_tables = ['c_genesis', 'c_txs', 'c_blocks']
-s_tables = ['s_protocol', 's_accounts', 's_udcs',
-            's_incentives', 's_penalties',
-            's_drafts', 's_storages', 's_udc_balances',
-            's_votes', 's_parcels', 's_requests', 's_usages']
+s_tables = ['s_requests', 's_usages', 's_parcels', 's_storages',
+            's_votes', 's_drafts', 's_incentives', 's_penalties',
+            's_udcs', 's_accounts', 's_protocol', 'asset_stat']
 
 
 def connect_db():
