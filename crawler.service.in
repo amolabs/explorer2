@@ -2,7 +2,7 @@
 Description=AMO Crawler 
 
 [Service]
-Type=simple
+Type=forking
 ExecStart=/root/amo_crawler_run.sh @node_addr@ @chain_id@
 WorkingDirectory=/root/amo-crawler
 SyslogFacility=daemon
