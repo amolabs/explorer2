@@ -1,0 +1,14 @@
+[Unit]
+Description=AMO Crawler 
+
+[Service]
+Type=simple
+ExecStart=/root/amo_crawler_run.sh @node_addr@ @chain_id@
+SyslogFacility=daemon
+SyslogLevel=info
+Restart=on-failure
+LimitNOFILE=500000
+
+[Install]
+WantedBy=multi-user.target
+
