@@ -30,7 +30,7 @@ echo "chain id     = $CHAIN_ID"
 
 # copy crawler/
 rm -rf /root/amo-crawler
-cp -f crawler/ /root/amo-crawler
+cp -rf crawler/ /root/amo-crawler
 
 # make symbolic link
 ln -sf /root/amo-crawler/collector.py /usr/local/bin/amo-crawler-collector
