@@ -25,5 +25,5 @@ fi
 echo "node addr    = $NODE_ADDR"
 echo "chain id     = $CHAIN_ID"
 
-amo-crawler-collector --node $NODE_ADDR --limit 0
-amo-crawler-builder --chain $CHAIN_ID --limit 0
+amo-crawler-collector --node $NODE_ADDR --limit 0 &
+amo-crawler-builder --chain $CHAIN_ID --limit 0 &
