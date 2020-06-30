@@ -6,7 +6,7 @@ FROM node:12.18.1-alpine3.11
 # set working dir
 WORKDIR /app
 
-# copy necessary elementes
+# copy necessary elements
 COPY bin/ /app/bin/
 COPY db/ /app/db/
 COPY models/ /app/models/
