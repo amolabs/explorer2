@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # vim: set sw=4 ts=4 expandtab :
 
+import json
+
 class Asset:
     def __init__(self, chain_id, cursor):
         self.chain_id = chain_id
@@ -11,7 +13,7 @@ class Asset:
             SELECT * FROM `asset_stat`
             WHERE (`chain_id` = %(chain_id)s)
             """,
-            vars(self))
+            self._vars())
         row = cursor.fetchone()
         if row:
             d = dict(zip(cursor.column_names, row))
@@ -23,11 +25,18 @@ class Asset:
                 INSERT INTO `asset_stat` (`chain_id`)
                 VALUES (%(chain_id)s)
                 """,
-                vars(self))
+                self._vars())
+
+    def _vars(self):
+        v = vars(self).copy()
+        v['active_coins'] = json.dumps(self.active_coins)
+        v['stakes'] = json.dumps(self.stakes)
+        v['delegates'] = json.dumps(self.delegates)
+        return v
 
     def save(self, cursor):
         #print(vars(self))
-        values = vars(self)
+        values = self._vars()
         values['active_coins'] = str(values['active_coins'])
         values['stakes'] = str(values['stakes'])
         values['delegates'] = str(values['delegates'])
