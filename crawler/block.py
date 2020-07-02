@@ -194,7 +194,7 @@ class Block:
                         staker.eff_take -= int(ev['attr']['amount'].strip('"'))
                         asset_stat.delegates -= int(ev['attr']['amount'].strip('"'))
                         recp.save(cursor)
-                        stake.save(cursor)
+                        staker.save(cursor)
                 if ev['type'] == 'draft_deposit':
                     recp = models.Account(self.chain_id,
                                           ev['attr']['address'].strip('"'),

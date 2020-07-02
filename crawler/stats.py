@@ -29,9 +29,9 @@ class Asset:
 
     def _vars(self):
         v = vars(self).copy()
-        v['active_coins'] = json.dumps(self.active_coins)
-        v['stakes'] = json.dumps(self.stakes)
-        v['delegates'] = json.dumps(self.delegates)
+        v['active_coins'] = str(self.active_coins)
+        v['stakes'] = str(self.stakes)
+        v['delegates'] = str(self.delegates)
         return v
 
     def save(self, cursor):

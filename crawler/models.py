@@ -87,7 +87,7 @@ class Storage:
             self.url = d['url']
             self.registration_fee = int(d['registration_fee'])
             self.hosting_fee = int(d['hosting_fee'])
-            self.active = d['active']
+            self.active = bool(d['active'])
         else:
             cursor.execute(
                 """
@@ -100,6 +100,7 @@ class Storage:
         values = vars(self).copy()
         values['registration_fee'] = str(values['registration_fee'])
         values['hosting_fee'] = str(values['hosting_fee'])
+        values['active'] = str(int(values['active'] == True))
         cursor.execute(
             """
             UPDATE `s_storages`
