@@ -11,6 +11,9 @@ def parse_event(d):
     for att in d['attributes']:
         k = base64.b64decode(att['key']).decode('latin1')
         v = base64.b64decode(att['value']).decode('latin1')
+        # exception handling for hex encoded address
+        if k == 'address' and len(v) != 42:
+            v = base64.b64decode(v).hex() # bizarre but necessary
         ev['attr'][k] = v
     return ev
 
