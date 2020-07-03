@@ -191,7 +191,7 @@ class Block:
                         recp.delegate -= int(ev['attr']['amount'].strip('"'))
                         staker = models.Account(self.chain_id, recp.del_addr,
                                                 cursor)
-                        staker.eff_take -= int(ev['attr']['amount'].strip('"'))
+                        staker.eff_stake -= int(ev['attr']['amount'].strip('"'))
                         asset_stat.delegates -= int(ev['attr']['amount'].strip('"'))
                         recp.save(cursor)
                         staker.save(cursor)
