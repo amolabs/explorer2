@@ -92,7 +92,8 @@ const tabList = [
 
 const supportedNetworks = [
   'amo-cherryblossom-01',
-  'amo-testnet-200330'
+  'amo-testnet-200330',
+  'amo-testnet-200706'
 ]
 
 const networkMap = new Set(supportedNetworks)
