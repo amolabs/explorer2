@@ -105,8 +105,10 @@ const ExplorerBar = () => {
   const isDesktop = useMediaQuery('(min-width: 1280px)')
 
   const dispatch = useDispatch()
-  const chainId = useSelector<RootState, string>(state => state.blockchain.chainId)
-  const path = useSelector<RootState, string>(state => state.router.location.pathname)
+  const chainId = useSelector<RootState, string>(state =>
+                                                 state.blockchain.chainId)
+  const path = useSelector<RootState, string>(state =>
+                                              state.router.location.pathname)
 
   const handleTabChange = (event: any, newValue: any) => {
     dispatch(push(`/${chainId}${urls[newValue]}`))
@@ -136,11 +138,11 @@ const ExplorerBar = () => {
     dispatch(replace(`/${supportedNetworks[0]}`))
   }, [path, dispatch, chainId])
 
-  const onChangeNetwork = (e: React.ChangeEvent<{ name?: string; value: unknown }>,) => {
-    window.open(`/${e.target.value}`)
+  const onNetworkChange = (e: React.ChangeEvent<{ name?: string; value: unknown }>,) => {
+    dispatch(push(`/${e.target.value}`))
   }
 
-  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchText(e.target.value.trim())
   }
 
@@ -148,14 +150,14 @@ const ExplorerBar = () => {
     if (e.keyCode === 13) {
       const length = searchText.length
       if (length === 40) {
-        dispatch(replace(`/${chainId}/inspect/account/${searchText}`))
+        dispatch(push(`/${chainId}/inspect/account/${searchText}`))
       } else if (length === 64) {
-        dispatch(replace(`/${chainId}/inspect/tx/${searchText}`))
+        dispatch(push(`/${chainId}/inspect/tx/${searchText}`))
       } else {
         if(/^([0-9]+)$/.test(searchText)) {
-          dispatch(replace(`/${chainId}/inspect/block/${searchText}`))
+          dispatch(push(`/${chainId}/inspect/block/${searchText}`))
         } else {
-          dispatch(replace(`/${chainId}/inspect/404`))
+          dispatch(push(`/${chainId}/inspect/404`))
         }
       }
     }
@@ -182,7 +184,7 @@ const ExplorerBar = () => {
               value={chainId}
               labelId="network-select-label"
               className={classes.mr2}
-              onChange={onChangeNetwork}
+              onChange={onNetworkChange}
               style={{
                 width: '40%'
               }}
@@ -193,7 +195,7 @@ const ExplorerBar = () => {
             </Select>
             <TextField
               value={searchText}
-              onChange={onChange}
+              onChange={onSearchChange}
               onKeyUp={onSearch}
               style={{
                 width: '60%'

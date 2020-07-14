@@ -88,6 +88,8 @@ const transactionColumns = [
 const PAGE_SIZE = 14
 
 const Block = () => {
+  const {height} = useParams()
+
   const [block, setBlock] = useState<BlockState>(initialBlock)
   const [transactions, setTransactions] = useState<TransactionSchema[]>([])
   const chainId = useChainId()
@@ -96,8 +98,6 @@ const Block = () => {
   const [txLoading, setTxLoading] = useState(true)
   const [page, setPage] = useState(0)
   const dispatch = useDispatch()
-
-  const {height} = useParams()
 
   useEffect(() => {
     if (height) {
@@ -121,6 +121,7 @@ const Block = () => {
         })
         .catch(() => {
           dispatch(replace(`/${chainId}/inspect/404`, {type: 'BLOCK', search: height}))
+          setBlockLoading(false)
         })
     }
   }, [chainId, height, dispatch])

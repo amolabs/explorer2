@@ -1,20 +1,18 @@
-import {useEffect, useState} from 'react'
+import {useEffect} from 'react'
 import {RootState, useUpdateState} from "../reducer"
 import {useSelector} from "react-redux"
 
 const useEnsureNetwork = (fn: (chainId: string) => void) => {
   const {chainId, updated} = useUpdateState()
   const path = useSelector<RootState, string>(state => state.router.location.pathname)
-  const [once, setOnce] = useState(false)
 
   useEffect(() => {
     const [, pathChainId] = path.split('/')
-    if (pathChainId === chainId && updated && !once) {
-      setOnce(true)
+    if (pathChainId === chainId && updated) {
       fn(chainId)
     }
 
-  }, [chainId, updated, path, fn, once])
+  }, [chainId, updated, path, fn])
 
 }
 
