@@ -11,6 +11,7 @@ import sys
 import functools
 import asyncio
 from time import time
+from datetime import datetime
 from datetime import timezone
 from dateutil.parser import parse as dateparse
 
@@ -89,18 +90,20 @@ def expand(node):
     return node
 
 
-async def inspect(nodes, n):
+async def inspect(nodes, n, timestamp):
     node_info = known[n]
     peek_n = await peek(n)
     if peek_n == {}:  # unreachable
         return
     node_info.update(expand(peek_n))
+    node_info['timestamp'] = timestamp
     nodes[n] = node_info
 
 
 async def collect_info(known):
     nodes = {}
-    futures = [asyncio.ensure_future(inspect(nodes, n)) for n in known]
+    timestamp = datetime.now()
+    futures = [asyncio.ensure_future(inspect(nodes, n, timestamp)) for n in known]
     await asyncio.gather(*futures)
 
     if not args.verbose:
@@ -155,12 +158,12 @@ def update_nodes(db, nodes):
         cur.execute(
             """
             INSERT IGNORE INTO `node_info`
-                (`chain_id`, `node_id`, `n_peers`, `val_addr`,
-                 `latest_block_time`, `latest_block_height`,
+                (`chain_id`, `node_id`, `timestamp`, `n_peers`,
+                 `val_addr`, `latest_block_time`, `latest_block_height`,
                  `catching_up`, `elapsed`)
             VALUES
-                (%(chain_id)s, %(node_id)s, %(n_peers)s, %(val_addr)s,
-                 %(latest_block_time)s, %(latest_block_height)s,
+                (%(chain_id)s, %(node_id)s, %(timestamp)s, %(n_peers)s,
+                 %(val_addr)s, %(latest_block_time)s, %(latest_block_height)s,
                  %(catching_up)s, %(elapsed)s)
             """, n)
 
