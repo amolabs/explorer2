@@ -12,9 +12,9 @@ export const transactionColumns = [
       format: (height: number, chainId: string) => {
         return (
           <Link to={`/${chainId}/inspect/block/${height}`}>
-        {height}
-        </Link>
-      )
+            {height}
+          </Link>
+        )
       }
     }
   },
@@ -33,9 +33,9 @@ export const transactionColumns = [
       format: (hash: string, chainId: string) => {
         return (
           <Link to={`/${chainId}/inspect/tx/${hash}`}>
-        {hash}
-        </Link>
-      )
+            {hash}
+          </Link>
+        )
       }
     }
   },

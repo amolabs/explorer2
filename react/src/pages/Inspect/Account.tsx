@@ -69,10 +69,8 @@ const Account = () => {
   const fetchAccountTransactions = useCallback(async (size: number, fixedHeight: number, chainId: string) => {
     if (fixedHeight !== -1) {
       const {data} = await ExplorerAPI.fetchAccountTransactions(chainId, address as string, fixedHeight, size)
-
       return data
     }
-
     return null
   }, [address])
   const [list, loading, onScroll] = useScrollUpdate<TransactionSchema>(fetchAccountTransactions, ref)

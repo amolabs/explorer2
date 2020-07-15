@@ -27,14 +27,14 @@ const initialBlockState = {
 }
 
 export const initialTransactions = {
-  chain_id: "amo-cherryblossom-01",
-  height: 1,
+  chain_id: '',
+  height: 0,
   index: 0,
-  hash: "",
+  hash: '',
   code: 0,
-  info: "ok",
-  type: "transfer",
-  sender: "",
+  info: '',
+  type: '',
+  sender: '',
   fee: 0,
   payload: "{}",
   last_height: 0,

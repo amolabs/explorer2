@@ -30,7 +30,7 @@ const fetchBlock = (chainId: string, height: number): Result<BlockState> => {
     .get(`/chain/${chainId}/blocks/${height}`)
 }
 
-const fetchBlockTransaction = (chainId: string, height: number, from: number, size: number = 20): Result<TransactionSchema[]> => {
+const fetchBlockTransactions = (chainId: string, height: number, from: number, size: number = 20): Result<TransactionSchema[]> => {
   return client
     .get(`/chain/${chainId}/blocks/${height}/txs?from=${from}&num=${size}`)
 }
@@ -101,7 +101,7 @@ export default {
   fetchBlocksStats,
   fetchTransactions,
   fetchBlock,
-  fetchBlockTransaction,
+  fetchBlockTransactions,
   fetchTransaction,
   fetchValidatorStat,
   fetchValidators,
