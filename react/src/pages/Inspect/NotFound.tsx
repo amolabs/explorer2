@@ -27,11 +27,15 @@ const message = (errorType: string, searchText: string) => {
       )
     case 'ACCOUNT':
       return (
-        ``
+        <h2>
+          Account #{searchText}
+        </h2>
       )
     case 'TRANSACTION':
       return (
-        ``
+        <h2>
+          Transaction #{searchText}
+        </h2>
       )
     default:
       return ``

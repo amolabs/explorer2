@@ -23,10 +23,19 @@ const columns = [
     }
   },
   {
-    key: 'hash',
-    format: (hash: string) => {
+    key: 'time',
+    format: (s: string, chainId: string, rowData: BlockState) => {
+      const diff = Math.abs(moment().diff(moment(s)))
+      return `${diff < 60000 ? `${Math.floor(diff / 1000)} seconds ago` : moment(s).fromNow()} (+${rowData.interval.toFixed(3)} sec)`
+    }
+  },
+  {
+    key: 'proposer',
+    format: (validator: string, chainId: string) => {
       return (
-        `${hash.slice(0, 40)}...`
+        <Link to={`/${chainId}/inspect/validator/${validator}`}>
+          <code>{validator}</code>
+        </Link>
       )
     }
   },
@@ -34,23 +43,6 @@ const columns = [
     key: 'num_txs',
     header: '# of TXs'
   },
-  {
-    key: 'proposer',
-    format: (validator: string, chainId: string) => {
-      return (
-        <Link to={`/${chainId}/inspect/validator/${validator}`}>
-          {validator}
-        </Link>
-      )
-    }
-  },
-  {
-    key: 'time',
-    format: (s: string, chainId: string, rowData: BlockState) => {
-      const diff = Math.abs(moment().diff(moment(s)))
-      return `${diff < 60000 ? `${Math.floor(diff / 1000)} seconds ago` : moment(s).fromNow()} (+${rowData.interval.toFixed(3)} sec)`
-    }
-  }
 ]
 
 const RecentBlocks = () => {

@@ -20,6 +20,11 @@ const columns = [
   {
     key: 'hash',
     header: 'Hash',
+    format: (hash: string) => {
+      return (
+        <code>{hash}</code>
+      )
+    }
   },
   {
     key: 'proposer',
@@ -27,7 +32,7 @@ const columns = [
     format: (validator: string, chainId: string) => {
       return (
         <Link to={`/${chainId}/inspect/validator/${validator}`}>
-          {validator}
+          <code>{validator}</code>
         </Link>
       )
     }
@@ -61,7 +66,7 @@ const transactionColumns = [
       format: (hash: string, chainId: string) => {
         return (
           <Link to={`/${chainId}/inspect/tx/${hash}`}>
-            {hash}
+            <code>{hash}</code>
           </Link>
         )
       }
@@ -76,7 +81,7 @@ const transactionColumns = [
       format: (sender: string, chainId: string) => {
         return (
           <Link to={`/${chainId}/inspect/account/${sender}`}>
-            {sender}
+            <code>{sender}</code>
           </Link>
         )
       }

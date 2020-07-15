@@ -15,7 +15,7 @@ const columns = [
     format: (validator: string, chainId: string) => {
       return (
         <Link to={`/${chainId}/inspect/validator/${validator}`}>
-          {validator}
+          <code>{validator}</code>
         </Link>
       )
     }

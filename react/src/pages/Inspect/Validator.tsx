@@ -3,28 +3,24 @@ import {Link, useParams} from 'react-router-dom'
 import {useUpdateState} from "../../reducer"
 import ExplorerAPI, {DelegateItem} from "../../ExplorerAPI"
 import InformationCard from "../../component/InformationCard"
-import {AMO, displayAddress} from "../../util"
+import {AMO, displayAddress, displayMono} from "../../util"
 import CollapseTable from "../../component/CollapseTable"
 
 const columns = [
   {
     key: 'address',
-    header: 'Address'
+    header: 'Address',
+    format: displayMono,
   },
   {
     key: 'pubkey',
-    header: 'Public key'
+    header: 'Public key',
+    format: displayMono,
   },
   {
     key: 'owner',
     header: 'Control account',
-    format: (sender: string, chainId: string) => {
-      return (
-        <Link to={`/${chainId}/inspect/account/${sender}`}>
-          {sender}
-        </Link>
-      )
-    }
+    format: displayAddress,
   },
   {
     key: 'stake',
@@ -45,12 +41,12 @@ const columns = [
 const delegatorColumns = [
   {
     key: 'address',
-    header: 'Address',
+    header: 'Delegator',
     format: displayAddress
   },
   {
     key: 'delegate',
-    header: 'Delegate',
+    header: 'Delegate Amount',
     format: AMO
   }
 ]

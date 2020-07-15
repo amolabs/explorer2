@@ -4,7 +4,9 @@ import InformationCard from "../../component/InformationCard"
 import {initialTransactions, TransactionSchema} from "../../reducer/blockchain"
 import ExplorerAPI from "../../ExplorerAPI"
 import {useUpdateState} from "../../reducer"
-import {AMO, displayAddress, displayAmount, displayResult} from "../../util"
+import {
+  AMO, displayAddress, displayAmount, displayResult, displayMono
+} from "../../util"
 import {Grid, Link as UrlLink} from "@material-ui/core"
 import {useDispatch} from "react-redux"
 import {replace} from "connected-react-router"
@@ -25,17 +27,20 @@ const payloadColumns: StringMap = {
   register: [
     {
       key: 'target',
-      header: 'Target'
+      header: 'Target Parcel',
+      format: displayMono, // TODO: displayParcel
     },
     {
       key: 'custody',
-      header: 'Custody'
+      header: 'Owner Key Custody',
+      format: displayMono,
     }
   ],
   stake: [
     {
       key: 'validator',
-      header: 'Validator'
+      header: 'Validator Public Key',
+      format: displayMono,
     },
     {
       key: 'amount',
@@ -46,7 +51,7 @@ const payloadColumns: StringMap = {
   issue: [
     {
       key: 'udc',
-      header: 'UDC'
+      header: 'UDC ID'
     },
     {
       key: 'desc',
@@ -61,7 +66,8 @@ const payloadColumns: StringMap = {
   delegate: [
     {
       key: 'to',
-      header: 'Validator'
+      header: 'Delegatee',
+      format: displayAddress,
     },
     {
       key: 'amount',
@@ -72,7 +78,7 @@ const payloadColumns: StringMap = {
   setup: [
     {
       key: 'storage',
-      header: 'Storage'
+      header: 'Storage ID'
     },
     {
       key: 'url',
@@ -87,14 +93,16 @@ const payloadColumns: StringMap = {
     },
     {
       key: 'registration_fee',
-      header: 'Registration fee'
+      header: 'Registration fee',
+      format: displayAmount,
     },
     {
       key: 'hosting_fee',
-      header: 'Hosting fee'
+      header: 'Hosting fee',
+      format: displayAmount,
     }
   ],
-  propose: [],
+  propose: [], // TODO
   retract: [
     {
       key: 'amount',
@@ -105,13 +113,13 @@ const payloadColumns: StringMap = {
   close: [
     {
       key: 'storage',
-      header: 'Storage'
+      header: 'Storage ID'
     }
   ],
   lock: [
     {
       key: 'udc',
-      header: 'UDC'
+      header: 'UDC ID'
     },
     {
       key: 'holder',
@@ -134,7 +142,7 @@ const payloadColumns: StringMap = {
   vote: [
     {
       key: 'draft_id',
-      header: 'Draft id'
+      header: 'Draft ID'
     },
     {
       key: 'approve',
@@ -147,7 +155,8 @@ const payloadColumns: StringMap = {
   request: [
     {
       key: 'target',
-      header: 'Target'
+      header: 'Target Parcel',
+      format: displayMono,
     },
     {
       key: 'payment',
@@ -158,19 +167,22 @@ const payloadColumns: StringMap = {
   grant: [
     {
       key: 'target',
-      header: 'Target'
+      header: 'Target Parcel',
+      format: displayMono,
     }
   ],
   cancel: [
     {
       key: 'target',
-      header: 'Target'
+      header: 'Target Parcel',
+      format: displayMono,
     }
   ],
   revoke: [
     {
       key: 'target',
-      header: 'Target'
+      header: 'Target Parcel',
+      format: displayMono,
     },
     {
       key: 'grantee',
@@ -181,7 +193,7 @@ const payloadColumns: StringMap = {
   burn: [
     {
       key: 'udc',
-      header: 'UDC'
+      header: 'UDC ID'
     },
     {
       key: 'amount',
@@ -190,7 +202,8 @@ const payloadColumns: StringMap = {
         return Number(amount).toLocaleString()
       }
     }
-  ]
+  ],
+  unknown: [],
 }
 
 const columns = [
@@ -201,13 +214,7 @@ const columns = [
   {
     key: 'sender',
     header: 'Sender',
-    format: (sender: string, chainId: string) => {
-      return (
-        <Link to={`/${chainId}/inspect/account/${sender}`}>
-          {sender}
-        </Link>
-      )
-    }
+    format: displayAddress,
   },
   {
     key: 'height',

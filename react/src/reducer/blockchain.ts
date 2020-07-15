@@ -33,7 +33,7 @@ export const initialTransactions = {
   hash: '',
   code: 0,
   info: '',
-  type: '',
+  type: 'unknown',
   sender: '',
   fee: 0,
   payload: "{}",

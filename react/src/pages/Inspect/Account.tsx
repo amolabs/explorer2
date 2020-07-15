@@ -15,7 +15,12 @@ import useEnsureNetwork from "../../hooks/useEnsureNetwork"
 const columns = [
   {
     key: 'address',
-    header: 'Address'
+    header: 'Address',
+    format: (address: string) => {
+      return (
+        <code>{address}</code>
+      )
+    }
   },
   {
     key: 'balance',

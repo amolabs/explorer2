@@ -38,7 +38,13 @@ export function displayResult(info: string) {
 export function displayAddress(address: string, chainId: string) {
   return (
     <Link to={`/${chainId}/inspect/account/${address}`}>
-      {address}
+      <code>{address}</code>
     </Link>
+  )
+}
+
+export function displayMono(text: string) {
+  return (
+    <code>{text}</code>
   )
 }

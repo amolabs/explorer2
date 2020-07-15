@@ -33,7 +33,7 @@ export const transactionColumns = [
       format: (hash: string, chainId: string) => {
         return (
           <Link to={`/${chainId}/inspect/tx/${hash}`}>
-            {hash}
+            <code>{hash}</code>
           </Link>
         )
       }
