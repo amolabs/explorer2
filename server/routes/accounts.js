@@ -32,8 +32,19 @@ router.get('/:address([a-fA-F0-9]+)', function(req, res) {
         res.status(200);
         res.send(rows[0]);
       } else {
-        res.status(404);
-        res.send('not found');
+        // prepare empty account
+        const acc = {
+          chain_id: chain_id,
+          address: req.params.address,
+          balance: '0',
+          stake: '0',
+          stake_locked: '0',
+          delegate: '0',
+          val_power: '0',
+          eff_stake: '0',
+        }
+        res.status(200);
+        res.send(acc);
       }
     })
     .catch((err) => {
