@@ -236,7 +236,9 @@ def tx_register(tx, cursor):
     host = models.Account(tx.chain_id, storage.owner, cursor)
 
     parcel.custody = payload['custody']
-    parcel.proxy_account = payload.get('proxy_account', None)[:40]
+    parcel.proxy_account = payload.get('proxy_account', None)
+    if parcel.proxy_account != None:
+        parcel.proxy_account = parcel.proxy_account[:40]
     parcel.extra = payload.get('extra', '{}')
     parcel.on_sale = True
     parcel.save(cursor)
