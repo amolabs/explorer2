@@ -100,10 +100,12 @@ async function getValidatorStat(chain_id, num_blks) {
       stat = rows[0];
 
       // another query
-      query_str = "SELECT AVG(`amount`) as `avg` \
-        FROM `s_incentives` WHERE `chain_id` = ? \
-        ORDER BY `height` DESC \
-        LIMIT ?";
+      query_str = "SELECT AVG(t.`amount`) AS `avg` \
+        FROM ( \
+          SELECT `amount` FROM `s_incentives` WHERE `chain_id` = ? \
+          ORDER BY `height` DESC \
+          LIMIT ? \
+        ) t";
       query_var = [chain_id, num_blks];
       db.query(query_str, query_var, function (err, rows, fields) {
         if (err) {
