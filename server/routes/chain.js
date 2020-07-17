@@ -14,6 +14,7 @@ var drafts = require('./drafts');
 var parcels = require('./parcels');
 var storages = require('./storages');
 var incentives = require('./incentives');
+var penalties = require('./penalties');
 
 router.use('/genesis', genesis);
 router.use('/blocks', blocks);
@@ -26,6 +27,7 @@ router.use('/config', appConfig);
 router.use('/parcels', parcels);
 router.use('/storages', storages);
 router.use('/incentives', incentives);
+router.use('/penalties', penalties);
 
 router.get('/', function(req, res) {
   const chain_id = res.locals.chain_id;
