@@ -106,6 +106,22 @@ async def collect_info(known):
     futures = [asyncio.ensure_future(inspect(nodes, n, timestamp)) for n in known]
     await asyncio.gather(*futures)
 
+    # append ghost node
+    ghost_n = {}
+    ghost_n['chain_id'] = 'ghost_chain_id'
+    ghost_n['node_id'] = 'ghost_node_id'
+    ghost_n['moniker'] = 'ghost_moniker'
+    ghost_n['ip_addr'] = '0.0.0.0'
+    ghost_n['rpc_addr'] = '0.0.0.0:26657'
+    ghost_n['timestamp'] = timestamp
+    ghost_n['n_peers'] = '0'
+    ghost_n['val_addr'] = 'ghost_val_addr'
+    ghost_n['latest_block_time'] = timestamp
+    ghost_n['latest_block_height'] = '0'
+    ghost_n['catching_up'] = '0'
+    ghost_n['elapsed'] = '0'
+    nodes['ghost_node'] = ghost_n
+
     if not args.verbose:
         print(' done')
 
@@ -113,18 +129,25 @@ async def collect_info(known):
 
 
 def print_nodes(nodes):
+    if len(nodes) == 1:
+        return
     # this is just for neat display
     # clen = 0
     mlen = 0
     alen = 0
     monikers = {}
-    for _, n in nodes.items():
+    for k, n in nodes.items():
+        if k == 'ghost_node':
+            continue
         # clen = max(clen, len(n['chain_id']))
         mlen = max(mlen, len(n['moniker']))
         alen = max(alen, len(n['rpc_addr']))
         monikers[n['chain_id'] + '_' + n['moniker']] = n
 
     for k in sorted(monikers.keys()):
+        if k == 'ghost_node':
+            continue
+
         n = monikers[k]
         # print(f'{n["chain_id"]:{clen}}', end=' ', flush=True)
         print(f'{n["moniker"]:{mlen}}', end=' ', flush=True)
@@ -137,9 +160,6 @@ def print_nodes(nodes):
 
 
 def update_nodes(db, nodes):
-    if len(nodes) == 0:
-        return
-
     cur = db.cursor()
 
     for _, n in nodes.items():
@@ -241,7 +261,7 @@ if __name__ == '__main__':
 
         # updating nodes
         if not args.dry:
-            print(f'updating {len(nodes)} nodes', end=' - ', flush=True)
+            print(f'updating {len(nodes)-1} nodes', end=' - ', flush=True)
             update_nodes(db, nodes)
             print('done !')
         if args.dry or args.verbose:
