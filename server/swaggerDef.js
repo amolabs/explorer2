@@ -1,5 +1,5 @@
 module.exports = {
-  openapi: '3.0.0',
+  openapi: '3.0.3',
   info: {
     title: 'AMO blockchain explorer API',
     contact: {
@@ -12,5 +12,23 @@ module.exports = {
     },
     version: '2.0',
   },
+  tags: [
+    {
+      name: 'default',
+      description: 'default'
+    },
+    {
+      name: 'chain',
+      description: 'chain'
+    },
+    {
+      name: 'blocks',
+      description: 'blocks'
+    },
+    {
+      name: 'txs',
+      description: 'transactions'
+    },
+  ],
   basePath: '/',
 }

@@ -3,6 +3,21 @@ var express = require('express');
 var router = express.Router();
 const db = require('../db/db');
 
+/**
+ * @swagger
+ * /chain/{chain_id}/genesis:
+ *   parameters:
+ *     - $ref: '#/definitions/ChainId'
+ *   get:
+ *     tags:
+ *       - chain
+ *     description: Get genesis document of the chain
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: Genesis document
+ */
 router.get('/', function(req, res) {
   const chain_id = res.locals.chain_id;
   var query_str;
