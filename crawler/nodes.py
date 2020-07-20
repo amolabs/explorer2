@@ -102,7 +102,7 @@ async def inspect(nodes, n, timestamp):
 
 async def collect_info(known):
     nodes = {}
-    timestamp = datetime.now()
+    timestamp = datetime.now(timezone.utc)
     futures = [asyncio.ensure_future(inspect(nodes, n, timestamp)) for n in known]
     await asyncio.gather(*futures)
 
