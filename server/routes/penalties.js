@@ -28,7 +28,7 @@ router.get('/:address([a-fA-F0-9]+)', function(req, res) {
   const address = req.params.address;
   var from = req.query.from || 0;
   var num = req.query.num || 20;
-  penalty.getOne(chain_id, address, from, num)
+  penalty.getListByAddress(chain_id, address, from, num)
     .then((rows) => {
       if (rows) {
         res.status(200);
