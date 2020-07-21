@@ -167,17 +167,20 @@ def update_nodes(db, nodes):
         cur.execute(
             """
             INSERT INTO `nodes`
-                (`chain_id`, `node_id`, `moniker`, `ip_addr`)
+                (`chain_id`, `node_id`, `timestamp`, `moniker`, `ip_addr`)
             VALUES
-                (%(chain_id)s, %(node_id)s, %(moniker)s, INET_ATON(%(ip_addr)s))
+                (%(chain_id)s, %(node_id)s, %(timestamp)s,
+                 %(moniker)s, INET_ATON(%(ip_addr)s))
             ON DUPLICATE KEY UPDATE 
-                `moniker` = %(moniker)s, `ip_addr` = INET_ATON(%(ip_addr)s)
+                `timestamp` = %(timestamp)s,
+                `moniker` = %(moniker)s,
+                `ip_addr` = INET_ATON(%(ip_addr)s)
             """, n)
 
-        # insert(append) into explorer.node_info
+        # insert(append) into explorer.node_history
         cur.execute(
             """
-            INSERT IGNORE INTO `node_info`
+            INSERT IGNORE INTO `node_history`
                 (`chain_id`, `node_id`, `timestamp`, `n_peers`,
                  `val_addr`, `latest_block_time`, `latest_block_height`,
                  `catching_up`, `elapsed`)
