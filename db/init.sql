@@ -259,14 +259,15 @@ CREATE TABLE `s_usages` (
 CREATE TABLE `nodes` (
   `chain_id` char(32) NOT NULL,
   `node_id` char(40) NOT NULL,
+  `timestamp` datetime(6) NOT NULL DEFAULT current_timestamp(6),
   `moniker` varchar(40) NOT NULL,
   `ip_addr` int(11) unsigned NOT NULL default 0,
   PRIMARY KEY (`chain_id`, `node_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- explorer.node_info definition (insert)
+-- explorer.node_history definition (insert)
 
-CREATE TABLE `node_info` (
+CREATE TABLE `node_history` (
   `chain_id` char(32) NOT NULL,
   `node_id` char(40) NOT NULL,
   `timestamp` datetime(6) NOT NULL DEFAULT current_timestamp(6),
