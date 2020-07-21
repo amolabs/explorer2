@@ -15,19 +15,30 @@ module.exports = {
   tags: [
     {
       name: 'default',
-      description: 'default'
     },
     {
       name: 'chain',
-      description: 'chain'
+      description: 'chain',
     },
     {
       name: 'blocks',
-      description: 'blocks'
+      description: 'blocks',
     },
     {
       name: 'txs',
-      description: 'transactions'
+      description: 'transactions',
+    },
+    {
+      name: 'accounts',
+      description: 'accounts',
+    },
+    {
+      name: 'validators',
+      description: 'validators',
+    },
+    {
+      name: 'governance',
+      description: 'drafts and votes',
     },
   ],
   basePath: '/',
