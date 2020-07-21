@@ -1,10 +1,11 @@
 {
-  "name": "explorer",
-  "version": "1.0.0",
-  "description": "AMO blockchain explorer support server",
+  "name": "amo-explorer-api",
+  "version": "2.0.0",
+  "description": "AMO blockchain explorer API server",
   "private": true,
   "scripts": {
-    "start": "node ./bin/server"
+    "start": "node main.js",
+    "build": "webpack --config webpack.config.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -14,5 +15,10 @@
     "mysql": "^2.18.1",
     "swagger-jsdoc": "^4.0.0",
     "swagger-ui-express": "^4.1.4"
+  },
+  "devDependencies": {
+    "swagger-jsdoc-sync-webpack-plugin": "^1.1.0",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.12"
   }
 }

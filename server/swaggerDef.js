@@ -10,7 +10,7 @@ module.exports = {
     license: {
       name: 'Apache 2.0',
     },
-    version: '2.0',
+    version: require('./package.json').version,
   },
   tags: [
     {

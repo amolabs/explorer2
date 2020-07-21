@@ -1,11 +1,8 @@
-#!/usr/bin/env node
-/* vim: set sw=2 ts=2 expandtab : */
-
 /**
  * Module dependencies.
  */
 
-var app = require('../app');
+var app = require('./app');
 var debug = require('debug')('server:server');
 var http = require('http');
 
