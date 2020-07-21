@@ -94,13 +94,8 @@ router.get('/', function(req, res) {
   var num = req.query.num || 20;
   account.getList(chain_id, false, from, num)
     .then((rows) => {
-      if (rows.length > 0) {
-        res.status(200);
-        res.send(rows);
-      } else {
-        res.status(404);
-        res.send('not found');
-      }
+      res.status(200);
+      res.send(rows);
     })
     .catch((err) => {
       res.status(500);

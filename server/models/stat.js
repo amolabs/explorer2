@@ -123,7 +123,8 @@ async function getDraftStat(chain_id) {
   return new Promise(function(resolve, reject) {
     // CAUTION: not very comfortable with this sum().
     var query_str = "SELECT COUNT(*) `num_drafts`, \
-      SUM(CASE WHEN `applied_at` > 0 THEN 1 ELSE 0 END) `num_passed` \
+      IFNULL(SUM(CASE WHEN `applied_at` > 0 THEN 1 ELSE 0 END), 0) \
+      AS `num_passed` \
       FROM `s_drafts` WHERE (`chain_id` = ?)";
     var query_var = [chain_id];
     db.query(query_str, query_var, function (err, rows, fields) {

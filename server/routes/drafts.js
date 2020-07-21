@@ -232,13 +232,8 @@ router.get('/:draft_id([0-9]+)/votes', function(req, res) {
     prom = draft.getVotes(chain_id, draft_id);
   }
   prom.then((rows) => {
-    if (rows) {
-      res.status(200);
-      res.send(rows);
-    } else {
-      res.status(404);
-      res.send('not found');
-    }
+    res.status(200);
+    res.send(rows); // can send empty list
   })
     .catch((err) => {
       res.status(500);
