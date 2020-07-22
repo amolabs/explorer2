@@ -3,6 +3,60 @@ var express = require('express');
 var router = express.Router();
 const penalty = require('../models/penalty');
 
+/**
+ * @swagger
+ * definitions:
+ *   PenaltyWAddr:
+ *     type: object
+ *     properties:
+ *       height:
+ *         type: number 
+ *       address:
+ *         type: string
+ *       amount:
+ *         type: string
+ *   PenaltyWOAddr:
+ *     type: object
+ *     properties:
+ *       height:
+ *         type: number 
+ *       amount:
+ *         type: string
+ */
+
+/**
+ * @swagger
+ * /chain/{chain_id}/penalties:
+ *   parameters:
+ *     - $ref: '#/definitions/ChainId'
+ *     - name: from
+ *       in: query
+ *       description: offset from the result
+ *       schema:
+ *         type: integer
+ *         default: 0
+ *     - name: num
+ *       in: query
+ *       description: number of items to retrieve
+ *       schema:
+ *         type: integer
+ *         default: 20
+ *   get:
+ *     tags:
+ *       - penalties 
+ *     description: Get penalty list
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: Penalty list
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/definitions/PenaltyWAddr'
+ */
 router.get('/', function(req, res) {
   const chain_id = res.locals.chain_id;
   var from = req.query.from || 0;
@@ -23,6 +77,40 @@ router.get('/', function(req, res) {
     });
 });
 
+/**
+ * @swagger
+ * /chain/{chain_id}/penalties/{address}:
+ *   parameters:
+ *     - $ref: '#/definitions/ChainId'
+ *     - $ref: '#/definitions/Address'
+ *     - name: from
+ *       in: query
+ *       description: offset from the result
+ *       schema:
+ *         type: integer
+ *         default: 0
+ *     - name: num
+ *       in: query
+ *       description: number of items to retrieve
+ *       schema:
+ *         type: integer
+ *         default: 20
+ *   get:
+ *     tags:
+ *       - penalties 
+ *     description: Get given node's penalty list
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: Incentive list
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/definitions/PenaltyWOAddr'
+ */
 router.get('/:address([a-fA-F0-9]+)', function(req, res) {
   const chain_id = res.locals.chain_id;
   const address = req.params.address;

@@ -3,6 +3,8 @@ const db = require('../db/db');
 
 async function getList(chain_id, from, num) {
   return new Promise(function(resolve, reject) {
+    from = Number(from);
+    num = Number(num);
     var query_str = "SELECT \
         `height`, `address`, `amount` \
       FROM `s_penalties` \
@@ -20,6 +22,8 @@ async function getList(chain_id, from, num) {
 
 async function getListByAddress(chain_id, address, from, num) {
   return new Promise(function(resolve, reject) {
+    from = Number(from);
+    num = Number(num);
     var query_str = "SELECT \
         `height`, `amount` \
       FROM `s_penalties` \

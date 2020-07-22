@@ -34,6 +34,9 @@ async function getOne(chain_id, node_id, from, to) {
           if(err) {
             return reject(err);
           }
+          if(rows.length == 0) {
+            return reject('not found');
+          }
           total_count = rows[rows.length-1].count;
           target_count = rows[0].count;
           result.uptime = target_count/total_count*100;
@@ -76,6 +79,9 @@ async function getList(chain_id, from, to) {
             db.query(query_str, query_var, function(err, rows, fields) {
               if(err) {
                 return reject(err);
+              }
+              if(rows.length == 0) {
+                return reject('not found');
               }
               total_count = rows[rows.length-1].count;
               for (i=0; i<rows.length-1; i++) {
