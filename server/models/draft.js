@@ -66,9 +66,8 @@ async function getVotes(chain_id, draft_id) {
   return new Promise(function(resolve, reject) {
     var query_str;
     var query_var;
-    query_str = "SELECT v.*, \
-      CASE WHEN v.`tally` = 0 THEN a.`eff_stake` \
-        ELSE v.`tally` END `tally_projected` \
+    query_str = "SELECT v.chain_id, v.draft_id, v.voter, v.approve, \
+      CASE WHEN v.`tally` = 0 THEN a.`eff_stake` ELSE v.`tally` END `tally` \
       FROM `s_votes` v \
         LEFT JOIN `s_accounts` a ON v.`chain_id` = a.`chain_id` \
           AND v.`voter` = a.`address` \
@@ -88,7 +87,7 @@ async function getVotesAbsent(chain_id, draft_id) {
     var query_str;
     var query_var;
     query_str = "SELECT a.`chain_id`, CONVERT(?, INT) `draft_id`, \
-        a.`address` `voter`, a.`eff_stake` `tally_absent` \
+        a.`address` `voter`, NULL `approve`, a.`eff_stake` `tally` \
       FROM `s_accounts` a LEFT JOIN ( \
         SELECT * FROM `s_votes` WHERE `chain_id` = ? AND `draft_id` = ?) v \
       ON v.`chain_id` = a.`chain_id` AND v.`voter` = a.`address` \

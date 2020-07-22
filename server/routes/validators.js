@@ -4,6 +4,70 @@ var router = express.Router();
 const validator = require('../models/validator');
 const stat = require('../models/stat');
 
+/**
+ * @swagger
+ * definitions:
+ *   ValidatorInfo:
+ *     type: object
+ *     properties:
+ *       address:
+ *         type: string
+ *       pubkey:
+ *         type: string
+ *       power:
+ *         type: string
+ *         description: quoted decimal number
+ *       owner:
+ *         type: string
+ *       stake:
+ *         type: string
+ *         description: quoted decimal number
+ *       eff_stake:
+ *         type: string
+ *         description: quoted decimal number
+ *   DelegatorInfo:
+ *     type: object
+ *     properties:
+ *       address:
+ *         type: string
+ *       delegate:
+ *         type: string
+ *         description: quoted decimal number
+ */
+
+/**
+ * @swagger
+ * /chain/{chain_id}/validators:
+ *   parameters:
+ *     - $ref: '#/definitions/ChainId'
+ *     - name: from
+ *       in: query
+ *       description: offset from the result
+ *       schema:
+ *         type: integer
+ *         default: 0
+ *     - name: num
+ *       in: query
+ *       description: number of items to retrieve
+ *       schema:
+ *         type: integer
+ *         default: 20
+ *   get:
+ *     tags:
+ *       - validators
+ *     description: Get validator list in descending order of `eff_stake`
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: Validator list
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/definitions/ValidatorInfo'
+ */
 router.get('/', function(req, res) {
   const chain_id = res.locals.chain_id;
   if ('stat' in req.query) {
@@ -37,6 +101,26 @@ router.get('/', function(req, res) {
   }
 });
 
+/**
+ * @swagger
+ * /chain/{chain_id}/validators/{address}:
+ *   parameters:
+ *     - $ref: '#/definitions/ChainId'
+ *     - $ref: '#/definitions/Address'
+ *   get:
+ *     tags:
+ *       - validators
+ *     description: Get validator info by address
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: Validator info
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/definitions/ValidatorInfo'
+ */
 router.get('/:address([a-fA-F0-9]+)', function(req, res) {
   const chain_id = res.locals.chain_id;
   validator.getOne(chain_id, req.params.address)
@@ -55,6 +139,38 @@ router.get('/:address([a-fA-F0-9]+)', function(req, res) {
     });
 });
 
+/**
+ * @swagger
+ * /chain/{chain_id}/validators/{address}/delegators:
+ *   parameters:
+ *     - $ref: '#/definitions/ChainId'
+ *     - $ref: '#/definitions/Address'
+ *     - name: from
+ *       in: query
+ *       description: offset from the result
+ *       schema:
+ *         type: integer
+ *         default: 0
+ *     - name: num
+ *       in: query
+ *       description: number of items to retrieve
+ *       schema:
+ *         type: integer
+ *         default: 20
+ *   get:
+ *     tags:
+ *       - validators
+ *     description: Get delegator list for this validator(delegatee)
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: Delegator info
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/definitions/DelegatorInfo'
+ */
 router.get('/:address([a-fA-F0-9]+)/delegators', function(req, res) {
   const chain_id = res.locals.chain_id;
   var from = req.query.from || 0;

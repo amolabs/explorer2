@@ -29,6 +29,36 @@ router.use('/storages', storages);
 router.use('/incentives', incentives);
 router.use('/penalties', penalties);
 
+/**
+ * @swagger
+ * definitions:
+ *   ChainId:
+ *     name: chain_id
+ *     in: path
+ *     description: chain id to inspect
+ *     required: true
+ *     schema:
+ *       type: string
+ *     style: simple
+ */
+
+/**
+ * @swagger
+ * /chain/{chain_id}:
+ *   parameters:
+ *     - $ref: '#/definitions/ChainId'
+ *   get:
+ *     tags:
+ *       - chain
+ *     description: Get chain's general stat
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: chain stat
+ *       404:
+ *         description: not available
+ */
 router.get('/', function(req, res) {
   const chain_id = res.locals.chain_id;
   var non_empty = 'non_empty' in req.query;

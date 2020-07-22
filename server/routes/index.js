@@ -9,6 +9,17 @@ router.param('chain_id', function(req, res, next, val) {
   next();
 });
 
+/**
+ * @swagger
+ * /:
+ *   get:
+ *     description: Get welcome message
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: Welcome message
+ */
 router.get('/', function(req, res, next) {
   res.send(JSON.stringify({
     name: 'AMO blockchain explorer support server',

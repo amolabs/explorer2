@@ -33,7 +33,7 @@ async function getList(chain_id, from, num) {
         `address` `owner`, `stake`, `eff_stake` \
       FROM `s_accounts` \
       WHERE `chain_id` = ? AND `val_addr` IS NOT NULL \
-      ORDER BY `eff_stake` DESC LIMIT ?,?";
+      ORDER BY CONVERT(`eff_stake`, DOUBLE) DESC LIMIT ?,?";
     var query_var = [chain_id, from, num];
     db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
