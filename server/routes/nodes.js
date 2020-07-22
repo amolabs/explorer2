@@ -3,29 +3,23 @@ var express = require('express');
 var router = express.Router();
 const node = require('../models/node');
 
+function dateToStr(target) {
+  return target.getUTCFullYear() + '-' 
+        + (target.getUTCMonth()+1) + '-'
+        + target.getUTCDate() + ' '
+        + target.getUTCHours() +':'
+        + target.getUTCMinutes() + ':'
+        + target.getUTCSeconds() + 'Z';
+}
+
 router.get('/', function(req, res) {
   const chain_id = res.locals.chain_id;
-  var range = req.query.range || 60; // seconds
+  const range = req.query.range || 60; // seconds
 
-  var to = new Date();
-  var to_timestamp = to.getUTCFullYear() + '-' 
-                   + (to.getUTCMonth()+1) + '-'
-                   + to.getUTCDate() + ' '
-                   + to.getUTCHours() +':'
-                   + to.getUTCMinutes() + ':'
-                   + to.getUTCSeconds();
-  to_timestamp = req.query.upto || to_timestamp;
-  var from = new Date(Date.parse(to_timestamp) - (range * 1000));
-  var from_timestamp = from.getUTCFullYear() + '-' 
-                     + (from.getUTCMonth()+1) + '-'
-                     + from.getUTCDate() + ' '
-                     + from.getUTCHours() +':'
-                     + from.getUTCMinutes() + ':'
-                     + from.getUTCSeconds();
+  const to = dateToStr(new Date());
+  const from = dateToStr(new Date(Date.parse(to) - range * 1000));
 
-  console.log(from_timestamp, "~", to_timestamp);
-
-  node.getList(chain_id, from_timestamp, to_timestamp)
+  node.getList(chain_id, from, to)
     .then((row) => {
       res.status(200);
       res.send(row);
@@ -36,26 +30,15 @@ router.get('/', function(req, res) {
     });
 });
 
-router.get('/:val_addr([a-fA-F0-9]+)', function(req, res) {
+router.get('/:node_id([a-fA-F0-9]+)', function(req, res) {
   const chain_id = res.locals.chain_id;
-  const val_addr = req.params.val_addr;
-  var range = req.query.range || 60; // seconds
-  var to = new Date();
-  var to_timestamp = to.getUTCFullYear() + '-' 
-                   + (to.getUTCMonth()+1) + '-'
-                   + to.getUTCDate() + ' '
-                   + to.getUTCHours() +':'
-                   + to.getUTCMinutes() + ':'
-                   + to.getUTCSeconds();
-  to_timestamp = req.query.upto || to_timestamp;
-  var from = new Date(Date.parse(to_timestamp) - (range * 1000));
-  var from_timestamp = from.getUTCFullYear() + '-' 
-                     + (from.getUTCMonth()+1) + '-'
-                     + from.getUTCDate() + ' '
-                     + from.getUTCHours() +':'
-                     + from.getUTCMinutes() + ':'
-                     + from.getUTCSeconds();
-  node.getOne(chain_id, val_addr, from_timestamp, to_timestamp)
+  const node_id = req.params.node_id;
+  const range = req.query.range || 60; // seconds
+
+  const to = dateToStr(new Date());
+  const from = dateToStr(new Date(Date.parse(to) - range * 1000));
+
+  node.getOne(chain_id, node_id, from, to)
     .then((row) => {
       if (row) {
         res.status(200);
@@ -71,13 +54,15 @@ router.get('/:val_addr([a-fA-F0-9]+)', function(req, res) {
     });
 });
 
-router.get('/:val_addr([a-fA-F0-9]+)/history', function(req, res) {
+router.get('/:node_id([a-fA-F0-9]+)/history', function(req, res) {
   const chain_id = res.locals.chain_id;
-  const val_addr = req.params.val_addr;
-  var anchor = req.query.anchor || 0;
-  var from = req.query.from || 0;
-  var num = req.query.num || 20;
-  node.getHistory(chain_id, val_addr, anchor, from, num)
+  const node_id = req.params.node_id;
+  const now = dateToStr(new Date());
+
+  const anchor = req.query.anchor || now;
+  const from = req.query.from || 0;
+  const num = req.query.num || 20;
+  node.getHistory(chain_id, node_id, anchor, from, num)
     .then((row) => {
       if (row) {
         res.status(200);
