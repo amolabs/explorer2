@@ -66,6 +66,18 @@ type ValidatorStat = {
   num_validators: number
 }
 
+type NodeInfo = {
+  node_id: string,
+  moniker: string,
+  val_addr: string,
+  latest_block_height: number,
+  latest_block_time: string,
+  catching_up: number,
+  elapsed: number,
+  timestamp: string,
+  uptime: number,
+}
+
 // https://github.com/amolabs/docs/blob/master/protocol.md#top-level-data
 interface DraftConfig {
   max_validators?: number
