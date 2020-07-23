@@ -21,6 +21,8 @@ const swaggerOptions = {
     'routes/parcels.js',
     'routes/storages.js',
     'routes/nodes.js',
+    'routes/incentives.js',
+    'routes/penalties.js',
   ]
 }
 const swaggerSpec = swaggerJSDoc(swaggerOptions);

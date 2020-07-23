@@ -40,6 +40,18 @@ module.exports = {
       name: 'governance',
       description: 'drafts and votes',
     },
+    {
+      name: 'nodes',
+      description: 'nodes',
+    },
+    {
+      name: 'incentives',
+      description: 'incentives',
+    },
+    {
+      name: 'penalties',
+      description: 'penalties',
+    },
   ],
   basePath: '/',
 }
