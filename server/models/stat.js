@@ -12,12 +12,13 @@ async function getBlockStat(chain_id, non_empty, num_blks) {
       limit = `LIMIT ${num_blks}`;
     }
     var query_str = "SELECT \
-        t.`chain_id` AS `chain_id`, \
-        MAX(t.`height`) `last_height`, \
+        ? AS `chain_id`, \
+        IFNULL(MAX(t.`height`), 0) `last_height`, \
         COUNT(t.`chain_id`) `num_blocks`, \
-        SUM(t.`num_txs`) `num_txs`, AVG(t.`num_txs`) `avg_num_txs`, \
-        AVG(IFNULL(t.`blk_tx_bytes`, 0)) `avg_blk_tx_bytes`, \
-        AVG(t.`interval`) `avg_interval` \
+        IFNULL(SUM(t.`num_txs`), 0) `num_txs`, \
+        IFNULL(AVG(t.`num_txs`), 0) `avg_num_txs`, \
+        IFNULL(AVG(IFNULL(t.`blk_tx_bytes`, 0)), 0) `avg_blk_tx_bytes`, \
+        IFNULL(AVG(t.`interval`), 0) `avg_interval` \
       FROM ( \
         SELECT \
           b.*, SUM(t.`tx_bytes`) `blk_tx_bytes` \
@@ -27,7 +28,7 @@ async function getBlockStat(chain_id, non_empty, num_blks) {
         GROUP BY b.`height` \
         ORDER BY b.`height` DESC " + limit + " \
       ) t";
-    var query_var = [chain_id];
+    var query_var = [chain_id, chain_id];
     db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
@@ -49,21 +50,21 @@ async function getTxStat(chain_id, num_txs) {
       limit = `LIMIT ${num_txs}`;
     }
     var query_str = "SELECT \
-        `t`.`chain_id` AS `chain_id`, \
-        MAX(t.`height`) `tx_height`, \
+        ? AS `chain_id`, \
+        IFNULL(MAX(t.`height`), 0) `tx_height`, \
         COUNT(`hash`) AS `num_txs`, \
-        SUM(IF(`t`.`code` = 0, 1, 0)) AS `num_txs_valid`, \
-        SUM(IF(`t`.`code` > 0, 1, 0)) AS `num_txs_invalid`, \
-        AVG(`t`.`fee`) AS `avg_fee`, \
-        AVG(`t`.`tx_bytes`) AS `avg_tx_bytes`, \
-        AVG(`t`.`height` - `t`.`last_height`) AS `avg_binding_lag`, \
+        IFNULL(SUM(IF(`t`.`code` = 0, 1, 0)), 0) AS `num_txs_valid`, \
+        IFNULL(SUM(IF(`t`.`code` > 0, 1, 0)), 0) AS `num_txs_invalid`, \
+        IFNULL(AVG(`t`.`fee`), 0) AS `avg_fee`, \
+        IFNULL(AVG(`t`.`tx_bytes`), 0) AS `avg_tx_bytes`, \
+        IFNULL(AVG(`t`.`height` - `t`.`last_height`), 0) AS `avg_binding_lag`, \
         10000 AS `max_binding_lag` \
       FROM ( \
         SELECT * FROM `c_txs` \
         WHERE `chain_id` = ? \
         ORDER BY `height` DESC, `index` DESC " + limit + " \
       ) t";
-    var query_var = [chain_id];
+    var query_var = [chain_id, chain_id];
     db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
@@ -100,7 +101,7 @@ async function getValidatorStat(chain_id, num_blks) {
       stat = rows[0];
 
       // another query
-      query_str = "SELECT AVG(t.`amount`) AS `avg` \
+      query_str = "SELECT IFNULL(AVG(t.`amount`), 0) AS `avg` \
         FROM ( \
           SELECT `amount` FROM `s_incentives` WHERE `chain_id` = ? \
           ORDER BY `height` DESC \
