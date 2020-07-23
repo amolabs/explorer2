@@ -167,7 +167,7 @@ const ExplorerBar = () => {
     <AppBar position="fixed">
       <Toolbar>
         <img src={require('./assets/amo_white.png')} alt="logo" style={{
-          height: '36px',
+          height: '30px',
           marginRight: '12px'
         }}/>
         <Hidden only={['xs', 'sm']}>
