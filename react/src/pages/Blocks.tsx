@@ -118,7 +118,9 @@ const BlocksStatView = (props: BlocksStatProps) => {
             color="#9179F2"
             suffix="txs / s"
           >
-            {(blocksStat.avg_num_txs / blocksStat.avg_interval).toFixed(2)}
+            {blocksStat.avg_num_txs > 0
+              ? (blocksStat.avg_num_txs / blocksStat.avg_interval).toFixed(2)
+              : 0}
           </StatCard>
           <StatCard
             icon={History}
