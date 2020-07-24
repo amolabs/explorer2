@@ -66,6 +66,16 @@ type ValidatorStat = {
   num_validators: number
 }
 
+type StorageInfo = {
+  chain_id: string,
+  storage_id: number,
+  url: string,
+  registration_fee: string,
+  hosting_fee: string,
+  owner: string,
+  active: boolean,
+}
+
 // https://github.com/amolabs/docs/blob/master/protocol.md#top-level-data
 interface DraftConfig {
   max_validators?: number
