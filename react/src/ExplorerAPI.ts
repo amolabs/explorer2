@@ -96,6 +96,11 @@ const fetchDraft = (chainId: string, draftId: number): Result<Draft> => {
     .get(`/chain/${chainId}/drafts/${draftId}`)
 }
 
+const fetchStorages = (chainId: string): Result<StorageInfo[]> => {
+  return client
+    .get(`chain/${chainId}/storages`)
+}
+
 export default {
   fetchBlocks,
   fetchBlocksStats,
@@ -112,5 +117,6 @@ export default {
   fetchTxStat,
   fetchDelegators,
   fetchDrafts,
-  fetchDraft
+  fetchDraft,
+  fetchStorages,
 }

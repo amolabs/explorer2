@@ -28,6 +28,7 @@ import {RootState} from "./reducer"
 import Blocks from "./pages/Blocks"
 import Inspect from "./pages/Inspect"
 import Validators from "./pages/Validators"
+import Storages from "./pages/Storages"
 import Footer from "./component/Footer"
 
 const useStyles = makeStyles((theme) => ({
@@ -77,7 +78,11 @@ const routers: RouteProps[] = [
   {
     path: '/:chainId/validators',
     component: Validators
-  }
+  },
+  {
+    path: '/:chainId/storages',
+    component: Storages
+  },
 ]
 
 const urls = routers.map((r) => (r.path as string).replace(/\/:chainId\/?/, '/'))
@@ -88,6 +93,7 @@ const tabList = [
   'blocks',
   'transactions',
   'validators',
+  'storages',
 ]
 
 const supportedNetworks = [
