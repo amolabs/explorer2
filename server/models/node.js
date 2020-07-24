@@ -24,11 +24,12 @@ async function getOne(chain_id, node_id, from, to) {
       var result = rows[0];
 
       // another query to get values for calculating uptime
-      query_str = "SELECT `node_id`, COUNT(`timestamp`) `count` \
+      query_str = "SELECT `node_id`, \
+        SUM(CASE WHEN `online` = 1 THEN 1 ELSE 0 END)/COUNT(*)*100 `uptime`\
         FROM `node_history` \
-        WHERE (`chain_id` = ? OR `chain_id` = 'ghost_chain_id') \
-        AND (`node_id` = ? OR node_id = 'ghost_node_id') \
-        AND `timestamp` BETWEEN ? AND ?";
+        WHERE `chain_id` = ? AND `node_id` = ? \
+        AND `timestamp` BETWEEN ? AND ? \
+        GROUP BY `node_id`";
       query_var = [chain_id, node_id, from, to];
       db.query(query_str, query_var, function(err, rows, fields) {
         if(err) {
@@ -37,9 +38,7 @@ async function getOne(chain_id, node_id, from, to) {
         if(rows.length == 0) {
           return reject('not found');
         }
-        total_count = rows[rows.length-1].count;
-        target_count = rows[0].count;
-        result.uptime = target_count/total_count*100;
+        result.uptime = rows[0].uptime;
         resolve(result);
       });
     });
@@ -70,32 +69,23 @@ async function getList(chain_id, from, to) {
       var result = rows;
 
       // another query to get values for calculating uptime
-      query_str = "SELECT `node_id`, COUNT(`timestamp`) `count` \
+      query_str = "SELECT `node_id`, \
+        SUM(CASE WHEN `online` = 1 THEN 1 ELSE 0 END)/COUNT(*)*100 `uptime`\
         FROM `node_history` \
-        WHERE (`chain_id` = ? OR `chain_id` = 'ghost_chain_id') \
-        AND `timestamp` BETWEEN ? AND ? \
-        GROUP BY `node_id` \
-        ORDER BY `node_id`";
+        WHERE `chain_id` = ? AND `timestamp` BETWEEN ? AND ? \
+        GROUP BY `node_id` ORDER BY `node_id`";
       query_var = [chain_id, from, to];
       db.query(query_str, query_var, function(err, rows, fields) {
         if(err) {
           return reject(err);
         }
-        if(rows.length > 0) {
-          // NOTE: since the query result is sorted by node_id, and the
-          // 'ghost_node_id' is to be considered lexically larger than any
-          // proper hex-encoded node ids, rows[rows.length-1] shall be the
-          // ghost node. So, ghost node id is to be changed somehow, one need
-          // to devise another method to figure out total_count
-          total_count = rows[rows.length-1].count;
-          for (i=0; i<rows.length-1; i++) {
-            if (result[i].node_id == rows[i].node_id) {
-              target_count = rows[i].count;
-              result[i].uptime = target_count/total_count*100;
-            }
+        if(rows.length == 0) {
+          return resolve(rows)
+        }
+        for (i=0; i<rows.length; i++) {
+          if (result[i].node_id == rows[i].node_id) {
+            result[i].uptime = rows[i].uptime;
           }
-        } else {
-          // no history within range(from, to) to calculate uptime
         }
         resolve(result);
       });
