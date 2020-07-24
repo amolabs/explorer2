@@ -1,8 +1,10 @@
 import React, {useEffect, useState} from 'react'
 import {Link, useParams} from 'react-router-dom'
 import {useUpdateState} from "../../reducer"
-import ExplorerAPI, {DelegateItem} from "../../ExplorerAPI"
+import ExplorerAPI from "../../ExplorerAPI"
 import InformationCard from "../../component/InformationCard"
+import {useDispatch} from "react-redux"
+import {replace} from "connected-react-router"
 import {AMO, displayAddress, displayMono} from "../../util"
 //import CollapseTable from "../../component/CollapseTable"
 
@@ -51,6 +53,7 @@ const columns = [
 ]
 
 const Storage = () => {
+  const dispatch = useDispatch()
   const {storage_id} = useParams()
   const {chainId, updated} = useUpdateState()
   const [storage, setStorage] = useState<StorageInfo>({
@@ -70,6 +73,9 @@ const Storage = () => {
       .then(({data}) => {
         setStorage(data)
         setLoading(false)
+      })
+      .catch(() => {
+        dispatch(replace(`/${chainId}/inspect/404`, {type: 'STORAGE', search: storage_id}))
       })
   }, [chainId, storage_id, updated])
 
