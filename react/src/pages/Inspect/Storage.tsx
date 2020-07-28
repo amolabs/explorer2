@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react'
-import {Link, useParams} from 'react-router-dom'
+import {useParams} from 'react-router-dom'
 import {useUpdateState} from "../../reducer"
 import ExplorerAPI from "../../ExplorerAPI"
 import InformationCard from "../../component/InformationCard"
@@ -12,22 +12,12 @@ const columns = [
   {
     key: 'storage_id',
     header: 'ID',
-    format: (storage_id: string, chainId: string) => {
-      return (
-        <code>{storage_id}</code>
-      )
-    }
+    format: displayMono
   },
   {
     key: 'owner',
     header: 'Owner',
-    format: (owner: string, chainId: string) => {
-      return (
-        <Link to={`/${chainId}/inspect/account/${owner}`}>
-          <code>{owner}</code>
-        </Link>
-      )
-    }
+    format: displayAddress
   },
   {
     key: 'registration_fee',
@@ -77,7 +67,7 @@ const Storage = () => {
       .catch(() => {
         dispatch(replace(`/${chainId}/inspect/404`, {type: 'STORAGE', search: storage_id}))
       })
-  }, [chainId, storage_id, updated])
+  }, [dispatch, chainId, storage_id, updated])
 
   return (
     <>
