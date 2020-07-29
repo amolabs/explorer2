@@ -96,8 +96,8 @@ class Nodes:
 
     def _get_neighbors(self, addr):
         try:
-            if self.verbose: print(f'collecting neighbors from {addr}')
-            else: print('*', end='', flush=True)
+            if self.verbose:
+                print('*', end='', flush=True)
             res = r.get(url=f'http://{addr}/net_info', timeout=DEFAULT_REQUEST_TIMEOUT)
             peers = json.loads(res.text)['result']['peers']
             ps = []
@@ -119,6 +119,9 @@ class Nodes:
         cands += list(self.known.keys())
 
         for t in self.targets:
+            if t.startswith('http://'):
+                t = t.split('http://')[1]
+
             host, port = t.split(':')
             ip = socket.gethostbyname(host)
             cands.append(f'{ip}:{port}')
@@ -135,6 +138,8 @@ class Nodes:
                     cands.append(n)
 
         if not self.verbose:
+            self.print_log(f'collected {len(self.known)} target nodes')
+        else:
             print(' done')
 
     def _expand_node(self, node):
@@ -171,14 +176,15 @@ class Nodes:
 
     async def _peek_node(self, addr):
         try:
-            if self.verbose: print(f'collecting information from {addr}')
-            else: print('.', end='', flush=True)
+            if self.verbose:
+                print('.', end='', flush=True)
             f = functools.partial(r.get, url=f'http://{addr}/status', timeout=DEFAULT_REQUEST_TIMEOUT)
             res = await self.loop.run_in_executor(None, f)
             node = json.loads(res.text)['result']
             node['elapsed'] = res.elapsed.total_seconds()
         except Exception:
-            if self.verbose: print(f'{addr} is unreachable')
+            if not self.verbose:
+                self.print_log(f'{addr} is unreachable')
             return {}
         return node
 
@@ -212,6 +218,8 @@ class Nodes:
         await asyncio.gather(*self.futures)
 
         if not self.verbose:
+            self.print_log(f'collected information from {len(self.nodes)} nodes')
+        else:
             print(' done')
         
 
