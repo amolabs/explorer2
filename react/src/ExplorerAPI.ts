@@ -112,10 +112,10 @@ const fetchStorage = (chainId: string, storageId: number): Result<StorageInfo> =
 }
 
 const fetchAccountIncentives = (
-  chainId: string, address: string, from: number, num: number):
+  chainId: string, address: string, top: number, from: number, num: number):
     Result<Incentive[]> => {
   return client
-    .get(`chain/${chainId}/accounts/${address}/incentives?from=${from}&num=${num}`)
+    .get(`chain/${chainId}/accounts/${address}/incentives?top=${top}&from=${from}&num=${num}`)
 }
 
 export default {

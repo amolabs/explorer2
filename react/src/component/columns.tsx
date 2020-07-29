@@ -97,3 +97,54 @@ export const incentiveColumns = [
     }
   },
 ]
+
+export const txColumns2 = [
+  {
+    key: 'height',
+    label: 'Height',
+    format: (height: number, chainId: string) => {
+      return (
+        <Link to={`/${chainId}/inspect/block/${height}`}>
+          {height}
+        </Link>
+      )
+    }
+  },
+  {
+    key: 'index',
+    label: 'Index',
+  },
+  {
+    key: 'hash',
+    label: 'Hash',
+    style: {flexGrow: 8},
+    format: (hash: string, chainId: string) => {
+      return (
+        <Link to={`/${chainId}/inspect/tx/${hash}`}>
+          <code>{hash}</code>
+        </Link>
+      )
+    }
+  },
+  {
+    key: 'sender',
+    label: 'Sender',
+    style: {flexGrow: 8},
+    format: displayAddress,
+  },
+  {
+    key: 'type',
+    label: 'Type',
+  },
+  {
+    key: 'fee',
+    label: 'Tx Fee',
+    format: displayAMO
+  },
+  {
+    key: 'info',
+    label: 'Result',
+    style: {flexGrow: 2},
+    format: displayResult
+  }
+]

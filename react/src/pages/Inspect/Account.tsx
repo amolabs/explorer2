@@ -1,17 +1,16 @@
-import React, {useCallback, useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import InformationCard from "../../component/InformationCard"
 import ExplorerAPI from "../../ExplorerAPI"
 import {useParams} from 'react-router-dom'
 import {displayAMOLong} from "../../util"
 import {TransactionSchema} from "../../reducer/blockchain"
 import {AxiosError} from "axios"
-import InfinityTable from "../../component/InfinityTable"
-import {txColumns, incentiveColumns} from "../../component/columns"
-import useScrollUpdate from "../../hooks/useScrollUpdate"
+import {txColumns2, incentiveColumns} from "../../component/columns"
 import {useDispatch} from "react-redux"
 import {replace} from "connected-react-router"
 import {Tabs, Tab, Container} from "@material-ui/core"
-import useEnsureNetwork from "../../hooks/useEnsureNetwork"
+import InfiniteTable from "../../component/InfiniteTable"
+import {useChainId} from "../../reducer"
 
 const infoColumns = [
   {
@@ -41,6 +40,7 @@ const infoColumns = [
 ]
 
 const Account = () => {
+  const chainId = useChainId()
   const {address} = useParams()
 
   const [account, setAccount] = useState<AccountInfo>({
@@ -54,8 +54,9 @@ const Account = () => {
     val_power: '0',
     val_pubkey: ''
   })
+  const [txs, setTxs] = useState<TransactionSchema[]>([])
+  const [incentives, setIncentives] = useState<Incentive[]>([])
   const [statLoading, setStatLoading] = useState(true)
-  const [ref, setRef] = useState<HTMLDivElement | undefined>(undefined)
   const [tab, setTab] = useState<number>(0)
   const dispatch = useDispatch()
 
@@ -63,44 +64,41 @@ const Account = () => {
     setTab(newValue)
   }
 
-  const fetchAccount = useCallback((chainId: string) => {
+  useEffect(() => {
+    if (chainId && address) {
+      ExplorerAPI
+        .fetchAccount(chainId, address as string)
+        .then(({data}) => {
+          setAccount(data)
+          setTxs([])
+          setStatLoading(false)
+        })
+        .catch((e: AxiosError) => {
+          dispatch(replace(`/${chainId}/inspect/404`, {type: 'ACCOUNT', search: address}))
+          setStatLoading(false)
+        })
+    }
+  }, [chainId, address, dispatch])
+
+  const fetchAccountTransactions = async (from: number, num: number) => {
     ExplorerAPI
-      .fetchAccount(chainId, address as string)
+      .fetchAccountTransactions(chainId, address, 0, from, num)
       .then(({data}) => {
-        setAccount(data)
-        setStatLoading(false)
+        setTxs(txs.concat(data))
       })
-      .catch((e: AxiosError) => {
-        dispatch(replace(`/${chainId}/inspect/404`, {type: 'ACCOUNT', search: address}))
-        setStatLoading(false)
+  }
+
+  const fetchAccountIncentives = async (from: number, num: number) => {
+    ExplorerAPI
+      .fetchAccountIncentives(chainId, address, 0, from, num)
+      .then(({data}) => {
+        setIncentives(incentives.concat(data))
       })
-  }, [address, dispatch])
-  useEnsureNetwork(fetchAccount)
-
-  const fetchAccountTransactions = useCallback(async (size: number, fixedHeight: number, chainId: string) => {
-    if (fixedHeight !== -1) {
-      const {data} = await ExplorerAPI.fetchAccountTransactions(chainId, address as string, fixedHeight, size)
-      return data
-    }
-    return null
-  }, [address])
-  const [txList, loading, onTxScroll] = useScrollUpdate<TransactionSchema>(fetchAccountTransactions, ref)
-
-  const fetchAccountIncentives = useCallback(
-    async (size: number, fixedHeight: number, chainId: string) => {
-    if (fixedHeight !== -1) {
-      const {data} = await ExplorerAPI.fetchAccountIncentives(
-        chainId, address, fixedHeight, size)
-      return data
-    }
-    return null
-  }, [address])
-  const [incentiveList, incLoading, onIncScroll] = useScrollUpdate<Incentive>(fetchAccountIncentives, ref)
+  }
 
   return (
     <>
       <InformationCard
-        setRef={setRef}
         title="Account information"
         columns={infoColumns}
         data={account}
@@ -116,21 +114,17 @@ const Account = () => {
       </Container>
       <Container style={{padding:"0 8px"}}>
         <div hidden={tab !== 0}>
-          <InfinityTable
-            onScroll={onTxScroll}
-            columns={txColumns}
-            rowKey="hash"
-            data={txList}
-            loading={loading}
+          <InfiniteTable
+            rows={txs}
+            columns={txColumns2}
+            loadMoreRows={fetchAccountTransactions}
           />
         </div>
         <div hidden={tab !== 1}>
-          <InfinityTable
-            onScroll={onIncScroll}
+          <InfiniteTable
+            rows={incentives}
             columns={incentiveColumns}
-            rowKey="hash"
-            data={incentiveList}
-            loading={incLoading}
+            loadMoreRows={fetchAccountIncentives}
           />
         </div>
       </Container>
