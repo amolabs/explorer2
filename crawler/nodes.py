@@ -11,7 +11,7 @@ import sys
 import functools
 import asyncio
 import signal  # for main
-from time import time
+import time
 from datetime import datetime
 from datetime import timezone
 from dateutil.parser import parse as dateparse
@@ -24,7 +24,8 @@ from filelock import FileLock, Timeout
 import dbproxy
 
 DEFAULT_REQUEST_TIMEOUT = 5 
-DEFAULT_REFRESH_INTERVAL = 10
+DEFAULT_REFRESH_INTERVAL = 60 * 60 # seconds
+DEFAULT_COLLECT_INTERVAL = 10 # seconds
 DEFAULT_RPC_PORT = 26657
 
 class Nodes:
@@ -42,9 +43,8 @@ class Nodes:
         self.loop = None
         self.futures = []
 
-        if chain_id is None:
-            raise ArgError('no chain_id is given.')
-        self.chain_id = chain_id
+        if chain_id is not None:
+            self.chain_id = chain_id
 
         if targets is not None:
             self.targets = targets
@@ -319,17 +319,21 @@ if __name__ == '__main__':
                    help="seed targets to crawl",
                    type=str,
                    nargs='+')
+    p.add_argument("-rit",
+                   "--refresh_interval",
+                   help="interval between refreshes",
+                   type=int,
+                   default=DEFAULT_REFRESH_INTERVAL)
+    p.add_argument("-cit",
+                   "--collect_interval",
+                   help="interval between collects",
+                   type=int,
+                   default=DEFAULT_COLLECT_INTERVAL)
     p.add_argument("-v",
                    "--verbose",
                    help="verbose output",
                    default=False,
                    dest='verbose',
-                   action='store_true')
-    p.add_argument("-f",
-                   "--force",
-                   help="force-run even if there is a lock",
-                   default=False,
-                   dest='force',
                    action='store_true')
     p.add_argument("-d",
                    "--dry-run",
@@ -341,7 +345,10 @@ if __name__ == '__main__':
     args = p.parse_args()
 
     try:
-        nodes = Nodes(chain_id=args.chain_id, targets=args.targets, verbose=args.verbose, dry=args.dry) 
+        nodes = Nodes(chain_id=args.chain_id,
+                      targets=args.targets,
+                      verbose=args.verbose,
+                      dry=args.dry)
     except ArgError as err:
         print(err)
         sys.exit(-1)
@@ -350,15 +357,20 @@ if __name__ == '__main__':
         signal.signal(signal.SIGTERM, handle)
         refresh_interval = 0 
         while True:
-            tt = time()
-            if refresh_interval == 0:
+            tt = time.time()
+            if refresh_interval <= 0:
                 nodes.refresh()
-                refresh_interval = DEFAULT_REFRESH_INTERVAL
+                refresh_interval = args.refresh_interval 
             nodes.collect()
             nodes.update()
             nodes.print_nodes()
-            nodes.print_log(f'{time() - tt} s')
-            refresh_interval -= 1
+            tt = time.time() - tt
+            nodes.print_log(f'elapsed {tt} s')
+            refresh_interval -= tt 
+            collect_interval = args.collect_interval - tt
+            if collect_interval > 0:
+                nodes.print_log(f'wait {collect_interval} s')
+                time.sleep(collect_interval)
     except KeyboardInterrupt:
         nodes.print_log('interrupted. closing nodes')
         nodes.close()
