@@ -22,7 +22,8 @@ from filelock import FileLock, Timeout
 
 import dbproxy
 
-REQUEST_TIMEOUT = 5 
+DEFAULT_REQUEST_TIMEOUT = 5 
+DEFAULT_REFRESH_INTERVAL = 10
 DEFAULT_RPC_PORT = 26657
 
 class Nodes:
@@ -89,8 +90,8 @@ class Nodes:
     def _get_neighbors(self, addr):
         try:
             if self.verbose: print(f'collecting neighbors from {addr}')
-            else: print('.', end='', flush=True)
-            res = r.get(url=f'http://{addr}/net_info', timeout=REQUEST_TIMEOUT)
+            else: print('*', end='', flush=True)
+            res = r.get(url=f'http://{addr}/net_info', timeout=DEFAULT_REQUEST_TIMEOUT)
             peers = json.loads(res.text)['result']['peers']
             ps = []
             for p in peers:
@@ -106,7 +107,7 @@ class Nodes:
         return ps
 
 
-    def prepare(self):
+    def refresh(self):
         cands = []
         cands += list(self.known.keys())
 
@@ -125,6 +126,9 @@ class Nodes:
             for n in peers:
                 if n not in self.known and n not in cands:
                     cands.append(n)
+
+        if not self.verbose:
+            print(' done')
 
     def _expand_node(self, node):
         tcp_addr = node['node_info']['listen_addr'].split('tcp://')[1]
@@ -162,7 +166,7 @@ class Nodes:
         try:
             if self.verbose: print(f'collecting information from {addr}')
             else: print('.', end='', flush=True)
-            f = functools.partial(r.get, url=f'http://{addr}/status', timeout=REQUEST_TIMEOUT)
+            f = functools.partial(r.get, url=f'http://{addr}/status', timeout=DEFAULT_REQUEST_TIMEOUT)
             res = await self.loop.run_in_executor(None, f)
             node = json.loads(res.text)['result']
             node['elapsed'] = res.elapsed.total_seconds()
@@ -279,7 +283,6 @@ class Nodes:
 
 
     def close(self):
-        #self.loop.stop()
         try:
             if self.db is not None:
                 self.db.close()
@@ -330,13 +333,17 @@ if __name__ == '__main__':
 
     try:
         signal.signal(signal.SIGTERM, handle)
-        nodes.prepare()
+        refresh_interval = 0 
         while True:
             tt = time()
+            if refresh_interval == 0:
+                nodes.refresh()
+                refresh_interval = DEFAULT_REFRESH_INTERVAL
             nodes.collect()
             nodes.update()
             nodes.print_nodes()
             nodes.print_log(f'{time() - tt} s')
+            refresh_interval -= 1
     except KeyboardInterrupt:
         nodes.print_log('interrupted. closing nodes')
         nodes.close()
