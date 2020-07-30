@@ -111,6 +111,13 @@ const fetchStorage = (chainId: string, storageId: number): Result<StorageInfo> =
     .get(`chain/${chainId}/storages/${storageId}`)
 }
 
+const fetchAccountIncentives = (
+  chainId: string, address: string, from: number, num: number):
+    Result<Incentive[]> => {
+  return client
+    .get(`chain/${chainId}/accounts/${address}/incentives?from=${from}&num=${num}`)
+}
+
 export default {
   fetchNetworks,
   fetchBlocks,
@@ -131,4 +138,5 @@ export default {
   fetchDraft,
   fetchStorages,
   fetchStorage,
+  fetchAccountIncentives,
 }
