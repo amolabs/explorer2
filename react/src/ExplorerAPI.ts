@@ -66,7 +66,7 @@ const fetchDelegators = (chainId: string, address: string, from: number, size: n
     .get(`/chain/${chainId}/validators/${address}/delegators`)
 }
 
-const fetchAccount = (chainId: string, address: string): Result<AccountSchema> => {
+const fetchAccount = (chainId: string, address: string): Result<AccountInfo> => {
   return client
     .get(`/chain/${chainId}/accounts/${address}`)
 }
