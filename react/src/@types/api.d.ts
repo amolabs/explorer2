@@ -1,3 +1,7 @@
+type Network = {
+  chain_id: string,
+}
+
 type AccountSchema = {
   chain_id: string,
   address: string,
@@ -76,6 +80,16 @@ type NodeInfo = {
   elapsed: number,
   timestamp: string,
   uptime: number,
+}
+
+type StorageInfo = {
+  chain_id: string,
+  storage_id: number,
+  url: string,
+  registration_fee: string,
+  hosting_fee: string,
+  owner: string,
+  active: boolean,
 }
 
 // https://github.com/amolabs/docs/blob/master/protocol.md#top-level-data
