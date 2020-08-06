@@ -125,6 +125,11 @@ const fetchAccountPenalties = (
     .get(`chain/${chainId}/penalties/${address}?from=${from}&num=${num}`)
 }
 
+const fetchNodes = (chainId: string, range: number = 3600, from: number = 0, num: number = 20): Result<NodeInfo[]> => {
+  return client
+    .get(`/chain/${chainId}/nodes?range=${range}&from=${from}&num=${num}`)
+}
+
 export default {
   fetchNetworks,
   fetchBlocks,
@@ -147,4 +152,5 @@ export default {
   fetchStorage,
   fetchAccountIncentives,
   fetchAccountPenalties,
+  fetchNodes,
 }
