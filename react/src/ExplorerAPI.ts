@@ -111,9 +111,9 @@ const fetchStorage = (chainId: string, storageId: number): Result<StorageInfo> =
     .get(`chain/${chainId}/storages/${storageId}`)
 }
 
-const fetchNodes = (chainId: string, range: number = 60, from: number = 0, num: number = 20): Result<NodeInfo[]> => {
+const fetchNodes = (chainId: string, range: number = 3600, from: number = 0, num: number = 20): Result<NodeInfo[]> => {
   return client
-    .get(`/chain/${chainId}/nodes?from=${from}&num=${num}`)
+    .get(`/chain/${chainId}/nodes?range=${range}&from=${from}&num=${num}`)
 }
 
 export default {
