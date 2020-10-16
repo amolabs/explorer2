@@ -35,7 +35,10 @@ CREATE TABLE `c_blocks` (
   `events_begin` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '[]',
   `events_end` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '[]' CHECK (json_valid(`events_end`)),
   PRIMARY KEY (`chain_id`,`height`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+PARTITION BY RANGE (height) (
+  PARTITION c_blocks_p0 VALUES LESS THAN MAXVALUE
+);
 
 
 -- explorer.c_genesis definition
@@ -95,7 +98,7 @@ CREATE TABLE `s_incentives` (
   `address` char(40) NOT NULL,
   `amount` char(40) NOT NULL DEFAULT '0',
   PRIMARY KEY (`chain_id`,`height`,`address`),
-  CONSTRAINT `inc_block_FK` FOREIGN KEY (`chain_id`, `height`) REFERENCES `c_blocks` (`chain_id`, `height`),
+  KEY `inc_block_FK` (`chain_id`, `height`) USING BTREE,
   CONSTRAINT `inc_account_FK` FOREIGN KEY (`chain_id`, `address`) REFERENCES `s_accounts` (`chain_id`, `address`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -108,7 +111,7 @@ CREATE TABLE `s_penalties` (
   `address` char(40) NOT NULL,
   `amount` char(40) NOT NULL DEFAULT '0',
   PRIMARY KEY (`chain_id`,`height`,`address`),
-  CONSTRAINT `pen_block_FK` FOREIGN KEY (`chain_id`, `height`) REFERENCES `c_blocks` (`chain_id`, `height`),
+  KEY `pen_block_FK` (`chain_id`, `height`) USING BTREE,
   CONSTRAINT `pen_account_FK` FOREIGN KEY (`chain_id`, `address`) REFERENCES `s_accounts` (`chain_id`, `address`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -131,9 +134,11 @@ CREATE TABLE `c_txs` (
   `events` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '[]' CHECK (json_valid(`events`)),
   PRIMARY KEY (`chain_id`,`height`,`index`),
   KEY `txs_hash` (`chain_id`,`hash`) USING BTREE,
-  KEY `txs_sender` (`chain_id`,`sender`) USING BTREE,
-  CONSTRAINT `block_FK` FOREIGN KEY (`chain_id`, `height`) REFERENCES `c_blocks` (`chain_id`, `height`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  KEY `txs_sender` (`chain_id`,`sender`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+PARTITION BY RANGE (height) (
+  PARTITION c_txs_p0 VALUES LESS THAN MAXVALUE
+);
 
 
 -- explorer.r_account_block definition
@@ -145,10 +150,9 @@ CREATE TABLE `r_account_block` (
   `height` int(11) NOT NULL,
   `amount` char(40) NOT NULL DEFAULT '0',
   PRIMARY KEY (`seq`),
-  KEY `r_account_block_FK` (`chain_id`,`address`),
-  KEY `r_account_block_FK_1` (`chain_id`,`height`),
-  CONSTRAINT `r_account_block_FK` FOREIGN KEY (`chain_id`, `address`) REFERENCES `s_accounts` (`chain_id`, `address`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `r_account_block_FK_1` FOREIGN KEY (`chain_id`, `height`) REFERENCES `c_blocks` (`chain_id`, `height`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `r_account_block_FK` (`chain_id`,`address`) USING BTREE,
+  KEY `r_account_block_FK_1` (`chain_id`,`height`) USING BTREE,
+  CONSTRAINT `r_account_block_FK` FOREIGN KEY (`chain_id`, `address`) REFERENCES `s_accounts` (`chain_id`, `address`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=1109313 DEFAULT CHARSET=utf8mb4;
 
 
@@ -162,10 +166,9 @@ CREATE TABLE `r_account_tx` (
   `index` int(11) NOT NULL,
   `amount` char(40) NOT NULL DEFAULT '0',
   PRIMARY KEY (`seq`),
-  KEY `r_account_tx_FK` (`chain_id`,`address`),
-  KEY `r_account_tx_FK_1` (`chain_id`,`height`,`index`),
-  CONSTRAINT `r_account_tx_FK` FOREIGN KEY (`chain_id`, `address`) REFERENCES `s_accounts` (`chain_id`, `address`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `r_account_tx_FK_1` FOREIGN KEY (`chain_id`, `height`, `index`) REFERENCES `c_txs` (`chain_id`, `height`, `index`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `r_account_tx_FK` (`chain_id`,`address`) USING BTREE,
+  KEY `r_account_tx_FK_1` (`chain_id`,`height`,`index`) USING BTREE,
+  CONSTRAINT `r_account_tx_FK` FOREIGN KEY (`chain_id`, `address`) REFERENCES `s_accounts` (`chain_id`, `address`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=6453 DEFAULT CHARSET=utf8mb4;
 
 
@@ -204,7 +207,7 @@ CREATE TABLE `s_storages` (
   `owner` char(40) NOT NULL DEFAULT '',
   `active` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`chain_id`,`storage_id`),
-  KEY `s_storages_FK` (`chain_id`,`owner`),
+  KEY `s_storages_FK` (`chain_id`,`owner`) USING BTREE,
   CONSTRAINT `s_storages_FK` FOREIGN KEY (`chain_id`, `owner`) REFERENCES `s_accounts` (`chain_id`, `address`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -249,10 +252,8 @@ CREATE TABLE `s_parcels` (
   `extra` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '{}' CHECK (json_valid(`extra`)),
   `on_sale` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`chain_id`,`parcel_id`),
-  KEY `s_parcels_FK` (`chain_id`,`storage_id`),
-  KEY `s_parcels_FK_1` (`chain_id`,`owner`),
-  CONSTRAINT `s_parcels_FK` FOREIGN KEY (`chain_id`, `storage_id`) REFERENCES `s_storages` (`chain_id`, `storage_id`),
-  CONSTRAINT `s_parcels_FK_1` FOREIGN KEY (`chain_id`, `owner`) REFERENCES `s_accounts` (`chain_id`, `address`)
+  KEY `s_parcels_FK` (`chain_id`,`storage_id`) USING BTREE,
+  KEY `s_parcels_FK_1` (`chain_id`,`owner`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
 PARTITION BY KEY()
 PARTITIONS 10;
@@ -269,8 +270,8 @@ CREATE TABLE `s_requests` (
   `dealer_fee` char(40) NOT NULL DEFAULT '0',
   `extra` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '{}' CHECK (json_valid(`extra`)),
   PRIMARY KEY (`chain_id`,`parcel_id`,`buyer`),
-  KEY `s_requests_FK_1` (`chain_id`,`buyer`),
-  CONSTRAINT `s_requests_FK` FOREIGN KEY (`chain_id`, `parcel_id`) REFERENCES `s_parcels` (`chain_id`, `parcel_id`),
+  KEY `s_requests_FK_1` (`chain_id`,`buyer`) USING BTREE,
+  KEY `s_requests_FK` (`chain_id`, `parcel_id`) USING BTREE,
   CONSTRAINT `s_requests_FK_1` FOREIGN KEY (`chain_id`, `buyer`) REFERENCES `s_accounts` (`chain_id`, `address`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -285,8 +286,8 @@ CREATE TABLE `s_usages` (
   `extra` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '{}',
   PRIMARY KEY (`chain_id`,`parcel_id`,`grantee`),
   KEY `s_requests_FK_1` (`chain_id`,`grantee`) USING BTREE,
-  CONSTRAINT `s_requests_FK_1_copy` FOREIGN KEY (`chain_id`, `grantee`) REFERENCES `s_accounts` (`chain_id`, `address`),
-  CONSTRAINT `s_requests_FK_copy` FOREIGN KEY (`chain_id`, `parcel_id`) REFERENCES `s_parcels` (`chain_id`, `parcel_id`)
+  KEY `s_requests_FK` (`chain_id`, `parcel_id`) USING BTREE,
+  CONSTRAINT `s_requests_FK_1_copy` FOREIGN KEY (`chain_id`, `grantee`) REFERENCES `s_accounts` (`chain_id`, `address`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- explorer.nodes definition (insert, update)
@@ -327,8 +328,6 @@ CREATE TABLE `r_parcel_tx` (
   `height` int(11) NOT NULL,
   `index` int(11) NOT NULL,
   PRIMARY KEY (`seq`),
-  KEY `r_parcel_tx_FK` (`chain_id`,`parcel_id`),
-  KEY `r_parcel_tx_FK_1` (`chain_id`,`height`,`index`),
-  CONSTRAINT `r_parcel_tx_FK` FOREIGN KEY (`chain_id`, `parcel_id`) REFERENCES `s_parcels` (`chain_id`, `parcel_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `r_parcel_tx_FK_1` FOREIGN KEY (`chain_id`, `height`, `index`) REFERENCES `c_txs` (`chain_id`, `height`, `index`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `r_parcel_tx_FK` (`chain_id`,`parcel_id`) USING BTREE,
+  KEY `r_parcel_tx_FK_1` (`chain_id`,`height`,`index`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
