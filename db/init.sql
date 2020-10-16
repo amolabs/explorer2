@@ -253,7 +253,9 @@ CREATE TABLE `s_parcels` (
   KEY `s_parcels_FK_1` (`chain_id`,`owner`),
   CONSTRAINT `s_parcels_FK` FOREIGN KEY (`chain_id`, `storage_id`) REFERENCES `s_storages` (`chain_id`, `storage_id`),
   CONSTRAINT `s_parcels_FK_1` FOREIGN KEY (`chain_id`, `owner`) REFERENCES `s_accounts` (`chain_id`, `address`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+PARTITION BY KEY()
+PARTITIONS 10;
 
 
 -- explorer.s_requests definition
