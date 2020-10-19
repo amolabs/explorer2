@@ -37,7 +37,7 @@ CREATE TABLE `c_blocks` (
   PRIMARY KEY (`chain_id`,`height`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
 PARTITION BY RANGE (height) (
-  PARTITION c_blocks_p0 VALUES LESS THAN MAXVALUE
+  PARTITION c_blocks_p_future VALUES LESS THAN MAXVALUE
 );
 
 
@@ -137,7 +137,7 @@ CREATE TABLE `c_txs` (
   KEY `txs_sender` (`chain_id`,`sender`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
 PARTITION BY RANGE (height) (
-  PARTITION c_txs_p0 VALUES LESS THAN MAXVALUE
+  PARTITION c_txs_p_future VALUES LESS THAN MAXVALUE
 );
 
 

@@ -12,6 +12,7 @@ import tx
 import stats
 import models
 
+PARTITION_SIZE = 1000000
 
 class Block:
     """form a block"""
@@ -242,6 +243,27 @@ class Block:
     def save(self, cursor):
         dt = self.time.astimezone(tz=timezone.utc)
         self.time = dt.replace(tzinfo=None).isoformat()
+
+        if self.height % PARTITION_SIZE == 0:
+            # update table partitioning: c_blocks, c_txs
+            p_index = self.height / PARTITION_SIZE - 1 
+            cursor.execute(
+                f"""
+                ALTER TABLE `c_blocks` REORGANIZE PARTITION `c_blocks_p_future` (
+                    PARTITION `c_blocks_p_{p_index}` VALUES LESS THAN {self.height}
+                    PARTITION `c_blocks_p_future` VALUES LESS THAN MAXVALUE
+                )
+                """
+            )
+            cursor.execute(
+                f"""
+                ALTER TABLE `c_txs` REORGANIZE PARTITION `c_txs_p_future` (
+                    PARTITION `c_txs_p_{p_index}` VALUES LESS THAN {self.height}
+                    PARTITION `c_txs_p_future` VALUES LESS THAN MAXVALUE
+                )
+                """
+            )
+
         self.interval = 0
         if self.height <= 2:
             self.interval = 0
