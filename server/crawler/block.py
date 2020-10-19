@@ -246,19 +246,19 @@ class Block:
 
         if self.height % PARTITION_SIZE == 0:
             # update table partitioning: c_blocks, c_txs
-            p_index = self.height / PARTITION_SIZE - 1 
+            p_index = int(self.height / PARTITION_SIZE) - 1 
             cursor.execute(
                 f"""
-                ALTER TABLE `c_blocks` REORGANIZE PARTITION `c_blocks_p_future` (
-                    PARTITION `c_blocks_p_{p_index}` VALUES LESS THAN {self.height}
+                ALTER TABLE `c_blocks` REORGANIZE PARTITION `c_blocks_p_future` INTO (
+                    PARTITION `c_blocks_p_{p_index}` VALUES LESS THAN ({self.height}),
                     PARTITION `c_blocks_p_future` VALUES LESS THAN MAXVALUE
                 )
                 """
             )
             cursor.execute(
                 f"""
-                ALTER TABLE `c_txs` REORGANIZE PARTITION `c_txs_p_future` (
-                    PARTITION `c_txs_p_{p_index}` VALUES LESS THAN {self.height}
+                ALTER TABLE `c_txs` REORGANIZE PARTITION `c_txs_p_future` INTO (
+                    PARTITION `c_txs_p_{p_index}` VALUES LESS THAN ({self.height}),
                     PARTITION `c_txs_p_future` VALUES LESS THAN MAXVALUE
                 )
                 """
