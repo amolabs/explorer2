@@ -5,6 +5,6 @@ if [ -z "$CHAIN_ID" ]; then
     exit 1
 fi
 
-echo "chain id         = $CHAIN_ID"
+echo "chain id = $CHAIN_ID"
 
-./builder.py --chain $CHAIN_ID --limit 0
+/app/builder.py --chain $CHAIN_ID --limit 0

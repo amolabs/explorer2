@@ -2,7 +2,7 @@
 
 version: '3.8'
 services:
-  amo-exp-db:
+  db:
     image: mariadb:10.5.4-focal
     restart: always
     environment:
@@ -14,33 +14,61 @@ services:
       - data-volume:/var/lib/mysql
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
 
-  amo-exp-crawler:
-    build: ./server/crawler
+  crawler-collector:
+    build:
+      context: ./server/crawler
+      dockerfile: collector.Dockerfile
     restart: always
     depends_on:
-      - amo-exp-db
+      - db
     environment:
       - NODE_ADDR=http://localhost:26657
+    volumes:
+      - ./db/config.json:/db/config.json
+      - tmp-volume:/var/tmp/
+
+  crawler-builder:
+    build:
+      context: ./server/crawler
+      dockerfile: builder.Dockerfile
+    restart: always
+    depends_on:
+      - db
+    environment:
       - CHAIN_ID=my-chain-id
     volumes:
       - ./db/config.json:/db/config.json
       - tmp-volume:/var/tmp/
 
-  amo-exp-api:
+  crawler-nodes:
+    build:
+      context: ./server/crawler
+      dockerfile: nodes.Dockerfile
+    restart: always
+    depends_on:
+      - db
+    environment:
+      - CHAIN_ID=my-chain-id
+      - TARGET_ADDRS=http://localhost:26657
+    volumes:
+      - ./db/config.json:/db/config.json
+      - tmp-volume:/var/tmp/
+
+  api:
     build: ./server/api
     restart: always
     depends_on:
-      - amo-exp-crawler 
+      - db
     volumes:
       - ./db/config.json:/db/config.json
     ports:
       - "3000:3000"
 
-  amo-exp-web:
+  web:
     build: ./web
     restart: always
     depends_on:
-      - amo-exp-api 
+      - api 
     ports:
       - "5000:5000"
 

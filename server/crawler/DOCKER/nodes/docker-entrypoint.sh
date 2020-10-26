@@ -18,4 +18,4 @@ echo "chain id         = $CHAIN_ID"
 echo "refresh interval = $REFRESH_INTERVAL"
 echo "collect interval = $COLLECT_INTERVAL"
 
-./nodes.py --chain $CHAIN_ID --targets $TARGET_ADDRS -rit $REFRESH_INTERVAL -cit $COLLECT_INTERVAL
+/app/nodes.py --chain $CHAIN_ID --targets $TARGET_ADDRS -rit $REFRESH_INTERVAL -cit $COLLECT_INTERVAL

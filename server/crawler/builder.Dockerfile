@@ -7,7 +7,9 @@ FROM python:3.8.3-alpine3.11
 WORKDIR /app
 
 # copy necessary elements
-COPY * /app/
+COPY builder.py dbproxy.py block.py tx.py models.py stats.py util.py /app/
+COPY DOCKER/builder/requirements.txt /app/
+COPY DOCKER/builder/docker-entrypoint.sh /usr/bin/
 
 # install requirements.txt
 RUN pip3 install -r requirements.txt
@@ -17,4 +19,4 @@ VOLUME /db/config.json
 VOLUME /var/tmp/
 
 # run app
-CMD ["./docker-entrypoint.sh"]
+CMD ["docker-entrypoint.sh"]
