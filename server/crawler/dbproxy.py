@@ -32,16 +32,25 @@ def connect_db():
 
     # connect db
     try:
-        db = mysql.connector.connect(
-            #host=dbconfig['host'],
-            #port=dbconfig.get('port', 3306),
-            unix_socket='/var/run/mysqld/mysqld.sock',
-            buffered=True,
-            use_pure=False,
-            user=dbconfig['user'],
-            password=dbconfig['password'],
-            database=dbconfig['database'],
-        )
+        if 'host' in dbconfig:
+            db = mysql.connector.connect(
+                host=dbconfig['host'],
+                port=dbconfig.get('port', 3306),
+                buffered=True,
+                use_pure=True,
+                user=dbconfig['user'],
+                password=dbconfig['password'],
+                database=dbconfig['database'],
+            )
+        else:
+            db = mysql.connector.connect(
+                unix_socket='/var/run/mysqld/mysqld.sock',
+                buffered=True,
+                use_pure=False,
+                user=dbconfig['user'],
+                password=dbconfig['password'],
+                database=dbconfig['database'],
+            )
     except DBError as e:
         print("DB connection error", e)
         return None

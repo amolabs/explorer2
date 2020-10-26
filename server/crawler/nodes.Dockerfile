@@ -7,7 +7,7 @@ FROM python:3.8.3-alpine3.11
 WORKDIR /app
 
 # copy necessary elements
-COPY nodes.py dbproxy.py /app/
+COPY nodes.py dbproxy.py error.py /app/
 COPY DOCKER/nodes/requirements.txt /app/
 COPY DOCKER/nodes/docker-entrypoint.sh /usr/bin/
 
