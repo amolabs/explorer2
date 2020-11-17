@@ -361,14 +361,18 @@ def tx_cancel(tx, cursor):
 def tx_grant(tx, cursor):
     payload = json.loads(tx.payload)
 
+    grantee = ''
+    if 'grantee' in payload:
+        grantee = payload['grantee']
+    elif 'recipient' in payload:
+        grantee = payload['recipient']
+
     parcel = models.Parcel(tx.chain_id, payload['target'], None, cursor)
     storage = models.Storage(tx.chain_id, parcel.storage_id, None, cursor)
     host = models.Account(tx.chain_id, storage.owner, cursor)
     owner = models.Account(tx.chain_id, parcel.owner, cursor)
-    request = models.Request(tx.chain_id, payload['target'],
-                             payload['grantee'], cursor)
-    usage = models.Usage(tx.chain_id, payload['target'], payload['grantee'],
-                         cursor)
+    request = models.Request(tx.chain_id, payload['target'], grantee, cursor)
+    usage = models.Usage(tx.chain_id, payload['target'], grantee, cursor)
 
     usage.custody = payload['custody']
     usage.extra = json.dumps(payload.get('extra', {}))
@@ -403,8 +407,13 @@ def tx_grant(tx, cursor):
 def tx_revoke(tx, cursor):
     payload = json.loads(tx.payload)
 
-    usage = models.Usage(tx.chain_id, payload['target'], payload['grantee'],
-                         cursor)
+    grantee = ''
+    if 'grantee' in payload:
+        grantee = payload['grantee']
+    elif 'recipient' in payload:
+        grantee = payload['recipient']
+
+    usage = models.Usage(tx.chain_id, payload['target'], grantee, cursor)
 
     usage.delete(cursor)
     # rel = models.RelParcelTx(tx.chain_id, usage.parcel_id, tx.height,
