@@ -37,6 +37,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
+  "proxy": "https://explorer.amolabs.io",
   "eslintConfig": {
     "extends": "react-app"
   },
