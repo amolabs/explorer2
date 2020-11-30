@@ -15,7 +15,7 @@ COPY DOCKER/nodes/docker-entrypoint.sh /usr/bin/
 RUN pip3 install -r requirements.txt
 
 # set volumes
-VOLUME /db/config.json
+VOLUME /db/
 VOLUME /var/tmp/
 
 # run app

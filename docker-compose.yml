@@ -24,7 +24,7 @@ services:
     environment:
       - NODE_ADDR=http://localhost:26657
     volumes:
-      - ./db/config.json:/db/config.json
+      - ./db/:/db/
       - tmp-volume:/var/tmp/
 
   crawler-builder:
@@ -37,7 +37,7 @@ services:
     environment:
       - CHAIN_ID=my-chain-id
     volumes:
-      - ./db/config.json:/db/config.json
+      - ./db/:/db/
       - tmp-volume:/var/tmp/
 
   crawler-nodes:
@@ -51,7 +51,7 @@ services:
       - CHAIN_ID=my-chain-id
       - TARGET_ADDRS=http://localhost:26657
     volumes:
-      - ./db/config.json:/db/config.json
+      - ./db/:/db/
       - tmp-volume:/var/tmp/
 
   api:
@@ -60,7 +60,7 @@ services:
     depends_on:
       - db
     volumes:
-      - ./db/config.json:/db/config.json
+      - ./db/:/db/
     ports:
       - "3000:3000"
 

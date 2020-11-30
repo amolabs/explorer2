@@ -17,7 +17,7 @@ COPY app.js config.js package.json package-lock.json swaggerDef.js /app/
 RUN npm install
 
 # volume
-VOLUME /db/config.json
+VOLUME /db/
 
 # run app
 CMD ["npm", "run", "start"]
