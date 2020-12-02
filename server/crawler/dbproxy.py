@@ -15,7 +15,7 @@ s_tables = ['s_requests', 's_usages', 's_parcels', 's_storages',
 r_tables = ['r_account_block', 'r_account_tx', 'r_parcel_tx']
 
 
-def connect_db():
+def connect_db(target=None):
     # read config
     config_dir = os.path.dirname(os.path.abspath(__file__)) + '/../../db'
     dbconfigfile = config_dir + '/config.json'
@@ -31,6 +31,13 @@ def connect_db():
         f.close()
 
     # connect db
+    if target is not None:
+        if target not in dbconfig:
+            print(f"'{target}' field is missing in DB config")
+            return None
+        else:
+            dbconfig = dbconfig[target]
+
     try:
         if 'host' in dbconfig:
             db = mysql.connector.connect(

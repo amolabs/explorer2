@@ -23,15 +23,19 @@ import models
 
 
 class Builder:
-    def __init__(self, chain_id, db=None):
+    def __init__(self, chain_id, c_db=None, b_db=None):
         if chain_id is None:
             raise ArgError('no chain_id is given.')
         self.chain_id = chain_id
 
-        if db is None:
-            db = dbproxy.connect_db()
-        self.db = db
-        self.cursor = self.db.cursor()
+        if c_db is None:
+            c_db = dbproxy.connect_db('collector')
+        self.c_db = c_db
+        self.c_cursor = self.c_db.cursor()
+        if b_db is None:
+            b_db = dbproxy.connect_db('builder')
+        self.b_db = b_db
+        self.b_cursor = self.b_db.cursor()
 
         self.refresh_roof()
 
@@ -44,7 +48,7 @@ class Builder:
         else:
             self.lock = lock
 
-        cur = self.cursor
+        cur = self.b_cursor
         # get current explorer state
         cur.execute(
             """
@@ -61,14 +65,18 @@ class Builder:
                 INSERT INTO `play_stat` (`chain_id`, `height`)
                 VALUES (%(chain_id)s, %(height)s)
                 """, self._vars())
-            self.db.commit()
+            self.b_db.commit()
 
     def _vars(self):
         v = vars(self).copy()
-        if 'db' in v:
-            del v['db']
-        if 'cursor' in v:
-            del v['cursor']
+        if 'c_db' in v:
+            del v['c_db']
+        if 'b_db' in v:
+            del v['b_db']
+        if 'c_cursor' in v:
+            del v['c_cursor']
+        if 'b_cursor' in v:
+            del v['b_cursor']
         if 'lock' in v:
             del v['lock']
         return v
@@ -81,7 +89,7 @@ class Builder:
 
     def clear(self):
         self.print_log('REBUILD state db')
-        cur = self.db.cursor()
+        cur = self.b_db.cursor()
 
         for t in dbproxy.r_tables:
             cur.execute(
@@ -97,12 +105,12 @@ class Builder:
 
         self.height = 0
         self._save_height(cur)
-        self.db.commit()
+        self.b_db.commit()
         cur.close()
 
     def refresh_roof(self):
-        self.db.commit()  # to get updated blocks
-        cur = self.cursor
+        self.c_db.commit()  # to get updated blocks
+        cur = self.c_cursor
         # get current explorer collector state
         cur.execute(
             """
@@ -124,7 +132,7 @@ class Builder:
         if limit == 0:
             limit = self.roof - self.height
         acc = 0
-        self.db.autocommit = False
+        self.b_db.autocommit = False
         for i in range(limit):
             if self.play_next_block() is False:
                 break
@@ -138,20 +146,21 @@ class Builder:
             if h % 1000 == 0:
                 self.print_log(f'block height {h}')
             if i > 0 and i % 10 == 0:
-                self.db.commit()
-        self.db.commit()
+                self.b_db.commit()
+        self.b_db.commit()
         if verbose:
             print(flush=True)
         self.print_log(f'{acc} blocks played')
 
     def play_genesis(self):
-        cur = self.db.cursor()
-        cur.execute(
+        cur = self.b_db.cursor()
+        c_cur = self.c_db.cursor()
+        c_cur.execute(
             """
             SELECT `genesis` FROM `c_genesis`
             WHERE (`chain_id` = %(chain_id)s)
             """, self._vars())
-        row = cur.fetchone()
+        row = c_cur.fetchone()
         if row:
             genesis = json.loads(row[0])['app_state']
             # genesis balances
@@ -165,22 +174,25 @@ class Builder:
         else:
             return False  # TODO: return error
 
-        self.db.commit()
+        self.b_db.commit()
         cur.close()
+        c_cur.close()
 
     def play_next_block(self):
-        cur = self.db.cursor()
+        cur = self.b_db.cursor()
+        c_cur = self.c_db.cursor()
         target = self.height + 1
         if target > self.roof:
             return False
 
         blk = block.Block(self.chain_id, target)
-        blk.play(cur)
+        blk.play(cur, c_cur)
 
         # close
         self.height = target
         self._save_height(cur)
         cur.close()
+        c_cur.close()
 
         return True
 
@@ -192,7 +204,8 @@ class Builder:
             """, self._vars())
 
     def close(self):
-        self.db.close()
+        self.c_db.close()
+        self.b_db.close()
         self.lock.release()
 
     def watch(self):

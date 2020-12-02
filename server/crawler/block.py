@@ -68,20 +68,20 @@ class Block:
 
     """cursor: db cursor"""
 
-    def play(self, cursor):
-        self.play_events_begin(cursor)
-        self.play_txs(cursor)
-        self.play_events_end(cursor)
-        self.play_val_updates(cursor)
+    def play(self, cursor, c_cursor):
+        self.play_events_begin(cursor, c_cursor)
+        self.play_txs(cursor, c_cursor)
+        self.play_events_end(cursor, c_cursor)
+        self.play_val_updates(cursor, c_cursor)
 
-    def play_events_begin(self, cursor):
+    def play_events_begin(self, cursor, c_cursor):
         # events
-        cursor.execute(
+        c_cursor.execute(
             """
             SELECT events_begin FROM `c_blocks`
             WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s)
             """, self._vars())
-        rows = cursor.fetchall()
+        rows = c_cursor.fetchall()
         # cols = cursor.column_names
         for row in rows:
             (raw,) = row
@@ -100,14 +100,14 @@ class Block:
                             (%(chain_id)s, %(height)s, %(protocol_version)s)
                         """, vs)
 
-    def play_events_end(self, cursor):
+    def play_events_end(self, cursor, c_cursor):
         # events
-        cursor.execute(
+        c_cursor.execute(
             """
             SELECT events_end FROM `c_blocks`
             WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s)
             """, self._vars())
-        rows = cursor.fetchall()
+        rows = c_cursor.fetchall()
         # cols = cursor.column_names
         for row in rows:
             (raw,) = row
@@ -208,29 +208,29 @@ class Block:
                     rel.save(cursor)
                 asset_stat.save(cursor)
 
-    def play_txs(self, cursor):
+    def play_txs(self, cursor, c_cursor):
         # txs
-        cursor.execute(
+        c_cursor.execute(
             """
             SELECT * FROM `c_txs`
             WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s)
             """, self._vars())
-        rows = cursor.fetchall()
-        cols = cursor.column_names
+        rows = c_cursor.fetchall()
+        cols = c_cursor.column_names
         for row in rows:
             d = dict(zip(cols, row))
             t = tx.Tx(self.chain_id, d['height'], d['index'])
             t.read(d)
             t.play(cursor)
 
-    def play_val_updates(self, cursor):
+    def play_val_updates(self, cursor, c_cursor):
         # validator updates
-        cursor.execute(
+        c_cursor.execute(
             """
             SELECT `validator_updates` FROM `c_blocks`
             WHERE (`chain_id` = %(chain_id)s AND `height` = %(height)s)
             """, self._vars())
-        row = cursor.fetchone()
+        row = c_cursor.fetchone()
         if row:
             vals = json.loads(row[0])
             for val in vals:
