@@ -29,7 +29,7 @@ async function getBlockStat(chain_id, non_empty, num_blks) {
         ORDER BY b.`height` DESC " + limit + " \
       ) t";
     var query_var = [chain_id, chain_id];
-    db.query(query_str, query_var, function (err, rows, fields) {
+    db.cPool.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
       }
@@ -65,7 +65,7 @@ async function getTxStat(chain_id, num_txs) {
         ORDER BY `height` DESC, `index` DESC " + limit + " \
       ) t";
     var query_var = [chain_id, chain_id];
-    db.query(query_str, query_var, function (err, rows, fields) {
+    db.cPool.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
       }
@@ -78,7 +78,7 @@ async function getAssetStat(chain_id) {
   return new Promise(function(resolve, reject) {
     var query_str = "SELECT * FROM `asset_stat` WHERE (`chain_id` = ?) LIMIT 1";
     var query_var = [chain_id];
-    db.query(query_str, query_var, function (err, rows, fields) {
+    db.bPool.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
       }
@@ -94,7 +94,7 @@ async function getValidatorStat(chain_id, num_blks) {
     var query_str = "SELECT count(*) `num_validators`, SUM(`eff_stake`) `total_eff_stakes`, AVG(`eff_stake`) `avg_eff_stake` FROM `s_accounts` \
       WHERE (`chain_id` = ? AND `val_addr` IS NOT NULL) LIMIT 1";
     var query_var = [chain_id];
-    db.query(query_str, query_var, function (err, rows, fields) {
+    db.bPool.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
       }
@@ -108,7 +108,7 @@ async function getValidatorStat(chain_id, num_blks) {
           LIMIT ? \
         ) t";
       query_var = [chain_id, num_blks];
-      db.query(query_str, query_var, function (err, rows, fields) {
+      db.bPool.query(query_str, query_var, function (err, rows, fields) {
         if (err) {
           return reject(err);
         }
@@ -128,7 +128,7 @@ async function getDraftStat(chain_id) {
       AS `num_passed` \
       FROM `s_drafts` WHERE (`chain_id` = ?)";
     var query_var = [chain_id];
-    db.query(query_str, query_var, function (err, rows, fields) {
+    db.bPool.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
       }
@@ -142,7 +142,7 @@ async function getStorageStat(chain_id) {
     var query_str = "SELECT count(*) `num_storages` FROM `s_storages` \
       WHERE (`chain_id` = ?)";
     var query_var = [chain_id];
-    db.query(query_str, query_var, function (err, rows) {
+    db.bPool.query(query_str, query_var, function (err, rows) {
       if (err) {
         return reject(err);
       }
@@ -156,7 +156,7 @@ async function getNodeStat(chain_id) {
     var query_str = "SELECT count(*) `num_nodes` FROM `nodes` \
       WHERE (`chain_id` = ?)";
     var query_var = [chain_id];
-    db.query(query_str, query_var, function (err, rows) {
+    db.nPool.query(query_str, query_var, function (err, rows) {
       if (err) {
         return reject(err);
       }

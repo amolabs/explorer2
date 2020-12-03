@@ -22,7 +22,7 @@ async function getOne(chain_id, draft_id) {
     query_str = "select * from s_drafts \
       where (chain_id = ?) and (draft_id = ?)";
     query_var = [chain_id, draft_id];
-    db.query(query_str, query_var, function (err, rows, fields) {
+    db.bPool.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
       }
@@ -53,7 +53,7 @@ async function getList(chain_id, anchor, from, num) {
         ORDER BY `draft_id` DESC LIMIT ?,?";
       query_var = [chain_id, anchor, from, num];
     }
-    db.query(query_str, query_var, function (err, rows, fields) {
+    db.bPool.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
       }
@@ -76,7 +76,7 @@ async function getVotes(chain_id, draft_id) {
           AND v.`voter` = a.`address` \
       WHERE v.`chain_id` = ? AND v.`draft_id` = ?";
     query_var = [chain_id, draft_id];
-    db.query(query_str, query_var, function (err, rows, fields) {
+    db.bPool.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
       }
@@ -97,7 +97,7 @@ async function getVotesAbsent(chain_id, draft_id) {
       WHERE a.`chain_id` = ? AND a.`eff_stake` != '0' \
         AND v.`voter` IS NULL";
     query_var = [draft_id, chain_id, draft_id, chain_id];
-    db.query(query_str, query_var, function (err, rows, fields) {
+    db.bPool.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
       }

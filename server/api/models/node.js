@@ -14,7 +14,7 @@ async function getOne(chain_id, node_id, from, to) {
       WHERE n.`chain_id` = ? AND n.`node_id` = ?";
     query_var = [chain_id, node_id];
     val = {};
-    db.query(query_str, query_var, function(err, rows, fields) {
+    db.nPool.query(query_str, query_var, function(err, rows, fields) {
       if(err) {
         return reject(err);
       }
@@ -31,7 +31,7 @@ async function getOne(chain_id, node_id, from, to) {
         AND `timestamp` BETWEEN ? AND ? \
         GROUP BY `node_id`";
       query_var = [chain_id, node_id, from, to];
-      db.query(query_str, query_var, function(err, rows, fields) {
+      db.nPool.query(query_str, query_var, function(err, rows, fields) {
         if(err) {
           return reject(err);
         }
@@ -58,7 +58,7 @@ async function getList(chain_id, from, to) {
       WHERE n.`chain_id` = ? \
       ORDER BY n.`node_id`";
     var query_var = [chain_id, from, to];
-    db.query(query_str, query_var, function(err, rows, fields) {
+    db.nPool.query(query_str, query_var, function(err, rows, fields) {
       if (err) {
         return reject(err);
       }
@@ -75,7 +75,7 @@ async function getList(chain_id, from, to) {
         WHERE `chain_id` = ? AND `timestamp` BETWEEN ? AND ? \
         GROUP BY `node_id` ORDER BY `node_id`";
       query_var = [chain_id, from, to];
-      db.query(query_str, query_var, function(err, rows, fields) {
+      db.nPool.query(query_str, query_var, function(err, rows, fields) {
         if(err) {
           return reject(err);
         }
@@ -124,7 +124,7 @@ async function getHistory(chain_id, node_id, anchor, from, num) {
         LIMIT ?, ?";
       query_var = [chain_id, node_id, anchor, from, num];
     }
-    db.query(query_str, query_var, function(err, rows, fields) {
+    db.nPool.query(query_str, query_var, function(err, rows, fields) {
       if (err) {
         return reject(err);
       }
