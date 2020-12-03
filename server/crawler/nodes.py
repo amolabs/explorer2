@@ -50,7 +50,7 @@ class Nodes:
             self.targets = targets
 
         if db is None and not self.dry:
-            db = dbproxy.connect_db('nodes')
+            db = dbproxy.connect_db()
         self.db = db
 
         lock = FileLock(f'/var/tmp/nodes-{self.chain_id}.lock')

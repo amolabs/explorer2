@@ -34,7 +34,7 @@ class Collector:
         self.node = node
 
         if db is None:
-            db = dbproxy.connect_db('collector')
+            db = dbproxy.connect_db()
         self.db = db
         cur = self.db.cursor()
 
@@ -265,7 +265,7 @@ class Collector:
                         # rpc query to get the block_id. Instead, just call
                         # self.play().
                         self.refresh_remote()
-                        self.db = dbproxy.connect_db('collector')
+                        self.db = dbproxy.connect_db()
                         self.play(0, self.verbose)
                         self.db.close()
                     except websockets.exceptions.ConnectionClosed:
