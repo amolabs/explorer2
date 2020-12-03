@@ -14,7 +14,7 @@ async function getOne(chain_id, height, index) {
         and (height = ? and `index` = ?)";
       query_var = [chain_id, height, index];
     }
-    db.cPool.query(query_str, query_var, function (err, rows, fields) {
+    db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
       }
@@ -28,7 +28,7 @@ async function getLast(chain_id) {
     var query_str = "SELECT * FROM `c_txs` WHERE (`chain_id` = ?) \
       ORDER BY `height` DESC, `index` DESC LIMIT 1";
     var query_var = [chain_id];
-    db.cPool.query(query_str, query_var, function (err, rows, fields) {
+    db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
       }
@@ -46,7 +46,7 @@ async function searchHash(chain_id, hash) {
       and (hash = ?) \
       order by height desc, `index` desc';
     query_var = [chain_id, hash];
-    db.cPool.query(query_str, query_var, function (err, rows, fields) {
+    db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
       }
@@ -72,7 +72,7 @@ async function getList(chain_id, top, from, num) {
         order by `height` desc, `index` desc limit ?,?";
       query_var = [chain_id, top, from, num];
     }
-    db.cPool.query(query_str, query_var, function (err, rows, fields) {
+    db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
       }
@@ -92,7 +92,7 @@ async function getListByBlock(chain_id, height, from, num) {
       and (`height` = ?) \
       order by `height` desc, `index` desc limit ?,?";
     query_var = [chain_id, height, from, num];
-    db.cPool.query(query_str, query_var, function (err, rows, fields) {
+    db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
       }
@@ -119,7 +119,7 @@ async function getListBySender(chain_id, address, top, from, num) {
         order by `height` desc, `index` desc limit ?,?";
       query_var = [chain_id, address, top, from, num];
     }
-    db.cPool.query(query_str, query_var, function (err, rows, fields) {
+    db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
       }

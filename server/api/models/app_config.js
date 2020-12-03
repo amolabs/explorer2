@@ -7,7 +7,7 @@ async function getLast(chain_id) {
     var query_var;
     query_str = "SELECT `genesis` FROM `c_genesis` WHERE (`chain_id` = ?)";
     query_var = [chain_id];
-    db.cPool.query(query_str, query_var, function (err, rows) {
+    db.query(query_str, query_var, function (err, rows) {
       if (err) {
         return reject(err);
       }
@@ -21,7 +21,7 @@ async function getLast(chain_id) {
       query_str = "SELECT `config` FROM `s_drafts` \
         WHERE `chain_id` = ? AND `applied_at` > 0 ORDER BY `draft_id`";
       query_var = [chain_id];
-      db.bPool.query(query_str, query_var, function (err, rows) {
+      db.query(query_str, query_var, function (err, rows) {
         if (err) {
           return reject(err);
         }

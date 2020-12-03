@@ -14,7 +14,7 @@ async function getOne(chain_id, height) {
         and (height = ?)";
       query_var = [chain_id, height];
     }
-    db.cPool.query(query_str, query_var, function (err, rows, fields) {
+    db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
       }
@@ -28,7 +28,7 @@ async function getLast(chain_id) {
     var query_str = "SELECT * FROM `c_blocks` WHERE (`chain_id` = ?) \
       ORDER BY `height` DESC LIMIT 1";
     var query_var = [chain_id];
-    db.cPool.query(query_str, query_var, function (err, rows, fields) {
+    db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
       }
@@ -57,7 +57,7 @@ async function getList(chain_id, anchor, from, num) {
         order by height desc limit ?,?";
       query_var = [chain_id, anchor, from, num];
     }
-    db.cPool.query(query_str, query_var, function (err, rows, fields) {
+    db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
       }

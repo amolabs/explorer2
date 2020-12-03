@@ -12,7 +12,7 @@ async function getList(chain_id, from, num) {
       ORDER BY `height` DESC \
       LIMIT ?, ?";
     var query_var = [chain_id, from, num];
-    db.bPool.query(query_str, query_var, function(err, rows, fields) {
+    db.query(query_str, query_var, function(err, rows, fields) {
       if (err) {
         return reject(err);
       }
@@ -45,7 +45,7 @@ async function getListByAddress(chain_id, address, anchor, from, num) {
         LIMIT ?, ?";
       query_var = [chain_id, address, anchor, from, num];
     }
-    db.bPool.query(query_str, query_var, function(err, rows, fields) {
+    db.query(query_str, query_var, function(err, rows, fields) {
       if(err) {
         return reject(err);
       }

@@ -8,7 +8,7 @@ async function getOne(chain_id, parcel_id) {
     query_str = "select * from s_parcels \
       where (chain_id = ? and parcel_id = ?)";
     query_var = [chain_id, parcel_id];
-    db.bPool.query(query_str, query_var, function (err, rows, fields) {
+    db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
       }

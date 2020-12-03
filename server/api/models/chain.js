@@ -1,4 +1,5 @@
 /* vim: set sw=2 ts=2 expandtab : */
+const db = require('../db/db');
 const stat = require('./stat');
 const block = require('./block');
 const tx = require('./tx');

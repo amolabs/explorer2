@@ -8,7 +8,7 @@ async function getOne(chain_id, address) {
     query_str = "select * from s_accounts \
       where (chain_id = ? and address = ?)";
     query_var = [chain_id, address];
-    db.bPool.query(query_str, query_var, function (err, rows, fields) {
+    db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
       }
@@ -24,7 +24,7 @@ async function getOneByValidator(chain_id, address) {
     query_str = "select * from s_accounts \
       where (chain_id = ? and val_addr = ?)";
     query_var = [chain_id, address];
-    db.bPool.query(query_str, query_var, function (err, rows, fields) {
+    db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
       }
@@ -50,7 +50,7 @@ async function getList(chain_id, val_only, from, num) {
         limit ?,?";
       query_var = [chain_id, from, num];
     }
-    db.bPool.query(query_str, query_var, function (err, rows, fields) {
+    db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
       }

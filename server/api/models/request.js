@@ -11,7 +11,7 @@ async function getList(chain_id, parcel, from, num) {
       (chain_id = ? and parcel_id = ?) \
       limit ?, ?";
     query_var = [chain_id, parcel, from, num];
-    db.bPool.query(query_str, query_var, function (err, rows, fields) {
+    db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
       }
