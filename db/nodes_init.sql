@@ -1,5 +1,5 @@
 -- explorer.nodes definition (insert, update)
-CREATE TABLE `nodes` (
+CREATE TABLE IF NOT EXISTS `nodes` (
   `chain_id` char(32) NOT NULL,
   `node_id` char(40) NOT NULL,
   `timestamp` datetime(6) NOT NULL DEFAULT current_timestamp(6),
@@ -9,7 +9,7 @@ CREATE TABLE `nodes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- explorer.node_history definition (insert)
-CREATE TABLE `node_history` (
+CREATE TABLE IF NOT EXISTS `node_history` (
   `chain_id` char(32) NOT NULL,
   `node_id` char(40) NOT NULL,
   `timestamp` datetime(6) NOT NULL DEFAULT current_timestamp(6),

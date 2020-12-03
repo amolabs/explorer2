@@ -1,5 +1,5 @@
 -- explorer.asset_stat definition
-CREATE TABLE `asset_stat` (
+CREATE TABLE IF NOT EXISTS `asset_stat` (
   `chain_id` char(32) NOT NULL,
   `active_coins` char(40) NOT NULL DEFAULT '0',
   `stakes` char(40) NOT NULL DEFAULT '0',
@@ -8,7 +8,7 @@ CREATE TABLE `asset_stat` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- explorer.s_protocol definition
-CREATE TABLE `s_protocol` (
+CREATE TABLE IF NOT EXISTS `s_protocol` (
   `chain_id` char(32) NOT NULL,
   `height` int(11) NOT NULL,
   `version` int(11) NOT NULL,
@@ -16,14 +16,14 @@ CREATE TABLE `s_protocol` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- explorer.play_stat definition
-CREATE TABLE `play_stat` (
+CREATE TABLE IF NOT EXISTS `play_stat` (
   `chain_id` char(32) NOT NULL,
   `height` int(11) NOT NULL,
   PRIMARY KEY (`chain_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- explorer.s_accounts definition
-CREATE TABLE `s_accounts` (
+CREATE TABLE IF NOT EXISTS `s_accounts` (
   `chain_id` char(32) NOT NULL,
   `address` char(40) NOT NULL,
   `balance` char(40) NOT NULL DEFAULT '0',
@@ -39,7 +39,7 @@ CREATE TABLE `s_accounts` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- explorer.s_udcs definition
-CREATE TABLE `s_udcs` (
+CREATE TABLE IF NOT EXISTS `s_udcs` (
   `chain_id` char(32) NOT NULL,
   `udc_id` int(11) NOT NULL,
   `owner` char(40) NOT NULL DEFAULT '',
@@ -50,7 +50,7 @@ CREATE TABLE `s_udcs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- explorer.s_incentives definition
-CREATE TABLE `s_incentives` (
+CREATE TABLE IF NOT EXISTS `s_incentives` (
   `chain_id` char(32) NOT NULL,
   `height` int(11) NOT NULL,
   `address` char(40) NOT NULL,
@@ -60,7 +60,7 @@ CREATE TABLE `s_incentives` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- explorer.s_penalties definition
-CREATE TABLE `s_penalties` (
+CREATE TABLE IF NOT EXISTS `s_penalties` (
   `chain_id` char(32) NOT NULL,
   `height` int(11) NOT NULL,
   `address` char(40) NOT NULL,
@@ -70,7 +70,7 @@ CREATE TABLE `s_penalties` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- explorer.r_account_block definition
-CREATE TABLE `r_account_block` (
+CREATE TABLE IF NOT EXISTS `r_account_block` (
   `seq` int(11) NOT NULL AUTO_INCREMENT,
   `chain_id` char(32) NOT NULL,
   `address` char(40) NOT NULL,
@@ -83,7 +83,7 @@ CREATE TABLE `r_account_block` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1109313 DEFAULT CHARSET=utf8mb4;
 
 -- explorer.r_account_tx definition
-CREATE TABLE `r_account_tx` (
+CREATE TABLE IF NOT EXISTS `r_account_tx` (
   `seq` int(11) NOT NULL AUTO_INCREMENT,
   `chain_id` char(32) NOT NULL,
   `address` char(40) NOT NULL,
@@ -97,7 +97,7 @@ CREATE TABLE `r_account_tx` (
 ) ENGINE=InnoDB AUTO_INCREMENT=6453 DEFAULT CHARSET=utf8mb4;
 
 -- explorer.s_drafts definition
-CREATE TABLE `s_drafts` (
+CREATE TABLE IF NOT EXISTS `s_drafts` (
   `chain_id` char(32) NOT NULL,
   `draft_id` int(11) NOT NULL,
   `proposer` char(40) NOT NULL DEFAULT '',
@@ -119,7 +119,7 @@ CREATE TABLE `s_drafts` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- explorer.s_storages definition
-CREATE TABLE `s_storages` (
+CREATE TABLE IF NOT EXISTS `s_storages` (
   `chain_id` char(32) NOT NULL,
   `storage_id` int(11) NOT NULL,
   `url` varchar(100) DEFAULT NULL,
@@ -133,7 +133,7 @@ CREATE TABLE `s_storages` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- explorer.s_udc_balances definition
-CREATE TABLE `s_udc_balances` (
+CREATE TABLE IF NOT EXISTS `s_udc_balances` (
   `chain_id` char(32) NOT NULL,
   `udc_id` int(11) NOT NULL,
   `address` char(40) NOT NULL,
@@ -144,7 +144,7 @@ CREATE TABLE `s_udc_balances` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- explorer.s_votes definition
-CREATE TABLE `s_votes` (
+CREATE TABLE IF NOT EXISTS `s_votes` (
   `chain_id` char(32) NOT NULL,
   `draft_id` int(11) NOT NULL,
   `voter` char(40) NOT NULL,
@@ -157,7 +157,7 @@ CREATE TABLE `s_votes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- explorer.s_parcels definition
-CREATE TABLE `s_parcels` (
+CREATE TABLE IF NOT EXISTS `s_parcels` (
   `chain_id` char(32) NOT NULL,
   `parcel_id` char(72) NOT NULL,
   `storage_id` int(11) NOT NULL,
@@ -174,7 +174,7 @@ CREATE TABLE `s_parcels` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- explorer.s_requests definition
-CREATE TABLE `s_requests` (
+CREATE TABLE IF NOT EXISTS `s_requests` (
   `chain_id` char(32) NOT NULL,
   `parcel_id` char(72) NOT NULL,
   `buyer` char(40) NOT NULL,
@@ -189,7 +189,7 @@ CREATE TABLE `s_requests` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- explorer.s_usages definition
-CREATE TABLE `s_usages` (
+CREATE TABLE IF NOT EXISTS `s_usages` (
   `chain_id` char(32) NOT NULL,
   `parcel_id` char(72) NOT NULL,
   `grantee` char(40) NOT NULL,
@@ -202,7 +202,7 @@ CREATE TABLE `s_usages` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- explorer.r_parcel_tx definition
-CREATE TABLE `r_parcel_tx` (
+CREATE TABLE IF NOT EXISTS `r_parcel_tx` (
   `seq` int(11) NOT NULL AUTO_INCREMENT,
   `chain_id` char(32) NOT NULL,
   `parcel_id` char(72) NOT NULL,

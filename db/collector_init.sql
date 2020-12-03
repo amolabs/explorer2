@@ -1,12 +1,12 @@
 -- explorer.c_genesis definition
-CREATE TABLE `c_genesis` (
+CREATE TABLE IF NOT EXISTS `c_genesis` (
   `chain_id` char(32) NOT NULL,
   `genesis` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`genesis`)),
   PRIMARY KEY (`chain_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- explorer.c_blocks definition
-CREATE TABLE `c_blocks` (
+CREATE TABLE IF NOT EXISTS `c_blocks` (
   `chain_id` char(32) NOT NULL,
   `height` int(11) NOT NULL,
   `time` datetime(6) NOT NULL DEFAULT current_timestamp(6),
@@ -23,7 +23,7 @@ CREATE TABLE `c_blocks` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- explorer.c_txs definition
-CREATE TABLE `c_txs` (
+CREATE TABLE IF NOT EXISTS `c_txs` (
   `chain_id` char(32) NOT NULL,
   `height` int(11) NOT NULL,
   `index` int(11) NOT NULL,
