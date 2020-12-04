@@ -276,7 +276,7 @@ class Collector:
                         # rpc query to get the block_id. Instead, just call
                         # self.play().
                         self.refresh_remote()
-                        self.db = dbproxy.connect_db()
+                        self.db, self.dbs = dbproxy.connect_db()
                         self.play(0, self.verbose)
                         self.db.close()
                     except websockets.exceptions.ConnectionClosed:
