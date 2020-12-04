@@ -1,18 +1,18 @@
 /* vim: set sw=2 ts=2 expandtab : */
-const db = require('../db/db');
+const { db, dbs } = require('../db/db');
 
 async function getOne(chain_id, height, index) {
   return new Promise(function(resolve, reject) {
     var query_str;
     var query_var;
     if (height == 0 && index == 0) {
-      query_str = "select * from c_txs where (chain_id = ?) \
+      query_str = "select * from `?`.c_txs where (chain_id = ?) \
         order by height desc, `index` desc limit 1";
-      query_var = [chain_id];
+      query_var = [dbs['collector'], chain_id];
     } else {
-      query_str = "select * from c_txs where (chain_id = ?) \
+      query_str = "select * from `?`.c_txs where (chain_id = ?) \
         and (height = ? and `index` = ?)";
-      query_var = [chain_id, height, index];
+      query_var = [dbs['collector'], chain_id, height, index];
     }
     db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
@@ -25,9 +25,9 @@ async function getOne(chain_id, height, index) {
 
 async function getLast(chain_id) {
   return new Promise(function(resolve, reject) {
-    var query_str = "SELECT * FROM `c_txs` WHERE (`chain_id` = ?) \
+    var query_str = "SELECT * FROM `?`.`c_txs` WHERE (`chain_id` = ?) \
       ORDER BY `height` DESC, `index` DESC LIMIT 1";
-    var query_var = [chain_id];
+    var query_var = [dbs['collector'], chain_id];
     db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
@@ -42,10 +42,10 @@ async function searchHash(chain_id, hash) {
   return new Promise(function(resolve, reject) {
     var query_str;
     var query_var;
-    query_str = 'select * from c_txs where (chain_id = ?) \
+    query_str = 'select * from `?`.c_txs where (chain_id = ?) \
       and (hash = ?) \
       order by height desc, `index` desc';
-    query_var = [chain_id, hash];
+    query_var = [dbs['collector'], chain_id, hash];
     db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
@@ -63,14 +63,14 @@ async function getList(chain_id, top, from, num) {
     var query_str;
     var query_var;
     if (top == 0) {
-      query_str = "select * from `c_txs` where (`chain_id` = ?) \
+      query_str = "select * from `?`.`c_txs` where (`chain_id` = ?) \
         order by `height` desc, `index` desc limit ?,?";
-      query_var = [chain_id, from, num];
+      query_var = [dbs['collector'], chain_id, from, num];
     } else {
-      query_str = "select * from `c_txs` where (`chain_id` = ?) \
+      query_str = "select * from `?`.`c_txs` where (`chain_id` = ?) \
         and (`height` <= ?) \
         order by `height` desc, `index` desc limit ?,?";
-      query_var = [chain_id, top, from, num];
+      query_var = [dbs['collector'], chain_id, top, from, num];
     }
     db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
@@ -88,10 +88,10 @@ async function getListByBlock(chain_id, height, from, num) {
     num = Number(num);
     var query_str;
     var query_var;
-    query_str = "select * from `c_txs` where (`chain_id` = ?) \
+    query_str = "select * from `?`.`c_txs` where (`chain_id` = ?) \
       and (`height` = ?) \
       order by `height` desc, `index` desc limit ?,?";
-    query_var = [chain_id, height, from, num];
+    query_var = [dbs['collector'], chain_id, height, from, num];
     db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
@@ -109,15 +109,15 @@ async function getListBySender(chain_id, address, top, from, num) {
     var query_str;
     var query_var;
     if (top == 0) {
-      query_str = "select * from `c_txs` where (`chain_id` = ?) \
+      query_str = "select * from `?`.`c_txs` where (`chain_id` = ?) \
         and (`sender` = ?) \
         order by `height` desc, `index` desc limit ?,?";
-      query_var = [chain_id, address, from, num];
+      query_var = [dbs['collector'], chain_id, address, from, num];
     } else {
-      query_str = "select * from `c_txs` where (`chain_id` = ?) \
+      query_str = "select * from `?`.`c_txs` where (`chain_id` = ?) \
         and (`sender` = ?) and (`height` <= ?) \
         order by `height` desc, `index` desc limit ?,?";
-      query_var = [chain_id, address, top, from, num];
+      query_var = [dbs['collector'], chain_id, address, top, from, num];
     }
     db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {

@@ -1,5 +1,5 @@
 /* vim: set sw=2 ts=2 expandtab : */
-const db = require('../db/db');
+const { db, dbs } = require('../db/db');
 
 async function getAccountHistory(chain_id, address, anchor, from, num,
   include_tx, include_block) {
@@ -20,8 +20,8 @@ async function getAccountHistory(chain_id, address, anchor, from, num,
             c_txs.`type` `tx_type`, c_txs.`hash` `tx_hash`, \
             c_txs.`sender` `tx_sender`, \
             c_txs.fee `tx_fee`, c_txs.payload `tx_payload` \
-          FROM r_account_tx rat \
-            LEFT JOIN c_txs ON rat.chain_id = c_txs.chain_id \
+          FROM `?`.r_account_tx rat \
+            LEFT JOIN `?`.c_txs ON rat.chain_id = c_txs.chain_id \
             AND rat.height = c_txs.height AND rat.`index` = c_txs.`index` \
           WHERE rat.chain_id = ? \
             AND rat.`address` = ? "
@@ -31,11 +31,11 @@ async function getAccountHistory(chain_id, address, anchor, from, num,
       ";
       if (anchor > 0) {
         query_var = query_var.concat([
-          chain_id, address, anchor, from + num]);
+          dbs['builder'], dbs['collector'], chain_id, address, anchor, from + num]);
       } else {
         // anchor height will not be used when anchor = 0
         query_var = query_var.concat([
-          chain_id, address, from + num]);
+          dbs['builder'], dbs['collector'], chain_id, address, from + num]);
       }
     }
     if (include_block) {
@@ -48,7 +48,7 @@ async function getAccountHistory(chain_id, address, anchor, from, num,
             rab.`height`, null `index`, rab.`amount`, \
             'block' `tx_type`, '' `tx_hash`, '' `tx_sender`, \
             '' `tx_fee`, '' `tx_payload` \
-          FROM r_account_block rab \
+          FROM `?`.r_account_block rab \
           WHERE  rab.chain_id = ? \
             AND rab.`address` = ? "
             + (anchor > 0 ? "AND rab.height <= ? " : "")
@@ -57,11 +57,11 @@ async function getAccountHistory(chain_id, address, anchor, from, num,
       ";
       if (anchor > 0) {
         query_var = query_var.concat([
-          chain_id, address, anchor, from + num]);
+          dbs['builder'], chain_id, address, anchor, from + num]);
       } else {
         // anchor height will not be used when anchor = 0
         query_var = query_var.concat([
-          chain_id, address, from + num]);
+          dbs['builder'], chain_id, address, from + num]);
       }
     }
     if (query_str.length == 0) {
@@ -89,15 +89,15 @@ async function getParcelHistory(chain_id, parcel_id, top, from, num) {
     var query_var;
     query_str = "\
       SELECT c_txs.* \
-      FROM r_parcel_tx rpt \
-        LEFT JOIN c_txs ON rpt.chain_id = c_txs.chain_id \
+      FROM `?`.r_parcel_tx rpt \
+        LEFT JOIN `?`.c_txs ON rpt.chain_id = c_txs.chain_id \
         AND rpt.height = c_txs.height AND rpt.`index` = c_txs.`index` \
       WHERE rpt.chain_id = ? \
         AND rpt.`parcel_id` = ? \
         AND rpt.height < ? \
       ORDER BY `height` DESC, `index` DESC LIMIT ?, ? \
     ";
-    query_var = [chain_id, parcel_id, top, from, num];
+    query_var = [dbs['builder'], dbs['collector'], chain_id, parcel_id, top, from, num];
     db.query(query_str, query_var, function(err, rows, fields) {
       if (err) {
         return reject(err);

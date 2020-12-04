@@ -1,13 +1,13 @@
 /* vim: set sw=2 ts=2 expandtab : */
-const db = require('../db/db');
+const { db, dbs } = require('../db/db');
 
 async function getOne(chain_id, parcel_id) {
   return new Promise(function(resolve, reject) {
     var query_str;
     var query_var;
-    query_str = "select * from s_parcels \
+    query_str = "select * from `?`.s_parcels \
       where (chain_id = ? and parcel_id = ?)";
-    query_var = [chain_id, parcel_id];
+    query_var = [dbs['builder'], chain_id, parcel_id];
     db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
