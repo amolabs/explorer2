@@ -28,14 +28,19 @@ import tx
 
 
 class Collector:
-    def __init__(self, node, db=None):
+    def __init__(self, node, db=None, dbs=None):
         if node is None:
             raise ArgError('no node is given.')
         self.node = node
 
         if db is None:
-            db = dbproxy.connect_db()
+            db, dbs = dbproxy.connect_db()
+            if db is None:
+                self.print_log('failed to connect to db')
+                sys.exit(-1)
+
         self.db = db
+        self.dbs = dbs
         cur = self.db.cursor()
 
         self.refresh_remote()
@@ -51,7 +56,7 @@ class Collector:
 
         # get current explorer state
         cur.execute(
-            """SELECT `height` FROM `c_blocks`
+            f"""SELECT `height` FROM `{self.dbs['collector']}`.`c_blocks`
             WHERE (`chain_id` = %(chain_id)s)
             ORDER BY `height` DESC LIMIT 1""", self._vars())
         row = cur.fetchone()
@@ -66,6 +71,8 @@ class Collector:
         v = vars(self).copy()
         if 'db' in v:
             del v['db']
+        if 'dbs' in v:
+            del v['dbs']
         if 'cursor' in v:
             del v['cursor']
         if 'http_sess' in v:
@@ -86,8 +93,11 @@ class Collector:
 
         for t in dbproxy.c_tables:
             cur.execute(
-                f"DELETE FROM `{t}` WHERE `chain_id` = '{self.chain_id}'")
-            cur.execute("""OPTIMIZE TABLE `{t}`""")
+                f"""
+                DELETE FROM `{self.dbs['collector']}`.`{t}`
+                WHERE `chain_id` = '{self.chain_id}'
+                """)
+            cur.execute(f"""OPTIMIZE TABLE `{self.dbs['collector']}`.`{t}`""")
             cur.fetchall()
 
         self.height = 0
@@ -100,7 +110,7 @@ class Collector:
             r = requests.get(f'{self.node}/status')
         except Exception:
             self.print_log('unable to get node status')
-            exit(-1)
+            sys.exit(-1)
         dat = json.loads(r.text)
         self.remote_height = int(
             dat['result']['sync_info']['latest_block_height'])
@@ -110,8 +120,9 @@ class Collector:
         cur = self.db.cursor()
         # check genesis
         cur.execute(
-            """
-            SELECT COUNT(*) FROM `c_genesis` WHERE (`chain_id` = %(chain_id)s)
+            f"""
+            SELECT COUNT(*) FROM `{self.dbs['collector']}`.`c_genesis`
+            WHERE (`chain_id` = %(chain_id)s)
             """, self._vars())
         row = cur.fetchone()
         if row[0] == 0:
@@ -119,8 +130,8 @@ class Collector:
             dat = json.loads(r.text)
             self.genesis = json.dumps(dat['result']['genesis'])
             cur.execute(
-                """
-                INSERT INTO `c_genesis`
+                f"""
+                INSERT INTO `{self.dbs['collector']}`.`c_genesis`
                     (`chain_id`, `genesis`)
                 VALUES
                     (%(chain_id)s, %(genesis)s)
@@ -187,7 +198,7 @@ class Collector:
         for i in range(len(blk.txs) if blk.txs else 0):
             tx_body = blk.txs[i]
             tx_result = blk.txs_results[i]
-            t = tx.Tx(blk.chain_id, blk.height, i)
+            t = tx.Tx(self.dbs, blk.chain_id, blk.height, i)
             t.parse_body(tx_body)
             t.set_result(tx_result)
             if tx_result['code'] == 0:
@@ -206,7 +217,7 @@ class Collector:
     def collect_block(self, s, height):
         r = s.get(f'{self.node}/block?height={height}')
         dat = json.loads(r.text)['result']
-        blk = block.Block(dat['block']['header']['chain_id'],
+        blk = block.Block(self.dbs, dat['block']['header']['chain_id'],
                           dat['block']['header']['height'])
         blk.read(dat)
 
@@ -234,7 +245,7 @@ class Collector:
         list.sort(metas, key=lambda val: int(val['header']['height']))
         blks = []
         for meta in metas:
-            blk = block.Block(meta['header']['chain_id'],
+            blk = block.Block(self.dbs, meta['header']['chain_id'],
                               meta['header']['height'])
             blk.read_meta(meta)
             blks.append(blk)

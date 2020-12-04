@@ -29,13 +29,12 @@ DEFAULT_COLLECT_INTERVAL = 10 # seconds
 DEFAULT_RPC_PORT = 26657
 
 class Nodes:
-    def __init__(self, chain_id, targets, db=None, verbose=False, dry=False):
+    def __init__(self, chain_id, targets, db=None, dbs=None, verbose=False, dry=False):
         self.chain_id = ""
         self.targets = []
         self.known = {}
         self.nodes = {}
 
-        self.db = None
         self.lock = None
         self.verbose = verbose 
         self.dry = dry 
@@ -50,8 +49,13 @@ class Nodes:
             self.targets = targets
 
         if db is None and not self.dry:
-            db = dbproxy.connect_db()
+            db, dbs = dbproxy.connect_db()
+            if db is None:
+                self.print_log('failed to connect to db')
+                sys.exit(-1)
+
         self.db = db
+        self.dbs = dbs 
 
         lock = FileLock(f'/var/tmp/nodes-{self.chain_id}.lock')
         try:
@@ -77,11 +81,11 @@ class Nodes:
         nodes = {}
         cur = self.db.cursor()
         cur.execute(
-            """
+            f"""
             SELECT 
                 `chain_id`, `node_id`, `timestamp`, 
                 `moniker`, INET_NTOA(`ip_addr`) `ip_addr`
-            FROM `nodes`
+            FROM `{self.dbs['nodes']}`.`nodes`
             WHERE `chain_id` = %(chain_id)s
             """, {'chain_id': self.chain_id})
         rows = cur.fetchall()
@@ -237,8 +241,8 @@ class Nodes:
         for _, n in self.nodes.items():
             # insert or update into explorer.nodes
             cur.execute(
-                """
-                INSERT INTO `nodes`
+                f"""
+                INSERT INTO `{self.dbs['nodes']}`.`nodes`
                     (`chain_id`, `node_id`, `timestamp`, `moniker`, `ip_addr`)
                 VALUES
                     (%(chain_id)s, %(node_id)s, %(timestamp)s,
@@ -251,8 +255,8 @@ class Nodes:
     
             # insert(append) into explorer.node_history
             cur.execute(
-                """
-                INSERT IGNORE INTO `node_history`
+                f"""
+                INSERT IGNORE INTO `{self.dbs['nodes']}`.`node_history`
                     (`chain_id`, `node_id`, `timestamp`, `n_peers`,
                      `val_addr`, `latest_block_time`, `latest_block_height`,
                      `catching_up`, `elapsed`, `online`)

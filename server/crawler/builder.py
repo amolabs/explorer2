@@ -23,15 +23,20 @@ import models
 
 
 class Builder:
-    def __init__(self, chain_id, db=None):
+    def __init__(self, chain_id, db=None, dbs=None):
         if chain_id is None:
             raise ArgError('no chain_id is given.')
         self.chain_id = chain_id
 
         if db is None:
-            db = dbproxy.connect_db()
+            db, dbs = dbproxy.connect_db()
+            if db is None:
+                self.print_log('failed to connect to db')
+                sys.exit(-1)
+
         self.db = db
-        self.cursor = self.db.cursor()
+        self.dbs = dbs
+        cur = self.db.cursor()
 
         self.refresh_roof()
 
@@ -44,11 +49,12 @@ class Builder:
         else:
             self.lock = lock
 
-        cur = self.cursor
+        cur = self.db.cursor()
         # get current explorer state
         cur.execute(
-            """
-            SELECT * FROM `play_stat` WHERE (`chain_id` = %(chain_id)s)
+            f"""
+            SELECT * FROM `{self.dbs['builder']}`.`play_stat`
+            WHERE (`chain_id` = %(chain_id)s)
             """, self._vars())
         row = cur.fetchone()
         if row:
@@ -57,9 +63,11 @@ class Builder:
         else:
             self.height = 0
             cur.execute(
-                """
-                INSERT INTO `play_stat` (`chain_id`, `height`)
-                VALUES (%(chain_id)s, %(height)s)
+                f"""
+                INSERT INTO `{self.dbs['builder']}`.`play_stat`
+                    (`chain_id`, `height`)
+                VALUES
+                    (%(chain_id)s, %(height)s)
                 """, self._vars())
             self.db.commit()
 
@@ -67,6 +75,8 @@ class Builder:
         v = vars(self).copy()
         if 'db' in v:
             del v['db']
+        if 'dbs' in v:
+            del v['dbs']
         if 'cursor' in v:
             del v['cursor']
         if 'lock' in v:
@@ -85,14 +95,16 @@ class Builder:
 
         for t in dbproxy.r_tables:
             cur.execute(
-                f"DELETE FROM `{t}` WHERE `chain_id` = '{self.chain_id}'")
+                f"""DELETE FROM `{self.dbs['builder']}`.`{t}`
+                  WHERE `chain_id` = '{self.chain_id}'""")
             cur.execute("""OPTIMIZE TABLE `{t}`""")
             cur.fetchall()
 
         for t in dbproxy.s_tables:
             cur.execute(
-                f"DELETE FROM `{t}` WHERE `chain_id` = '{self.chain_id}'")
-            cur.execute("""OPTIMIZE TABLE `{t}`""")
+                f"""DELETE FROM `{self.dbs['builder']}`.`{t}`
+                  WHERE `chain_id` = '{self.chain_id}'""")
+            cur.execute("""OPTIMIZE TABLE `{self.dbs['builder']}`.`{t}`""")
             cur.fetchall()
 
         self.height = 0
@@ -102,11 +114,11 @@ class Builder:
 
     def refresh_roof(self):
         self.db.commit()  # to get updated blocks
-        cur = self.cursor
+        cur = self.db.cursor()
         # get current explorer collector state
         cur.execute(
-            """
-            SELECT `height` FROM `c_blocks` cb
+            f"""
+            SELECT `height` FROM `{self.dbs['collector']}`.`c_blocks` cb
             WHERE cb.`chain_id` = %(chain_id)s
             ORDER BY cb.`height` DESC LIMIT 1
             """, self._vars())
@@ -147,17 +159,17 @@ class Builder:
     def play_genesis(self):
         cur = self.db.cursor()
         cur.execute(
-            """
-            SELECT `genesis` FROM `c_genesis`
+            f"""
+            SELECT `genesis` FROM `{self.dbs['collector']}`.`c_genesis`
             WHERE (`chain_id` = %(chain_id)s)
             """, self._vars())
         row = cur.fetchone()
         if row:
             genesis = json.loads(row[0])['app_state']
             # genesis balances
-            asset_stat = stats.Asset(self.chain_id, cur)
+            asset_stat = stats.Asset(self.dbs, self.chain_id, cur)
             for item in genesis['balances']:
-                acc = models.Account(self.chain_id, item['owner'], cur)
+                acc = models.Account(self.dbs, self.chain_id, item['owner'], cur)
                 acc.balance = int(item['amount'])
                 asset_stat.active_coins += int(item['amount'])
                 acc.save(cur)
@@ -174,7 +186,7 @@ class Builder:
         if target > self.roof:
             return False
 
-        blk = block.Block(self.chain_id, target)
+        blk = block.Block(self.dbs, self.chain_id, target)
         blk.play(cur)
 
         # close
@@ -186,8 +198,9 @@ class Builder:
 
     def _save_height(self, cursor):
         cursor.execute(
-            """
-            UPDATE `play_stat` SET `height` = %(height)s
+            f"""
+            UPDATE `{self.dbs['builder']}`.`play_stat`
+            SET `height` = %(height)s
             WHERE `chain_id` = %(chain_id)s
             """, self._vars())
 

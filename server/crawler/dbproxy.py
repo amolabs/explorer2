@@ -26,9 +26,13 @@ def connect_db():
         dbconfig = cfg['db']
     except OSError as e:
         print("Unable to read DB config:", e)
-        return None
+        return None, None
     else:
         f.close()
+
+    if 'dbs' not in dbconfig:
+        print("'dbs' filed is missing in DB config")
+        return None, None
 
     # connect db
     try:
@@ -39,8 +43,7 @@ def connect_db():
                 buffered=True,
                 use_pure=True,
                 user=dbconfig['user'],
-                password=dbconfig['password'],
-                database=dbconfig['database'],
+                password=dbconfig['password']
             )
         else:
             db = mysql.connector.connect(
@@ -48,12 +51,11 @@ def connect_db():
                 buffered=True,
                 use_pure=False,
                 user=dbconfig['user'],
-                password=dbconfig['password'],
-                database=dbconfig['database'],
+                password=dbconfig['password']
             )
     except DBError as e:
         print("DB connection error", e)
-        return None
+        return None, None
     else:
         print("DB connected")
-        return db
+        return db, dbconfig["dbs"] 

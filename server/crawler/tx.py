@@ -14,7 +14,8 @@ import models
 class Tx:
     """form a tx"""
 
-    def __init__(self, chain_id, height, index):
+    def __init__(self, dbs, chain_id, height, index):
+        self.dbs = dbs
         self.chain_id = chain_id
         self.height = height
         self.index = index
@@ -22,6 +23,7 @@ class Tx:
 
     def _vars(self):
         v = vars(self).copy()
+        del v['dbs']
         v['events'] = json.dumps(self.events)
         v['fee'] = str(v['fee'])
         return v
@@ -57,7 +59,7 @@ class Tx:
         if self.code != 0:
             return
         if self.fee > 0:
-            sender = models.Account(self.chain_id, self.sender, cursor)
+            sender = models.Account(self.dbs, self.chain_id, self.sender, cursor)
             sender.balance -= int(self.fee)
             sender.save(cursor)
         # NOTE: fee will be added to the balance of the block proposer as part
@@ -70,8 +72,8 @@ class Tx:
             ev = util.parse_event(ev)
             # TODO: refactor
             if ev['type'] == 'draft':
-                draft = models.Draft(self.chain_id, int(ev['attr']['id']),
-                                     None, cursor)
+                draft = models.Draft(self.dbs, self.chain_id,
+                                     int(ev['attr']['id']), None, cursor)
                 util.from_dict(draft, json.loads(ev['attr']['draft']))
                 draft.deposit = int(draft.deposit)
                 draft.tally_quorum = int(draft.tally_quorum)
@@ -79,12 +81,13 @@ class Tx:
                 draft.tally_reject = int(draft.tally_reject)
                 draft.save(cursor)
                 # TODO: use another events regarding balance change
-                proposer = models.Account(self.chain_id, draft.proposer,
-                                          cursor)
+                proposer = models.Account(self.dbs, self.chain_id,
+                                          draft.proposer, cursor)
                 proposer.balance -= draft.deposit
                 proposer.save(cursor)
-                rel = models.RelAccountTx(self.chain_id, draft.proposer,
-                                          self.height, self.index, cursor)
+                rel = models.RelAccountTx(self.dbs, self.chain_id,
+                                          draft.proposer, self.height,
+                                          self.index, cursor)
                 rel.amount -= draft.deposit
                 rel.save(cursor)
 
@@ -95,8 +98,8 @@ class Tx:
 
     def save(self, cursor):
         cursor.execute(
-            """
-            INSERT INTO `c_txs`
+            f"""
+            INSERT INTO `{self.dbs['collector']}`.`c_txs`
                 (`chain_id`, `height`, `index`, `hash`, `tx_bytes`,
                 `code`, `info`,
                 `type`, `sender`, `fee`, `last_height`, `payload`,
@@ -118,18 +121,18 @@ def tx_transfer(tx, cursor):
     payload = json.loads(tx.payload)
     payload['amount'] = int(payload['amount'])
 
-    sender = models.Account(tx.chain_id, tx.sender, cursor)
+    sender = models.Account(tx.dbs, tx.chain_id, tx.sender, cursor)
     sender.balance -= payload['amount']
     sender.save(cursor)
-    rel = models.RelAccountTx(tx.chain_id, tx.sender, tx.height, tx.index,
+    rel = models.RelAccountTx(tx.dbs, tx.chain_id, tx.sender, tx.height, tx.index,
                               cursor)
     rel.amount -= payload['amount']
     rel.save(cursor)
 
-    recp = models.Account(tx.chain_id, payload['to'], cursor)
+    recp = models.Account(tx.dbs, tx.chain_id, payload['to'], cursor)
     recp.balance += payload['amount']
     recp.save(cursor)
-    rel = models.RelAccountTx(tx.chain_id, payload['to'], tx.height, tx.index,
+    rel = models.RelAccountTx(tx.dbs, tx.chain_id, payload['to'], tx.height, tx.index,
                               cursor)
     rel.amount += payload['amount']
     rel.save(cursor)
@@ -139,7 +142,7 @@ def tx_stake(tx, cursor):
     payload = json.loads(tx.payload)
     payload['amount'] = int(payload['amount'])
 
-    sender = models.Account(tx.chain_id, tx.sender, cursor)
+    sender = models.Account(tx.dbs, tx.chain_id, tx.sender, cursor)
     sender.stake += payload['amount']
     sender.stake_locked += payload['amount']
     sender.eff_stake += payload['amount']
@@ -148,12 +151,12 @@ def tx_stake(tx, cursor):
     b = bytearray.fromhex(sender.val_pubkey)
     sender.val_addr = sha256(b).hexdigest()[:40].upper()
     sender.save(cursor)
-    rel = models.RelAccountTx(tx.chain_id, tx.sender, tx.height, tx.index,
+    rel = models.RelAccountTx(tx.dbs, tx.chain_id, tx.sender, tx.height, tx.index,
                               cursor)
     rel.amount -= payload['amount']
     rel.save(cursor)
 
-    asset_stat = stats.Asset(tx.chain_id, cursor)
+    asset_stat = stats.Asset(tx.dbs, tx.chain_id, cursor)
     asset_stat.active_coins -= payload['amount']
     asset_stat.stakes += payload['amount']
     asset_stat.save(cursor)
@@ -163,7 +166,7 @@ def tx_withdraw(tx, cursor):
     payload = json.loads(tx.payload)
     payload['amount'] = int(payload['amount'])
 
-    sender = models.Account(tx.chain_id, tx.sender, cursor)
+    sender = models.Account(tx.dbs, tx.chain_id, tx.sender, cursor)
     sender.stake -= payload['amount']
     sender.eff_stake -= payload['amount']
     sender.balance += payload['amount']
@@ -172,12 +175,12 @@ def tx_withdraw(tx, cursor):
         sender.val_pubkey = None
         sender.val_power = 0
     sender.save(cursor)
-    rel = models.RelAccountTx(tx.chain_id, tx.sender, tx.height, tx.index,
+    rel = models.RelAccountTx(tx.dbs, tx.chain_id, tx.sender, tx.height, tx.index,
                               cursor)
     rel.amount += payload['amount']
     rel.save(cursor)
 
-    asset_stat = stats.Asset(tx.chain_id, cursor)
+    asset_stat = stats.Asset(tx.dbs, tx.chain_id, cursor)
     asset_stat.active_coins += payload['amount']
     asset_stat.stakes -= payload['amount']
     asset_stat.save(cursor)
@@ -187,21 +190,21 @@ def tx_delegate(tx, cursor):
     payload = json.loads(tx.payload)
     payload['amount'] = int(payload['amount'])
 
-    sender = models.Account(tx.chain_id, tx.sender, cursor)
+    sender = models.Account(tx.dbs, tx.chain_id, tx.sender, cursor)
     sender.delegate += payload['amount']
     sender.balance -= payload['amount']
     sender.del_addr = payload['to']
     sender.save(cursor)
-    rel = models.RelAccountTx(tx.chain_id, tx.sender, tx.height, tx.index,
+    rel = models.RelAccountTx(tx.dbs, tx.chain_id, tx.sender, tx.height, tx.index,
                               cursor)
     rel.amount -= payload['amount']
     rel.save(cursor)
 
-    delegatee = models.Account(tx.chain_id, sender.del_addr, cursor)
+    delegatee = models.Account(tx.dbs, tx.chain_id, sender.del_addr, cursor)
     delegatee.eff_stake += payload['amount']
     delegatee.save(cursor)
 
-    asset_stat = stats.Asset(tx.chain_id, cursor)
+    asset_stat = stats.Asset(tx.dbs, tx.chain_id, cursor)
     asset_stat.active_coins -= payload['amount']
     asset_stat.delegates += payload['amount']
     asset_stat.save(cursor)
@@ -211,8 +214,8 @@ def tx_retract(tx, cursor):
     payload = json.loads(tx.payload)
     payload['amount'] = int(payload['amount'])
 
-    sender = models.Account(tx.chain_id, tx.sender, cursor)
-    asset_stat = stats.Asset(tx.chain_id, cursor)
+    sender = models.Account(tx.dbs, tx.chain_id, tx.sender, cursor)
+    asset_stat = stats.Asset(tx.dbs, tx.chain_id, cursor)
 
     sender.delegate -= payload['amount']
     sender.balance += payload['amount']
@@ -220,12 +223,12 @@ def tx_retract(tx, cursor):
     if sender.delegate == 0:
         sender.del_addr = None
     sender.save(cursor)
-    rel = models.RelAccountTx(tx.chain_id, tx.sender, tx.height, tx.index,
+    rel = models.RelAccountTx(tx.dbs, tx.chain_id, tx.sender, tx.height, tx.index,
                               cursor)
     rel.amount += payload['amount']
     rel.save(cursor)
 
-    delegatee = models.Account(tx.chain_id, del_addr, cursor)
+    delegatee = models.Account(tx.dbs, tx.chain_id, del_addr, cursor)
     delegatee.eff_stake -= payload['amount']
     delegatee.save(cursor)
 
@@ -239,8 +242,8 @@ def tx_setup(tx, cursor):
     payload['registration_fee'] = int(payload['registration_fee'])
     payload['hosting_fee'] = int(payload['hosting_fee'])
 
-    owner = models.Account(tx.chain_id, tx.sender, cursor)
-    storage = models.Storage(tx.chain_id, payload['storage'], owner.address,
+    owner = models.Account(tx.dbs, tx.chain_id, tx.sender, cursor)
+    storage = models.Storage(tx.dbs, tx.chain_id, payload['storage'], owner.address,
                              cursor)
 
     storage.url = payload['url']
@@ -253,7 +256,7 @@ def tx_setup(tx, cursor):
 def tx_close(tx, cursor):
     payload = json.loads(tx.payload)
 
-    storage = models.Storage(tx.chain_id, payload['storage'], None, cursor)
+    storage = models.Storage(tx.dbs, tx.chain_id, payload['storage'], None, cursor)
 
     storage.active = False
     storage.save(cursor)
@@ -262,10 +265,10 @@ def tx_close(tx, cursor):
 def tx_register(tx, cursor):
     payload = json.loads(tx.payload)
 
-    owner = models.Account(tx.chain_id, tx.sender, cursor)
-    parcel = models.Parcel(tx.chain_id, payload['target'], owner.address,
+    owner = models.Account(tx.dbs, tx.chain_id, tx.sender, cursor)
+    parcel = models.Parcel(tx.dbs, tx.chain_id, payload['target'], owner.address,
                            cursor)
-    storage = models.Storage(tx.chain_id, parcel.storage_id, None, cursor)
+    storage = models.Storage(tx.dbs, tx.chain_id, parcel.storage_id, None, cursor)
 
     parcel.custody = payload['custody']
     if parcel.custody != None and len(parcel.custody) > 100:
@@ -276,22 +279,22 @@ def tx_register(tx, cursor):
     parcel.extra = json.dumps(payload.get('extra', {}))
     parcel.on_sale = True
     parcel.save(cursor)
-    # rel = models.RelParcelTx(tx.chain_id, parcel.parcel_id, tx.height,
+    # rel = models.RelParcelTx(tx.dbs, tx.chain_id, parcel.parcel_id, tx.height,
     #                          tx.index, cursor)
     # rel.save(cursor)
 
     if storage.registration_fee > 0:
         owner.balance -= storage.registration_fee
         owner.save(cursor)
-        rel = models.RelAccountTx(tx.chain_id, owner.address, tx.height,
+        rel = models.RelAccountTx(tx.dbs, tx.chain_id, owner.address, tx.height,
                                   tx.index, cursor)
         rel.amount -= storage.registration_fee
         rel.save(cursor)
 
-        host = models.Account(tx.chain_id, storage.owner, cursor)
+        host = models.Account(tx.dbs, tx.chain_id, storage.owner, cursor)
         host.balance += storage.registration_fee
         host.save(cursor)
-        rel = models.RelAccountTx(tx.chain_id, host.address, tx.height,
+        rel = models.RelAccountTx(tx.dbs, tx.chain_id, host.address, tx.height,
                                   tx.index, cursor)
         rel.amount += storage.registration_fee
         rel.save(cursor)
@@ -300,11 +303,11 @@ def tx_register(tx, cursor):
 def tx_discard(tx, cursor):
     payload = json.loads(tx.payload)
 
-    parcel = models.Parcel(tx.chain_id, payload['target'], None, cursor)
+    parcel = models.Parcel(tx.dbs, tx.chain_id, payload['target'], None, cursor)
 
     parcel.on_sale = False
     parcel.save(cursor)
-    # rel = models.RelParcelTx(tx.chain_id, parcel.parcel_id, tx.height,
+    # rel = models.RelParcelTx(tx.dbs, tx.chain_id, parcel.parcel_id, tx.height,
     #                          tx.index, cursor)
     # rel.save(cursor)
 
@@ -314,9 +317,9 @@ def tx_request(tx, cursor):
     payload['payment'] = int(payload['payment'])
     payload['dealer_fee'] = int(payload.get('dealer_fee', '0'))
 
-    buyer = models.Account(tx.chain_id, tx.sender, cursor)
-    parcel = models.Parcel(tx.chain_id, payload['target'], None, cursor)
-    request = models.Request(tx.chain_id, parcel.parcel_id, buyer.address,
+    buyer = models.Account(tx.dbs, tx.chain_id, tx.sender, cursor)
+    parcel = models.Parcel(tx.dbs, tx.chain_id, payload['target'], None, cursor)
+    request = models.Request(tx.dbs, tx.chain_id, parcel.parcel_id, buyer.address,
                              cursor)
 
     request.payment = payload['payment']
@@ -324,7 +327,7 @@ def tx_request(tx, cursor):
     request.dealer_fee = payload['dealer_fee']
     request.extra = json.dumps(payload.get('extra', {}))
     request.save(cursor)
-    # rel = models.RelParcelTx(tx.chain_id, parcel.parcel_id, tx.height,
+    # rel = models.RelParcelTx(tx.dbs, tx.chain_id, parcel.parcel_id, tx.height,
     #                          tx.index, cursor)
     # rel.save(cursor)
 
@@ -332,7 +335,7 @@ def tx_request(tx, cursor):
         buyer.balance -= request.dealer_fee
     buyer.balance -= request.payment
     buyer.save(cursor)
-    rel = models.RelAccountTx(tx.chain_id, buyer.address, tx.height, tx.index,
+    rel = models.RelAccountTx(tx.dbs, tx.chain_id, buyer.address, tx.height, tx.index,
                               cursor)
     rel.amount -= request.payment
     rel.save(cursor)
@@ -341,19 +344,19 @@ def tx_request(tx, cursor):
 def tx_cancel(tx, cursor):
     payload = json.loads(tx.payload)
 
-    buyer = models.Account(tx.chain_id, tx.sender, cursor)
-    request = models.Request(tx.chain_id, payload['target'], tx.sender, cursor)
+    buyer = models.Account(tx.dbs, tx.chain_id, tx.sender, cursor)
+    request = models.Request(tx.dbs, tx.chain_id, payload['target'], tx.sender, cursor)
 
     buyer.balance += request.payment
     buyer.balance += request.dealer_fee
     buyer.save(cursor)
-    rel = models.RelAccountTx(tx.chain_id, buyer.address, tx.height, tx.index,
+    rel = models.RelAccountTx(tx.dbs, tx.chain_id, buyer.address, tx.height, tx.index,
                               cursor)
     rel.amount += request.payment + request.dealer_fee
     rel.save(cursor)
 
     request.delete(cursor)
-    # rel = models.RelParcelTx(tx.chain_id, request.parcel_id, tx.height,
+    # rel = models.RelParcelTx(tx.dbs, tx.chain_id, request.parcel_id, tx.height,
     #                          tx.index, cursor)
     # rel.save(cursor)
 
@@ -367,36 +370,36 @@ def tx_grant(tx, cursor):
     elif 'recipient' in payload:
         grantee = payload['recipient']
 
-    parcel = models.Parcel(tx.chain_id, payload['target'], None, cursor)
-    storage = models.Storage(tx.chain_id, parcel.storage_id, None, cursor)
-    host = models.Account(tx.chain_id, storage.owner, cursor)
-    owner = models.Account(tx.chain_id, parcel.owner, cursor)
-    request = models.Request(tx.chain_id, payload['target'], grantee, cursor)
-    usage = models.Usage(tx.chain_id, payload['target'], grantee, cursor)
+    parcel = models.Parcel(tx.dbs, tx.chain_id, payload['target'], None, cursor)
+    storage = models.Storage(tx.dbs, tx.chain_id, parcel.storage_id, None, cursor)
+    host = models.Account(tx.dbs, tx.chain_id, storage.owner, cursor)
+    owner = models.Account(tx.dbs, tx.chain_id, parcel.owner, cursor)
+    request = models.Request(tx.dbs, tx.chain_id, payload['target'], grantee, cursor)
+    usage = models.Usage(tx.dbs, tx.chain_id, payload['target'], grantee, cursor)
 
     usage.custody = payload['custody']
     usage.extra = json.dumps(payload.get('extra', {}))
     usage.save(cursor)
-    # rel = models.RelParcelTx(tx.chain_id, parcel.parcel_id, tx.height,
+    # rel = models.RelParcelTx(tx.dbs, tx.chain_id, parcel.parcel_id, tx.height,
     #                          tx.index, cursor)
     # rel.save(cursor)
 
     owner.balance += request.payment
     if request.dealer is not None:
-        dealer = models.Account(tx.chain_id, request.dealer, cursor)
+        dealer = models.Account(tx.dbs, tx.chain_id, request.dealer, cursor)
         dealer.balance += request.dealer_fee
         dealer.save(cursor)
     owner.balance -= storage.hosting_fee
     owner.save(cursor)
     if storage.hosting_fee > 0:
-        rel = models.RelAccountTx(tx.chain_id, owner.address, tx.height,
+        rel = models.RelAccountTx(tx.dbs, tx.chain_id, owner.address, tx.height,
                                   tx.index, cursor)
         rel.amount -= storage.hosting_fee
         rel.save(cursor)
 
         host.balance += storage.hosting_fee
         host.save(cursor)
-        rel = models.RelAccountTx(tx.chain_id, host.address, tx.height,
+        rel = models.RelAccountTx(tx.dbs, tx.chain_id, host.address, tx.height,
                                   tx.index, cursor)
         rel.amount += storage.hosting_fee
         rel.save(cursor)
@@ -413,10 +416,10 @@ def tx_revoke(tx, cursor):
     elif 'recipient' in payload:
         grantee = payload['recipient']
 
-    usage = models.Usage(tx.chain_id, payload['target'], grantee, cursor)
+    usage = models.Usage(tx.dbs, tx.chain_id, payload['target'], grantee, cursor)
 
     usage.delete(cursor)
-    # rel = models.RelParcelTx(tx.chain_id, usage.parcel_id, tx.height,
+    # rel = models.RelParcelTx(tx.dbs, tx.chain_id, usage.parcel_id, tx.height,
     #                          tx.index, cursor)
     # rel.save(cursor)
 
@@ -425,8 +428,8 @@ def tx_issue(tx, cursor):
     payload = json.loads(tx.payload)
     payload['amount'] = int(payload['amount'])
 
-    udc = models.UDC(tx.chain_id, payload['udc'], cursor)
-    issuer = models.UDCBalance(tx.chain_id, udc.udc_id, tx.sender, cursor)
+    udc = models.UDC(tx.dbs, tx.chain_id, payload['udc'], cursor)
+    issuer = models.UDCBalance(tx.dbs, tx.chain_id, udc.udc_id, tx.sender, cursor)
 
     if udc.total == 0:  # initial issue
         udc.owner = tx.sender
@@ -443,7 +446,7 @@ def tx_lock(tx, cursor):
     payload = json.loads(tx.payload)
     payload['amount'] = int(payload['amount'])
 
-    udc_bal = models.UDCBalance(tx.chain_id, payload['udc'], payload['holder'],
+    udc_bal = models.UDCBalance(tx.dbs, tx.chain_id, payload['udc'], payload['holder'],
                                 cursor)
 
     udc_bal.balance_lock = payload['amount']
@@ -454,7 +457,7 @@ def tx_burn(tx, cursor):
     payload = json.loads(tx.payload)
     payload['amount'] = int(payload['amount'])
 
-    udc_bal = models.UDCBalance(tx.chain_id, payload['udc'], tx.sender, cursor)
+    udc_bal = models.UDCBalance(tx.dbs, tx.chain_id, payload['udc'], tx.sender, cursor)
 
     udc_bal.balance -= payload['amount']
     udc_bal.save(cursor)
@@ -463,7 +466,7 @@ def tx_burn(tx, cursor):
 def tx_propose(tx, cursor):
     payload = json.loads(tx.payload)
 
-    draft = models.Draft(tx.chain_id, payload['draft_id'], tx.sender, cursor)
+    draft = models.Draft(tx.dbs, tx.chain_id, payload['draft_id'], tx.sender, cursor)
     draft.config = json.dumps(payload['config'])
     draft.desc = payload['desc']
     draft.proposed_at = tx.height
@@ -474,9 +477,9 @@ def tx_propose(tx, cursor):
 def tx_vote(tx, cursor):
     payload = json.loads(tx.payload)
 
-    voter = models.Account(tx.chain_id, tx.sender, cursor)
-    draft = models.Draft(tx.chain_id, payload['draft_id'], None, cursor)
-    vote = models.Vote(tx.chain_id, draft.draft_id, voter.address, cursor)
+    voter = models.Account(tx.dbs, tx.chain_id, tx.sender, cursor)
+    draft = models.Draft(tx.dbs, tx.chain_id, payload['draft_id'], None, cursor)
+    vote = models.Vote(tx.dbs, tx.chain_id, draft.draft_id, voter.address, cursor)
 
     vote.approve = payload['approve']
     vote.save(cursor)
