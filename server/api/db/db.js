@@ -1,12 +1,14 @@
 /* vim: set sw=2 ts=2 expandtab : */
-var config = require('../../../db/config');
-var mysql = require('mysql');
+const config = require('../../../db/config');
+const mysql = require('mysql');
 
-var param = config.db;
+let param = config.db;
+param.timezone = 'UTC';
+const dbs = Object.assign({}, param['dbs']);
+delete param['dbs'];
 //param.supportBigNumbers = true;
 //param.bigNumberStrings = true;
-param.timezone = 'UTC';
-var pool = mysql.createPool(param);
+const db = mysql.createPool(param);
 /*
 conn.connect((err) => {
   if (err) {
@@ -18,4 +20,7 @@ conn.connect((err) => {
 });
 */
 
-module.exports = pool;
+module.exports = {
+  db: db,
+  dbs: dbs
+};
