@@ -12,7 +12,7 @@ COPY db/ /app/db/
 COPY models/ /app/models/
 COPY routes/ /app/routes/
 COPY app.js config.js package.json package-lock.json swaggerDef.js /app/
-COPY DOCKER/docker-entrypoint.sh /usr/bin
+COPY DOCKER/docker-entrypoint.sh /usr/local/bin
 
 # install package.json
 RUN npm install
