@@ -1,7 +1,7 @@
 /* vim: set sw=2 ts=2 expandtab : */
 var express = require('express');
 var router = express.Router();
-const db = require('../db/db');
+const { db, dbs } = require('../db/db');
 
 /**
  * @swagger
@@ -22,7 +22,7 @@ router.get('/', function(req, res) {
   const chain_id = res.locals.chain_id;
   var query_str;
   var query_var;
-  query_str = "SELECT `genesis` FROM `c_genesis` WHERE (`chain_id` = ?)";
+  query_str = `SELECT \`genesis\` FROM \`${dbs['collector']}\`.\`c_genesis\` WHERE (\`chain_id\` = ?)`;
   query_var = [chain_id];
   db.query(query_str, query_var, function (err, rows, fields) {
     if (err) {
