@@ -19,9 +19,9 @@ async function getOne(chain_id, draft_id) {
   return new Promise(function(resolve, reject) {
     var query_str;
     var query_var;
-    query_str = "select * from `?`.s_drafts \
-      where (chain_id = ?) and (draft_id = ?)";
-    query_var = [dbs['builder'], chain_id, draft_id];
+    query_str = `select * from \`${dbs['builder']}\`.\`s_drafts\` \
+      where (\`chain_id\` = ?) and (\`draft_id\` = ?)`;
+    query_var = [chain_id, draft_id];
     db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
@@ -43,15 +43,15 @@ async function getList(chain_id, anchor, from, num) {
     var query_str;
     var query_var;
     if (anchor == 0) {
-      query_str = "SELECT * FROM `?`.`s_drafts` \
-        WHERE (`chain_id` = ?) \
-        ORDER BY `draft_id` DESC LIMIT ?,?";
-      query_var = [dbs['builder'], chain_id, from, num];
+      query_str = `SELECT * FROM \`${dbs['builder']}\`.\`s_drafts\` \
+        WHERE (\`chain_id\` = ?) \
+        ORDER BY \`draft_id\` DESC LIMIT ?,?`;
+      query_var = [chain_id, from, num];
     } else {
-      query_str = "SELECT * FROM `?`.`s_drafts` \
-        WHERE (`chain_id` = ?) AND (`draft_id` <= ?) \
-        ORDER BY `draft_id` DESC LIMIT ?,?";
-      query_var = [dbs['builder'], chain_id, anchor, from, num];
+      query_str = `SELECT * FROM \`${dbs['builder']}\`.\`s_drafts\` \
+        WHERE (\`chain_id\` = ?) AND (\`draft_id\` <= ?) \
+        ORDER BY \`draft_id\` DESC LIMIT ?,?`;
+      query_var = [chain_id, anchor, from, num];
     }
     db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
@@ -69,13 +69,13 @@ async function getVotes(chain_id, draft_id) {
   return new Promise(function(resolve, reject) {
     var query_str;
     var query_var;
-    query_str = "SELECT v.chain_id, v.draft_id, v.voter, v.approve, \
-      CASE WHEN v.`tally` = 0 THEN a.`eff_stake` ELSE v.`tally` END `tally` \
-      FROM `?`.`s_votes` v \
-        LEFT JOIN `?`.`s_accounts` a ON v.`chain_id` = a.`chain_id` \
-          AND v.`voter` = a.`address` \
-      WHERE v.`chain_id` = ? AND v.`draft_id` = ?";
-    query_var = [dbs['builder'], dbs['builder'], chain_id, draft_id];
+    query_str = `SELECT v.chain_id, v.draft_id, v.voter, v.approve, \
+      CASE WHEN v.tally = 0 THEN a.eff_stake ELSE v.tally END tally \
+      FROM \`${dbs['builder']}\`.\`s_votes\` v \
+        LEFT JOIN \`${dbs['builder']}\`.\`s_accounts\` a ON v.chain_id = a.chain_id \
+          AND v.voter = a.address \
+      WHERE v.chain_id = ? AND v.draft_id = ?`;
+    query_var = [chain_id, draft_id];
     db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
@@ -89,14 +89,14 @@ async function getVotesAbsent(chain_id, draft_id) {
   return new Promise(function(resolve, reject) {
     var query_str;
     var query_var;
-    query_str = "SELECT a.`chain_id`, CONVERT(?, INT) `draft_id`, \
-        a.`address` `voter`, NULL `approve`, a.`eff_stake` `tally` \
-      FROM `?`.`s_accounts` a LEFT JOIN ( \
-        SELECT * FROM `?`.`s_votes` WHERE `chain_id` = ? AND `draft_id` = ?) v \
-      ON v.`chain_id` = a.`chain_id` AND v.`voter` = a.`address` \
-      WHERE a.`chain_id` = ? AND a.`eff_stake` != '0' \
-        AND v.`voter` IS NULL";
-    query_var = [dbs['builder'], dbs['builder'], draft_id, chain_id, draft_id, chain_id];
+    query_str = `SELECT a.chain_id, CONVERT(?, INT) draft_id, \
+        a.address voter, NULL approve, a.eff_stake tally \
+      FROM \`${dbs['builder']}\`.\`s_accounts\` a LEFT JOIN ( \
+        SELECT * FROM \`${dbs['builder']}\`.\`s_votes\` WHERE \`chain_id\` = ? AND \`draft_id\` = ?) v \
+      ON v.chain_id = a.chain_id AND v.voter = a.address \
+      WHERE a.chain_id = ? AND a.eff_stake != '0' \
+        AND v.voter IS NULL`;
+    query_var = [draft_id, chain_id, draft_id, chain_id];
     db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);

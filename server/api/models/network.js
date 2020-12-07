@@ -3,8 +3,8 @@ const { db, dbs } = require('../db/db');
 
 async function getList() {
   return new Promise(function(resolve, reject) {
-    var query_str = "SELECT `chain_id` FROM `?`.`c_blocks` GROUP BY `chain_id`";
-    var query_var = [dbs['collector']];
+    var query_str = `SELECT chain_id FROM \`${dbs['collector']}\`.\`c_blocks\` GROUP BY \`chain_id\``;
+    var query_var = [];
     db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);

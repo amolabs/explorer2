@@ -6,22 +6,22 @@ async function getOne(chain_id, address, from, to) {
     var query_str;
     var query_var;
     // NOTE: unfortunately, mariadb 10.4 does not support JSON_ARRAYAGG().
-    var query_str = "SELECT \
-        sa.`val_addr` `address`, sa.`val_pubkey` `pubkey`, \
-        sa.`val_power` `power`, \
-        sa.`address` `owner`, sa.`stake`, sa.`eff_stake`, \
-        nh.`node_id`, nh.`uptime` \
-      FROM `?`.`s_accounts` sa \
+    var query_str = `SELECT \
+        sa.val_addr address, sa.val_pubkey pubkey, \
+        sa.val_power power, \
+        sa.address owner, sa.stake, sa.eff_stake, \
+        nh.node_id, nh.uptime \
+      FROM \`${dbs['builder']}\`.\`s_accounts\` sa \
       LEFT JOIN ( \
-        SELECT `chain_id`, `node_id`, `val_addr`, \
-          SUM(CASE WHEN `online` = 1 THEN 1 ELSE 0 END)/COUNT(*)*100 `uptime` \
-        FROM `?`.`node_history` \
-        WHERE `timestamp` BETWEEN ? AND ? \
-        GROUP BY `chain_id`, `node_id` \
+        SELECT chain_id, node_id, val_addr, \
+          SUM(CASE WHEN online = 1 THEN 1 ELSE 0 END)/COUNT(*)*100 \`uptime\` \
+        FROM \`${dbs['nodes']}\`.\`node_history\` \
+        WHERE \`timestamp\` BETWEEN ? AND ? \
+        GROUP BY chain_id, node_id \
       ) nh \
-      ON sa.`chain_id` = nh.`chain_id` AND sa.`val_addr` = nh.`val_addr` \
-      WHERE sa.`chain_id` = ? AND sa.`val_addr` = ?";
-    query_var = [dbs['builder'], dbs['nodes'], from, to, chain_id, address];
+      ON sa.chain_id = nh.chain_id AND sa.val_addr = nh.val_addr \
+      WHERE sa.chain_id = ? AND sa.val_addr = ?`;
+    query_var = [from, to, chain_id, address];
     var val = {};
     db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
@@ -34,23 +34,23 @@ async function getOne(chain_id, address, from, to) {
 
 async function getList(chain_id, from, to) {
   return new Promise(function(resolve, reject) {
-    var query_str = "SELECT \
-        sa.`val_addr` `address`, sa.`val_pubkey` `pubkey`, \
-        sa.`val_power` `power`, \
-        sa.`address` `owner`, sa.`stake`, sa.`eff_stake`, \
-        nh.`node_id`, nh.`uptime` \
-      FROM `?`.`s_accounts` sa \
+    var query_str = `SELECT \
+        sa.val_addr address, sa.val_pubkey pubkey, \
+        sa.val_power power, \
+        sa.address owner, sa.stake, sa.eff_stake, \
+        nh.node_id, nh.uptime \
+      FROM \`${dbs['builder']}\`.\`s_accounts\` sa \
       LEFT JOIN ( \
-        SELECT `chain_id`, `node_id`, `val_addr`, \
-          SUM(CASE WHEN `online` = 1 THEN 1 ELSE 0 END)/COUNT(*)*100 `uptime` \
-        FROM `?`.`node_history` \
-        WHERE `timestamp` BETWEEN ? AND ? \
-        GROUP BY `chain_id`, `node_id` \
+        SELECT chain_id, node_id, val_addr, \
+          SUM(CASE WHEN online = 1 THEN 1 ELSE 0 END)/COUNT(*)*100 \`uptime\` \
+        FROM \`${dbs['nodes']}\`.\`node_history\` \
+        WHERE \`timestamp\` BETWEEN ? AND ? \
+        GROUP BY chain_id, node_id \
       ) nh \
-      ON sa.`chain_id` = nh.`chain_id` AND sa.`val_addr` = nh.`val_addr` \
-      WHERE sa.`chain_id` = ? AND sa.`val_addr` IS NOT NULL \
-      ORDER BY CONVERT(`eff_stake`, DOUBLE) DESC";
-    var query_var = [dbs['builder'], dbs['nodes'], from, to, chain_id];
+      ON sa.chain_id = nh.chain_id AND sa.val_addr = nh.val_addr \
+      WHERE sa.chain_id = ? AND sa.val_addr IS NOT NULL \
+      ORDER BY CONVERT(eff_stake, DOUBLE) DESC`;
+    var query_var = [from, to, chain_id];
     db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
@@ -67,12 +67,12 @@ async function getDelegators(chain_id, address, from, num) {
     num = Number(num);
     var query_str;
     var query_var;
-    query_str = "SELECT r.`address`, r.`delegate` \
-      FROM `?`.`s_accounts` l \
-        LEFT JOIN `?`.`s_accounts` r ON l.`address` = r.`del_addr` \
-      WHERE l.`chain_id` = ? AND l.`val_addr` = ? AND r.`address` IS NOT NULL \
-      LIMIT ?,?";
-    query_var = [dbs['builder'], dbs['builder'], chain_id, address, from, num];
+    query_str = `SELECT r.address, r.delegate \
+      FROM \`${dbs['builder']}\`.\`s_accounts\` l \
+        LEFT JOIN \`${dbs['builder']}\`.s_accounts r ON l.address = r.del_addr \
+      WHERE l.chain_id = ? AND l.val_addr = ? AND r.address IS NOT NULL \
+      LIMIT ?,?`;
+    query_var = [chain_id, address, from, num];
     db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);

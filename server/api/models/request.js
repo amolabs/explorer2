@@ -7,10 +7,10 @@ async function getList(chain_id, parcel, from, num) {
     num = Number(num);
     var query_str;
     var query_var;
-    query_str = "select * from `?`.s_requests where \
+    query_str = `select * from \`${dbs['builder']}\`.\`s_requests\` where \
       (chain_id = ? and parcel_id = ?) \
-      limit ?, ?";
-    query_var = [dbs['builder'], chain_id, parcel, from, num];
+      limit ?, ?`;
+    query_var = [chain_id, parcel, from, num];
     db.query(query_str, query_var, function (err, rows, fields) {
       if (err) {
         return reject(err);
