@@ -11,7 +11,7 @@
     "@testing-library/user-event": "^7.1.2",
     "@types/chart.js": "^2.9.20",
     "@types/react-infinite-scroller": "^1.2.1",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "chart.js": "^2.9.3",
     "clsx": "^1.1.0",
     "connected-react-router": "^6.8.0",
