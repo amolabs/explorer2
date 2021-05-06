@@ -56,8 +56,11 @@ class Tx:
     def play(self, cursor):
         if self.code != 0:
             return
+        # NOTE: This will create a tx sender's account in s_accounts even if a
+        # fee is zero. It is necssary to satisfy the foreign key constraints in
+        # various tables.
+        sender = models.Account(self.chain_id, self.sender, cursor)
         if self.fee > 0:
-            sender = models.Account(self.chain_id, self.sender, cursor)
             sender.balance -= int(self.fee)
             sender.save(cursor)
         # NOTE: fee will be added to the balance of the block proposer as part
@@ -371,6 +374,12 @@ def tx_grant(tx, cursor):
     storage = models.Storage(tx.chain_id, parcel.storage_id, None, cursor)
     host = models.Account(tx.chain_id, storage.owner, cursor)
     owner = models.Account(tx.chain_id, parcel.owner, cursor)
+    # NOTE: This is line is for creating buyer account in s_accounts table. It
+    # is necessary to satisfy the foreign key constraint. Even if we create a
+    # row for each tx sender, it is not the case for the recipient for
+    # `request` or `grant` tx. So, we need to explicitly create a grantee or
+    # recipient account in s_accounts table.
+    buyer = models.Account(tx.chain_id, grantee, cursor)
     request = models.Request(tx.chain_id, payload['target'], grantee, cursor)
     usage = models.Usage(tx.chain_id, payload['target'], grantee, cursor)
 
