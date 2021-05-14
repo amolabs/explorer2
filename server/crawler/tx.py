@@ -63,9 +63,10 @@ class Tx:
         if self.fee > 0:
             sender.balance -= int(self.fee)
             sender.save(cursor)
+        processor = processorMap.get(self.type, tx_unknown)
+        processor(self, cursor)
         # NOTE: fee will be added to the balance of the block proposer as part
         # of block incentive in block.play_incentives().
-        processor.get(self.type, tx_unknown)(self, cursor)
         self.play_events(cursor)
 
     def play_events(self, cursor):
@@ -119,23 +120,37 @@ def tx_unknown(tx, cursor):
 
 def tx_transfer(tx, cursor):
     payload = json.loads(tx.payload)
-    payload['amount'] = int(payload['amount'])
+    if payload.get('parcel'):
+        owner = models.Account(tx.chain_id, tx.sender, cursor)
+        parcel = models.Parcel(tx.chain_id, payload['target'], owner.address,
+                               cursor)
+        recp = models.Account(tx.chain_id, payload['to'], cursor)
 
-    sender = models.Account(tx.chain_id, tx.sender, cursor)
-    sender.balance -= payload['amount']
-    sender.save(cursor)
-    rel = models.RelAccountTx(tx.chain_id, tx.sender, tx.height, tx.index,
-                              cursor)
-    rel.amount -= payload['amount']
-    rel.save(cursor)
+        parcel.owner = recp.address
+        parcel.save(cursor)
+        # NOTE: parcel-tx relation is disabled _temporarily_ earlier.
+        # rel = models.RelParcelTx(tx.chain_id, parcel.parcel_id, tx.height,
+        #                          tx.index, cursor)
+        # rel.save(cursor)
 
-    recp = models.Account(tx.chain_id, payload['to'], cursor)
-    recp.balance += payload['amount']
-    recp.save(cursor)
-    rel = models.RelAccountTx(tx.chain_id, payload['to'], tx.height, tx.index,
-                              cursor)
-    rel.amount += payload['amount']
-    rel.save(cursor)
+    else:
+        amount = int(payload['amount'])
+
+        sender = models.Account(tx.chain_id, tx.sender, cursor)
+        sender.balance -= amount
+        sender.save(cursor)
+        rel = models.RelAccountTx(tx.chain_id, tx.sender, tx.height, tx.index,
+                                  cursor)
+        rel.amount -= amount
+        rel.save(cursor)
+
+        recp = models.Account(tx.chain_id, payload['to'], cursor)
+        recp.balance += amount
+        recp.save(cursor)
+        rel = models.RelAccountTx(tx.chain_id, payload['to'], tx.height, tx.index,
+                                  cursor)
+        rel.amount += amount
+        rel.save(cursor)
 
 
 def tx_stake(tx, cursor):
@@ -491,7 +506,7 @@ def tx_vote(tx, cursor):
     vote.save(cursor)
 
 
-processor = {
+processorMap = {
     'transfer': tx_transfer,
     'stake': tx_stake,
     'withdraw': tx_withdraw,
