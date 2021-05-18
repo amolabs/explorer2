@@ -60,7 +60,7 @@ class Tx:
         # fee is zero. It is necssary to satisfy the foreign key constraints in
         # various tables.
         sender = models.Account(self.chain_id, self.sender, cursor)
-        if self.fee > 0:
+        if self.fee != 0:
             sender.balance -= int(self.fee)
             sender.save(cursor)
         processor = processorMap.get(self.type, tx_unknown)
