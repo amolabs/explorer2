@@ -9,7 +9,7 @@ async function getOne(chain_id, address) {
     var query_str = "SELECT \
         sa.`val_addr` `address`, sa.`val_pubkey` `pubkey`, \
         sa.`val_power` `power`, \
-        sa.`address` `owner`, sa.`stake`, sa.`eff_stake`, \
+        sa.`address` `owner`, sa.`stake`, sa.`eff_stake` \
       FROM `s_accounts` sa \
       WHERE sa.`chain_id` = ? AND sa.`val_addr` = ?";
     query_var = [chain_id, address];
@@ -28,7 +28,7 @@ async function getList(chain_id) {
     var query_str = "SELECT \
         sa.`val_addr` `address`, sa.`val_pubkey` `pubkey`, \
         sa.`val_power` `power`, \
-        sa.`address` `owner`, sa.`stake`, sa.`eff_stake`, \
+        sa.`address` `owner`, sa.`stake`, sa.`eff_stake` \
       FROM `s_accounts` sa \
       WHERE sa.`chain_id` = ? AND sa.`val_addr` IS NOT NULL \
       ORDER BY CONVERT(`eff_stake`, DOUBLE) DESC";
