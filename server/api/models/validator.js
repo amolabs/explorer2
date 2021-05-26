@@ -10,10 +10,7 @@ async function getOne(chain_id, address) {
         sa.`val_addr` `address`, sa.`val_pubkey` `pubkey`, \
         sa.`val_power` `power`, \
         sa.`address` `owner`, sa.`stake`, sa.`eff_stake`, \
-        //n.`node_id`, n.`ip_addr` \
       FROM `s_accounts` sa \
-        //LEFT JOIN `nodes` n \
-        //ON sa.`chain_id` = n.`chain_id` AND sa.`val_addr` = n.`val_addr` \
       WHERE sa.`chain_id` = ? AND sa.`val_addr` = ?";
     query_var = [chain_id, address];
     var val = {};
@@ -32,10 +29,7 @@ async function getList(chain_id) {
         sa.`val_addr` `address`, sa.`val_pubkey` `pubkey`, \
         sa.`val_power` `power`, \
         sa.`address` `owner`, sa.`stake`, sa.`eff_stake`, \
-        //n.`node_id`, n.`ip_addr` \
       FROM `s_accounts` sa \
-        //LEFT JOIN `nodes` n \
-        //ON sa.`chain_id` = n.`chain_id` AND sa.`val_addr` = n.`val_addr` \
       WHERE sa.`chain_id` = ? AND sa.`val_addr` IS NOT NULL \
       ORDER BY CONVERT(`eff_stake`, DOUBLE) DESC";
     var query_var = [chain_id];
