@@ -6,6 +6,7 @@ state db builder
 """
 
 # standard imports
+import os
 import argparse
 import json
 import time
@@ -18,12 +19,32 @@ from filelock import FileLock, Timeout
 
 import dbproxy
 import block
+import tx
 import stats
 import models
 
 
 class Builder:
     def __init__(self, chain_id, db=None):
+        # read config
+        config_dir = os.path.dirname(os.path.abspath(__file__)) + '/..'
+        configfile = config_dir + '/config.json'
+        config = None
+        try:
+            f = open(configfile, "r")
+            config = json.load(f)
+        except OSError as e:
+            print(f'Unable to read config({configfile}):', e)
+            config = {}
+        else:
+            f.close()
+        yappers = config.get('yappers')
+        if yappers is not None:
+            tx.set_yappers(yappers)
+            print('yappers are set to:')
+            for y in tx.yappers:
+                print(f'  {y}')
+
         if chain_id is None:
             raise ArgError('no chain_id is given.')
         self.chain_id = chain_id

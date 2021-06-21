@@ -128,9 +128,10 @@ def tx_transfer(tx, cursor):
 
         parcel.owner = recp.address
         parcel.save(cursor)
-        rel = models.RelParcelTx(tx.chain_id, parcel.parcel_id, tx.height,
-                                 tx.index)
-        rel.save(cursor)
+        if tx.sender not in yappers:
+            rel = models.RelParcelTx(tx.chain_id, parcel.parcel_id, tx.height,
+                                     tx.index)
+            rel.save(cursor)
 
     else:
         amount = int(payload['amount'])
@@ -293,9 +294,10 @@ def tx_register(tx, cursor):
     parcel.extra = json.dumps(payload.get('extra', {}))
     parcel.on_sale = True
     parcel.save(cursor)
-    rel = models.RelParcelTx(tx.chain_id, parcel.parcel_id, tx.height,
-                             tx.index)
-    rel.save(cursor)
+    if tx.sender not in yappers:
+        rel = models.RelParcelTx(tx.chain_id, parcel.parcel_id, tx.height,
+                                 tx.index)
+        rel.save(cursor)
 
     if storage.registration_fee > 0:
         owner.balance -= storage.registration_fee
@@ -321,9 +323,10 @@ def tx_discard(tx, cursor):
 
     parcel.on_sale = False
     parcel.save(cursor)
-    rel = models.RelParcelTx(tx.chain_id, parcel.parcel_id, tx.height,
-                             tx.index)
-    rel.save(cursor)
+    if tx.sender not in yappers:
+        rel = models.RelParcelTx(tx.chain_id, parcel.parcel_id, tx.height,
+                                 tx.index)
+        rel.save(cursor)
 
 
 def tx_request(tx, cursor):
@@ -341,9 +344,10 @@ def tx_request(tx, cursor):
     request.dealer_fee = payload['dealer_fee']
     request.extra = json.dumps(payload.get('extra', {}))
     request.save(cursor)
-    rel = models.RelParcelTx(tx.chain_id, parcel.parcel_id, tx.height,
-                             tx.index)
-    rel.save(cursor)
+    if tx.sender not in yappers:
+        rel = models.RelParcelTx(tx.chain_id, parcel.parcel_id, tx.height,
+                                 tx.index)
+        rel.save(cursor)
 
     if request.dealer is not None:
         buyer.balance -= request.dealer_fee
@@ -370,9 +374,10 @@ def tx_cancel(tx, cursor):
     rel.save(cursor)
 
     request.delete(cursor)
-    rel = models.RelParcelTx(tx.chain_id, request.parcel_id, tx.height,
-                             tx.index)
-    rel.save(cursor)
+    if tx.sender not in yappers:
+        rel = models.RelParcelTx(tx.chain_id, request.parcel_id, tx.height,
+                                 tx.index)
+        rel.save(cursor)
 
 
 def tx_grant(tx, cursor):
@@ -400,9 +405,10 @@ def tx_grant(tx, cursor):
     usage.custody = payload['custody']
     usage.extra = json.dumps(payload.get('extra', {}))
     usage.save(cursor)
-    rel = models.RelParcelTx(tx.chain_id, parcel.parcel_id, tx.height,
-                             tx.index)
-    rel.save(cursor)
+    if tx.sender not in yappers:
+        rel = models.RelParcelTx(tx.chain_id, parcel.parcel_id, tx.height,
+                                 tx.index)
+        rel.save(cursor)
 
     owner.balance += request.payment
     if request.dealer is not None:
@@ -439,9 +445,10 @@ def tx_revoke(tx, cursor):
     usage = models.Usage(tx.chain_id, payload['target'], grantee, cursor)
 
     usage.delete(cursor)
-    rel = models.RelParcelTx(tx.chain_id, usage.parcel_id, tx.height,
-                             tx.index)
-    rel.save(cursor)
+    if tx.sender not in yappers:
+        rel = models.RelParcelTx(tx.chain_id, usage.parcel_id, tx.height,
+                                 tx.index)
+        rel.save(cursor)
 
 
 def tx_issue(tx, cursor):
@@ -503,6 +510,14 @@ def tx_vote(tx, cursor):
 
     vote.approve = payload['approve']
     vote.save(cursor)
+
+
+yappers = []
+
+
+def set_yappers(addresses):
+    global yappers
+    yappers += addresses
 
 
 processorMap = {
