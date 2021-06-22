@@ -88,16 +88,20 @@ async function getParcelHistory(chain_id, parcel_id, top, from, num) {
     var query_str;
     var query_var;
     query_str = "\
-      SELECT c_txs.* \
-      FROM r_parcel_tx rpt \
-        LEFT JOIN c_txs ON rpt.chain_id = c_txs.chain_id \
-        AND rpt.height = c_txs.height AND rpt.`index` = c_txs.`index` \
-      WHERE rpt.chain_id = ? \
-        AND rpt.`parcel_id` = ? \
-        AND rpt.height < ? \
-      ORDER BY `height` DESC, `index` DESC LIMIT ?, ? \
+      SELECT rpt.`chain_id`, rpt.`parcel_id`, rpt.`height`, rpt.`index`, \
+        ct.`type` `tx_type`, ct.`hash` `tx_hash`, \
+        ct.`sender` `tx_sender`, \
+        ct.fee `tx_fee`, ct.payload `tx_payload` \
+      FROM `r_parcel_tx` rpt \
+        LEFT JOIN `c_txs` ct \
+        ON rpt.`chain_id` = ct.`chain_id` \
+          AND rpt.`height` = ct.`height` \
+          AND rpt.`index` = ct.`index`  \
+      WHERE rpt.`chain_id` = ? AND rpt.`parcel_id` = ? \
+      ORDER BY rpt.`height` DESC, rpt.`index` DESC \
+      LIMIT ?, ? \
     ";
-    query_var = [chain_id, parcel_id, top, from, num];
+    query_var = [chain_id, parcel_id, from, num];
     db.query(query_str, query_var, function(err, rows, fields) {
       if (err) {
         return reject(err);
