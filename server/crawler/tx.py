@@ -152,6 +152,14 @@ def tx_transfer(tx, cursor):
         rel.amount += amount
         rel.save(cursor)
 
+        if recp.address == '000000000000000000000000000000000000DEAD':
+            # This account is used for ad-hoc burning process, the balance of
+            # this account is considered out of normal operation from now. So
+            # let's decrease the amount of active coins permanently.
+            asset_stat = stats.Asset(tx.chain_id, cursor)
+            asset_stat.active_coins -= amount
+            asset_stat.save(cursor)
+
 
 def tx_stake(tx, cursor):
     payload = json.loads(tx.payload)
