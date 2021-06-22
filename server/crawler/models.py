@@ -10,7 +10,7 @@ class Account:
         self.address = address
         self.balance = 0
         self.stake = 0
-        self.stake_locked = 0 # stake_unlocked = stake - stake_locked
+        self.stake_locked = 0  # stake_unlocked = stake - stake_locked
         self.eff_stake = 0
         self.val_addr = None
         self.val_pubkey = None
@@ -100,7 +100,7 @@ class Storage:
         values = vars(self).copy()
         values['registration_fee'] = str(values['registration_fee'])
         values['hosting_fee'] = str(values['hosting_fee'])
-        values['active'] = str(int(values['active'] == True))
+        values['active'] = str(int(values['active'] is True))
         cursor.execute(
             """
             UPDATE `s_storages`
@@ -553,7 +553,7 @@ class RelAccountTx:
 
 
 class RelParcelTx:
-    def __init__(self, chain_id, parcel_id, height, index, cursor):
+    def __init__(self, chain_id, parcel_id, height, index):
         self.chain_id = chain_id
         self.parcel_id = parcel_id
         self.height = height

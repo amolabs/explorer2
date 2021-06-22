@@ -217,7 +217,7 @@ class Builder:
         self.lock.release()
 
     def watch(self):
-        self.print_log(f'Waiting for new block from db')
+        self.print_log('Waiting for new block from db')
         while True:
             time.sleep(2)
             self.refresh_roof()

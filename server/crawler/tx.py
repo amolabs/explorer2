@@ -35,7 +35,9 @@ class Tx:
         self.type = parsed['type']
         self.sender = parsed['sender']
         self.fee = int(parsed['fee'])
-        self.last_height = int(parsed['last_height'] if parsed['last_height'] != "" else "0")
+        self.last_height = int(
+            parsed['last_height'] if parsed['last_height'] != "" else "0"
+        )
         self.payload = json.dumps(parsed['payload'])
 
     def set_result(self, result):
@@ -147,8 +149,8 @@ def tx_transfer(tx, cursor):
         recp = models.Account(tx.chain_id, payload['to'], cursor)
         recp.balance += amount
         recp.save(cursor)
-        rel = models.RelAccountTx(tx.chain_id, payload['to'], tx.height, tx.index,
-                                  cursor)
+        rel = models.RelAccountTx(tx.chain_id, payload['to'], tx.height,
+                                  tx.index, cursor)
         rel.amount += amount
         rel.save(cursor)
 
@@ -294,10 +296,10 @@ def tx_register(tx, cursor):
     storage = models.Storage(tx.chain_id, parcel.storage_id, None, cursor)
 
     parcel.custody = payload['custody']
-    if parcel.custody != None and len(parcel.custody) > 100:
+    if parcel.custody is not None and len(parcel.custody) > 100:
         parcel.custody = parcel.custody[:100]
     parcel.proxy_account = payload.get('proxy_account', None)
-    if parcel.proxy_account != None and len(parcel.proxy_account) > 40:
+    if parcel.proxy_account is not None and len(parcel.proxy_account) > 40:
         parcel.proxy_account = parcel.proxy_account[:40]
     parcel.extra = json.dumps(payload.get('extra', {}))
     parcel.on_sale = True
@@ -407,6 +409,7 @@ def tx_grant(tx, cursor):
     # `request` or `grant` tx. So, we need to explicitly create a grantee or
     # recipient account in s_accounts table.
     buyer = models.Account(tx.chain_id, grantee, cursor)
+    buyer.save(cursor)
     request = models.Request(tx.chain_id, payload['target'], grantee, cursor)
     usage = models.Usage(tx.chain_id, payload['target'], grantee, cursor)
 
