@@ -495,8 +495,11 @@ def tx_burn(tx, cursor):
     payload = json.loads(tx.payload)
     payload['amount'] = int(payload['amount'])
 
-    udc_bal = models.UDCBalance(tx.chain_id, payload['udc'], tx.sender, cursor)
+    udc = models.UDC(tx.chain_id, payload['udc'], cursor)
+    udc.total -= payload['amount']
+    udc.save(cursor)
 
+    udc_bal = models.UDCBalance(tx.chain_id, payload['udc'], tx.sender, cursor)
     udc_bal.balance -= payload['amount']
     udc_bal.save(cursor)
 
