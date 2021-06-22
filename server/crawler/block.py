@@ -165,6 +165,9 @@ class Block:
                     recp = models.Account(self.chain_id, addr, cursor)
                     recp.balance += int(ev['attr']['amount'].strip('"'))
                     asset_stat.active_coins += int(ev['attr']['amount'].strip('"'))
+                    if recp.balance < 0:  # revert
+                        recp.balance -= int(ev['attr']['amount'].strip('"'))
+                        asset_stat.active_coins -= int(ev['attr']['amount'].strip('"'))
                     recp.save(cursor)
                     rel = models.RelAccountBlock(self.chain_id, addr,
                                                  self.height, cursor)
