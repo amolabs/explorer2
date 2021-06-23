@@ -552,6 +552,54 @@ class RelAccountTx:
                 """, values)
 
 
+class RelBalanceTx:
+    def __init__(self, chain_id, udc_id, address, height, index, cursor):
+        self.chain_id = chain_id
+        self.address = address
+        self.udc_id = udc_id
+        self.height = height
+        self.index = index
+        self.amount = 0
+        cursor.execute(
+            """
+            SELECT * FROM `r_balance_tx`
+            WHERE (`chain_id` = %(chain_id)s
+                AND `udc_id` = %(udc_id)s AND `address` = %(address)s
+                AND `height` = %(height)s AND `index` = %(index)s)
+            """, vars(self))
+        row = cursor.fetchone()
+        if row:
+            d = dict(zip(cursor.column_names, row))
+            self.amount = int(d['amount'])
+            self.new = False
+        else:
+            self.amount = 0
+            self.new = True
+
+    def save(self, cursor):
+        values = vars(self).copy()
+        values['amount'] = str(values['amount'])
+        if self.new and self.amount != 0:
+            cursor.execute(
+                """
+                INSERT INTO `r_balance_tx` (
+                    `chain_id`, `udc_id`, `address`,
+                    `height`, `index`, `amount`)
+                VALUES (%(chain_id)s, %(udc_id)s, %(address)s,
+                    %(height)s, %(index)s, %(amount)s)
+                """, values)
+        else:
+            cursor.execute(
+                """
+                UPDATE `r_balance_tx`
+                SET
+                    `amount` = %(amount)s
+                WHERE (`chain_id` = %(chain_id)s
+                    AND `udc_id` = %(udc_id)s AND `address` = %(address)s
+                    AND `height` = %(height)s AND `index` = %(index)s)
+                """, values)
+
+
 class RelParcelTx:
     def __init__(self, chain_id, parcel_id, height, index):
         self.chain_id = chain_id

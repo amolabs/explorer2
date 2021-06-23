@@ -137,30 +137,49 @@ def tx_transfer(tx, cursor):
 
     else:
         amount = int(payload['amount'])
+        udc = payload.get('udc')
 
-        sender = models.Account(tx.chain_id, tx.sender, cursor)
-        sender.balance -= amount
-        sender.save(cursor)
-        rel = models.RelAccountTx(tx.chain_id, tx.sender, tx.height, tx.index,
-                                  cursor)
-        rel.amount -= amount
-        rel.save(cursor)
+        if udc is None:
+            sender = models.Account(tx.chain_id, tx.sender, cursor)
+            sender.balance -= amount
+            sender.save(cursor)
+            rel = models.RelAccountTx(tx.chain_id, tx.sender, tx.height,
+                                      tx.index, cursor)
+            rel.amount -= amount
+            rel.save(cursor)
 
-        recp = models.Account(tx.chain_id, payload['to'], cursor)
-        recp.balance += amount
-        recp.save(cursor)
-        rel = models.RelAccountTx(tx.chain_id, payload['to'], tx.height,
-                                  tx.index, cursor)
-        rel.amount += amount
-        rel.save(cursor)
+            recp = models.Account(tx.chain_id, payload['to'], cursor)
+            recp.balance += amount
+            recp.save(cursor)
+            rel = models.RelAccountTx(tx.chain_id, payload['to'], tx.height,
+                                      tx.index, cursor)
+            rel.amount += amount
+            rel.save(cursor)
 
-        if recp.address == '000000000000000000000000000000000000DEAD':
-            # This account is used for ad-hoc burning process, the balance of
-            # this account is considered out of normal operation from now. So
-            # let's decrease the amount of active coins permanently.
-            asset_stat = stats.Asset(tx.chain_id, cursor)
-            asset_stat.active_coins -= amount
-            asset_stat.save(cursor)
+            if recp.address == '000000000000000000000000000000000000DEAD':
+                # This account is used for ad-hoc burning process, the balance
+                # of this account is considered out of normal operation from
+                # now. So let's decrease the amount of active coins
+                # permanently.
+                asset_stat = stats.Asset(tx.chain_id, cursor)
+                asset_stat.active_coins -= amount
+                asset_stat.save(cursor)
+        else:
+            sender = models.UDCBalance(tx.chain_id, udc, tx.sender, cursor)
+            sender.balance -= amount
+            sender.save(cursor)
+            rel = models.RelBalanceTx(tx.chain_id, udc, tx.sender,
+                                      tx.height, tx.index, cursor)
+            rel.amount -= amount
+            rel.save(cursor)
+
+            recp = models.UDCBalance(tx.chain_id, udc, payload['to'], cursor)
+            recp.balance += amount
+            recp.save(cursor)
+            rel = models.RelBalanceTx(tx.chain_id, udc, payload['to'],
+                                      tx.height, tx.index, cursor)
+            rel.amount += amount
+            rel.save(cursor)
 
 
 def tx_stake(tx, cursor):
@@ -464,7 +483,7 @@ def tx_revoke(tx, cursor):
 
 def tx_issue(tx, cursor):
     payload = json.loads(tx.payload)
-    payload['amount'] = int(payload['amount'])
+    amount = int(payload['amount'])
 
     udc = models.UDC(tx.chain_id, payload['udc'], cursor)
     issuer = models.UDCBalance(tx.chain_id, udc.udc_id, tx.sender, cursor)
@@ -473,35 +492,50 @@ def tx_issue(tx, cursor):
         udc.owner = tx.sender
     udc.desc = payload['desc'] if 'desc' in payload else ''
     udc.operators = json.dumps(payload.get('operators', []))
-    udc.total += payload['amount']
+    udc.total += amount
     udc.save(cursor)
 
-    issuer.balance += payload['amount']
+    issuer.balance += amount
     issuer.save(cursor)
+
+    rel = models.RelBalanceTx(tx.chain_id, udc, tx.sender,
+                              tx.height, tx.index, cursor)
+    rel.amount += amount
+    rel.save(cursor)
 
 
 def tx_lock(tx, cursor):
     payload = json.loads(tx.payload)
-    payload['amount'] = int(payload['amount'])
+    amount = int(payload['amount'])
+    udc = payload['udc']
 
-    udc_bal = models.UDCBalance(tx.chain_id, payload['udc'], payload['holder'],
+    udc_bal = models.UDCBalance(tx.chain_id, udc, payload['holder'],
                                 cursor)
-
-    udc_bal.balance_lock = payload['amount']
+    udc_bal.balance_lock = amount
     udc_bal.save(cursor)
+
+    rel = models.RelBalanceTx(tx.chain_id, udc, tx.sender,
+                              tx.height, tx.index, cursor)
+    rel.amount = 0  # zero amount relation just to record the lock event
+    rel.save(cursor)
 
 
 def tx_burn(tx, cursor):
     payload = json.loads(tx.payload)
-    payload['amount'] = int(payload['amount'])
+    amount = int(payload['amount'])
 
     udc = models.UDC(tx.chain_id, payload['udc'], cursor)
-    udc.total -= payload['amount']
+    udc.total -= amount
     udc.save(cursor)
 
     udc_bal = models.UDCBalance(tx.chain_id, payload['udc'], tx.sender, cursor)
-    udc_bal.balance -= payload['amount']
+    udc_bal.balance -= amount
     udc_bal.save(cursor)
+
+    rel = models.RelBalanceTx(tx.chain_id, udc.udc_id, tx.sender,
+                              tx.height, tx.index, cursor)
+    rel.amount -= amount
+    rel.save(cursor)
 
 
 def tx_propose(tx, cursor):
