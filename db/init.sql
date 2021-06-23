@@ -330,3 +330,23 @@ CREATE TABLE `r_parcel_tx` (
   CONSTRAINT `r_parcel_tx_FK` FOREIGN KEY (`chain_id`, `parcel_id`) REFERENCES `s_parcels` (`chain_id`, `parcel_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `r_parcel_tx_FK_1` FOREIGN KEY (`chain_id`, `height`, `index`) REFERENCES `c_txs` (`chain_id`, `height`, `index`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- explorer.r_balance_tx definition
+
+CREATE TABLE `r_balance_tx` (
+  `seq` int(11) NOT NULL AUTO_INCREMENT,
+  `chain_id` char(32) NOT NULL,
+  `address` char(40) NOT NULL,
+  `height` int(11) NOT NULL,
+  `index` int(11) NOT NULL,
+  `amount` char(40) NOT NULL DEFAULT '0',
+  `udc_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`seq`),
+  KEY `account_FK` (`chain_id`,`address`),
+  KEY `tx_FK` (`chain_id`,`height`,`index`),
+  KEY `udc_balance_FK` (`chain_id`,`udc_id`,`address`),
+  CONSTRAINT `account_FK` FOREIGN KEY (`chain_id`, `address`) REFERENCES `s_accounts` (`chain_id`, `address`),
+  CONSTRAINT `tx_FK` FOREIGN KEY (`chain_id`, `height`, `index`) REFERENCES `c_txs` (`chain_id`, `height`, `index`),
+  CONSTRAINT `udc_balance_FK` FOREIGN KEY (`chain_id`, `udc_id`, `address`) REFERENCES `s_udc_balances` (`chain_id`, `udc_id`, `address`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4;
