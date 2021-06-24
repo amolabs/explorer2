@@ -498,7 +498,7 @@ def tx_issue(tx, cursor):
     issuer.balance += amount
     issuer.save(cursor)
 
-    rel = models.RelBalanceTx(tx.chain_id, udc, tx.sender,
+    rel = models.RelBalanceTx(tx.chain_id, udc.udc_id, tx.sender,
                               tx.height, tx.index, cursor)
     rel.amount += amount
     rel.save(cursor)
@@ -528,7 +528,7 @@ def tx_burn(tx, cursor):
     udc.total -= amount
     udc.save(cursor)
 
-    udc_bal = models.UDCBalance(tx.chain_id, payload['udc'], tx.sender, cursor)
+    udc_bal = models.UDCBalance(tx.chain_id, udc.udc_id, tx.sender, cursor)
     udc_bal.balance -= amount
     udc_bal.save(cursor)
 
