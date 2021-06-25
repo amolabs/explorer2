@@ -16,6 +16,7 @@ const swaggerOptions = {
     'routes/blocks.js',
     'routes/txs.js',
     'routes/accounts.js',
+    'routes/udcs.js',
     'routes/validators.js',
     'routes/drafts.js',
     'routes/incentives.js',

@@ -8,6 +8,8 @@ const relation = require('../models/relation');
 const handleAccountIncentives = require('./incentives').handleAccountIncentives;
 const handleAccountPenalties = require('./penalties').handleAccountPenalties;
 
+const udcs = require('./udcs');
+
 /**
  * @swagger
  * definitions:
@@ -392,5 +394,12 @@ router.get('/:address([a-fA-F0-9]+)/parcels', function(req, res) {
       res.send(err);
     });
 });
+
+router.param('address', function(req, res, next, val) {
+  res.locals.address = val;
+  next();
+});
+
+router.use('/:address([a-fA-F0-9]+)/udcs', udcs);
 
 module.exports = router;
