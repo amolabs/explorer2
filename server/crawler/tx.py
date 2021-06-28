@@ -122,6 +122,15 @@ def tx_unknown(tx, cursor):
 
 def tx_transfer(tx, cursor):
     payload = json.loads(tx.payload)
+
+    # NOTE: This is line is for creating buyer account in s_accounts table. It
+    # is necessary to satisfy the foreign key constraint. Even if we create a
+    # row for each tx sender, it is not the case for the recipient for
+    # `request` or `grant` tx. So, we need to explicitly create a grantee or
+    # recipient account in s_accounts table.
+    recp = models.Account(tx.chain_id, payload['to'], cursor)
+    recp.save(cursor)
+
     if payload.get('parcel'):
         owner = models.Account(tx.chain_id, tx.sender, cursor)
         parcel = models.Parcel(tx.chain_id, payload['target'], owner.address,
