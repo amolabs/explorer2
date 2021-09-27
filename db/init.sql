@@ -350,6 +350,38 @@ CREATE TABLE `r_parcel_tx` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
+-- explorer.r_did_tx definition
+
+CREATE TABLE `r_did_tx` (
+  `seq` int(11) NOT NULL AUTO_INCREMENT,
+  `chain_id` char(32) NOT NULL,
+  `id` char(48) NOT NULL,
+  `height` int(11) NOT NULL,
+  `index` int(11) NOT NULL,
+  PRIMARY KEY (`seq`),
+  KEY `r_did_tx_FK` (`chain_id`,`id`),
+  KEY `r_did_tx_FK_1` (`chain_id`,`height`,`index`),
+  CONSTRAINT `r_did_tx_FK` FOREIGN KEY (`chain_id`, `id`) REFERENCES `s_dids` (`chain_id`, `id`),
+  CONSTRAINT `r_did_tx_FK_1` FOREIGN KEY (`chain_id`, `height`, `index`) REFERENCES `c_txs` (`chain_id`, `height`, `index`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- explorer.r_vc_tx definition
+
+CREATE TABLE `r_vc_tx` (
+  `seq` int(11) NOT NULL AUTO_INCREMENT,
+  `chain_id` char(32) NOT NULL,
+  `id` char(48) NOT NULL,
+  `height` int(11) NOT NULL,
+  `index` int(11) NOT NULL,
+  PRIMARY KEY (`seq`),
+  KEY `r_vc_tx_FK` (`chain_id`,`id`),
+  KEY `r_vc_tx_FK_1` (`chain_id`,`height`,`index`),
+  CONSTRAINT `r_vc_tx_FK` FOREIGN KEY (`chain_id`, `id`) REFERENCES `s_vcs` (`chain_id`, `id`),
+  CONSTRAINT `r_vc_tx_FK_1` FOREIGN KEY (`chain_id`, `height`, `index`) REFERENCES `c_txs` (`chain_id`, `height`, `index`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 -- explorer.nodes definition
 
 CREATE TABLE `nodes` (
