@@ -569,6 +569,38 @@ def tx_vote(tx, cursor):
     vote.save(cursor)
 
 
+def tx_did_claim(tx, cursor):
+    payload = json.loads(tx.payload)
+
+    owner = models.Account(tx.chain_id, tx.sender, cursor)
+    did = models.DID(tx.chain_id, payload['target'], owner.address, cursor)
+    did.document = payload['document']
+    did.save(cursor)
+
+
+def tx_did_dismiss(tx, cursor):
+    payload = json.loads(tx.payload)
+
+    did = models.DID(tx.chain_id, payload['target'], None, cursor)
+    did.delete(cursor)
+
+
+def tx_did_issue(tx, cursor):
+    payload = json.loads(tx.payload)
+
+    issuer = models.Account(tx.chain_id, tx.sender, cursor)
+    vc = models.VC(tx.chain_id, payload['target'], issuer.address, cursor)
+    vc.credential = payload['credential']
+    vc.save(cursor)
+
+
+def tx_did_revoke(tx, cursor):
+    payload = json.loads(tx.payload)
+
+    vc = models.VC(tx.chain_id, payload['target'], None, cursor)
+    vc.delete(cursor)
+
+
 yappers = []
 
 
@@ -596,4 +628,8 @@ processorMap = {
     'burn': tx_burn,
     'propose': tx_propose,
     'vote': tx_vote,
+    'did.claim': tx_did_claim,
+    'did.dismiss': tx_did_dismiss,
+    'did.issue': tx_did_issue,
+    'did.revoke': tx_did_revoke,
 }

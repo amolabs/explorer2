@@ -466,6 +466,90 @@ class UDCBalance:
             """, values)
 
 
+class DID:
+    def __init__(self, chain_id, did, owner, cursor):
+        self.chain_id = chain_id
+        self.id = did
+        self.owner = owner
+        self.document = "{}"
+        cursor.execute(
+            """
+            SELECT * FROM `s_dids`
+            WHERE (`chain_id` = %(chain_id)s AND `id` = %(id)s)
+            """, vars(self))
+        row = cursor.fetchone()
+        if row:
+            d = dict(zip(cursor.column_names, row))
+            self.owner = d['owner']
+            self.document = d['document']
+        else:
+            cursor.execute(
+                """
+                INSERT INTO `s_dids`
+                    (`chain_id`, `id`, `owner`, `document`)
+                VALUES (%(chain_id)s, %(id)s, %(owner)s, %(document)s)
+                """, vars(self))
+
+    def save(self, cursor):
+        values = vars(self).copy()
+        cursor.execute(
+            """
+            UPDATE `s_dids`
+            SET
+                `document` = %(document)s
+            WHERE (`chain_id` = %(chain_id)s AND `id` = %(id)s)
+            """, values)
+
+    def delete(self, cursor):
+        cursor.execute(
+            """
+            DELETE FROM `s_dids`
+            WHERE (`chain_id` = %(chain_id)s AND `id` = %(id)s
+            """, vars(self))
+
+
+class VC:
+    def __init__(self, chain_id, vcid, issuer, cursor):
+        self.chain_id = chain_id
+        self.id = vcid
+        self.issuer = issuer
+        self.credential = "{}"
+        cursor.execute(
+            """
+            SELECT * FROM `s_vcs`
+            WHERE (`chain_id` = %(chain_id)s AND `id` = %(id)s)
+            """, vars(self))
+        row = cursor.fetchone()
+        if row:
+            d = dict(zip(cursor.column_names, row))
+            self.issuer = d['issuer']
+            self.credential = d['credential']
+        else:
+            cursor.execute(
+                """
+                INSERT INTO `s_vcs`
+                    (`chain_id`, `id`, `issuer`, `credential`)
+                VALUES (%(chain_id)s, %(id)s, %(issuer)s, %(credential)s)
+                """, vars(self))
+
+    def save(self, cursor):
+        values = vars(self).copy()
+        cursor.execute(
+            """
+            UPDATE `s_vcs`
+            SET
+                `credential` = %(credential)s
+            WHERE (`chain_id` = %(chain_id)s AND `id` = %(id)s)
+            """, values)
+
+    def delete(self, cursor):
+        cursor.execute(
+            """
+            DELETE FROM `s_vcs`
+            WHERE (`chain_id` = %(chain_id)s AND `id` = %(id)s
+            """, vars(self))
+
+
 class RelAccountBlock:
     def __init__(self, chain_id, address, height, cursor):
         self.chain_id = chain_id
