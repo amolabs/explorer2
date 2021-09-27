@@ -23,9 +23,14 @@ import tx
 import stats
 import models
 
+# for typing
+from mysql.connector import MySQLConnection, CMySQLConnection
+from typing import Union
+
 
 class Builder:
-    def __init__(self, chain_id, db=None):
+    def __init__(self, chain_id,
+                 db: Union[MySQLConnection, CMySQLConnection] = None):
         # read config
         config_dir = os.path.dirname(os.path.abspath(__file__)) + '/..'
         configfile = config_dir + '/config.json'

@@ -7,6 +7,10 @@ import os
 import mysql.connector
 from mysql.connector import Error as DBError
 
+# for typing
+from mysql.connector import MySQLConnection, CMySQLConnection
+from typing import Union
+
 c_tables = ['c_genesis', 'c_txs', 'c_blocks']
 s_tables = ['s_requests', 's_usages', 's_parcels', 's_storages',
             's_votes', 's_drafts', 's_incentives', 's_penalties',
@@ -15,7 +19,7 @@ s_tables = ['s_requests', 's_usages', 's_parcels', 's_storages',
 r_tables = ['r_account_block', 'r_account_tx', 'r_parcel_tx', 'r_balance_tx']
 
 
-def connect_db():
+def connect_db() -> Union[MySQLConnection, CMySQLConnection]:
     # read config
     config_dir = os.path.dirname(os.path.abspath(__file__)) + '/../../db'
     dbconfigfile = config_dir + '/config.json'
@@ -26,7 +30,7 @@ def connect_db():
         dbconfig = cfg['db']
     except OSError as e:
         print("Unable to read DB config:", e)
-        return None
+        raise e
     else:
         f.close()
 
@@ -44,7 +48,7 @@ def connect_db():
         )
     except DBError as e:
         print("DB connection error", e)
-        return None
+        raise e
     else:
         print("DB connected")
         return db
