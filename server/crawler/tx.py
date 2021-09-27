@@ -582,7 +582,8 @@ def tx_did_dismiss(tx, cursor):
     payload = json.loads(tx.payload)
 
     did = models.DID(tx.chain_id, payload['target'], None, cursor)
-    did.delete(cursor)
+    did.active = False
+    did.save(cursor)
 
 
 def tx_did_issue(tx, cursor):
@@ -598,7 +599,8 @@ def tx_did_revoke(tx, cursor):
     payload = json.loads(tx.payload)
 
     vc = models.VC(tx.chain_id, payload['target'], None, cursor)
-    vc.delete(cursor)
+    vc.active = False
+    vc.save(cursor)
 
 
 yappers = []

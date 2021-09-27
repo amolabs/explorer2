@@ -472,6 +472,7 @@ class DID:
         self.id = did
         self.owner = owner
         self.document = "{}"
+        self.active = True
         cursor.execute(
             """
             SELECT * FROM `s_dids`
@@ -482,12 +483,14 @@ class DID:
             d = dict(zip(cursor.column_names, row))
             self.owner = d['owner']
             self.document = d['document']
+            self.active = d['active']
         else:
             cursor.execute(
                 """
                 INSERT INTO `s_dids`
-                    (`chain_id`, `id`, `owner`, `document`)
-                VALUES (%(chain_id)s, %(id)s, %(owner)s, %(document)s)
+                    (`chain_id`, `id`, `owner`, `document`, `active`)
+                VALUES (%(chain_id)s, %(id)s, %(owner)s, %(document)s,
+                    %(active)s)
                 """, vars(self))
 
     def save(self, cursor):
@@ -496,7 +499,8 @@ class DID:
             """
             UPDATE `s_dids`
             SET
-                `document` = %(document)s
+                `document` = %(document)s,
+                `active` = %(active)s
             WHERE (`chain_id` = %(chain_id)s AND `id` = %(id)s)
             """, values)
 
@@ -514,6 +518,7 @@ class VC:
         self.id = vcid
         self.issuer = issuer
         self.credential = "{}"
+        self.active = True
         cursor.execute(
             """
             SELECT * FROM `s_vcs`
@@ -524,12 +529,14 @@ class VC:
             d = dict(zip(cursor.column_names, row))
             self.issuer = d['issuer']
             self.credential = d['credential']
+            self.active = d['active']
         else:
             cursor.execute(
                 """
                 INSERT INTO `s_vcs`
-                    (`chain_id`, `id`, `issuer`, `credential`)
-                VALUES (%(chain_id)s, %(id)s, %(issuer)s, %(credential)s)
+                    (`chain_id`, `id`, `issuer`, `credential`, `active`)
+                VALUES (%(chain_id)s, %(id)s, %(issuer)s, %(credential)s,
+                    %(active)s)
                 """, vars(self))
 
     def save(self, cursor):
@@ -538,7 +545,8 @@ class VC:
             """
             UPDATE `s_vcs`
             SET
-                `credential` = %(credential)s
+                `credential` = %(credential)s,
+                `active` = %(active)s
             WHERE (`chain_id` = %(chain_id)s AND `id` = %(id)s)
             """, values)
 

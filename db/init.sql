@@ -117,6 +117,7 @@ CREATE TABLE `s_dids` (
   `id` char(48) NOT NULL,
   `owner` char(40) NOT NULL,
   `document` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`document`)),
+  `active` tinyint(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`chain_id`,`id`),
   KEY `did_owner_FK` (`chain_id`,`owner`),
   CONSTRAINT `did_owner_FK` FOREIGN KEY (`chain_id`, `owner`) REFERENCES `s_accounts` (`chain_id`, `address`)
@@ -130,6 +131,7 @@ CREATE TABLE `s_vcs` (
   `id` char(48) NOT NULL,
   `issuer` char(40) NOT NULL,
   `cred` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`cred`)),
+  `active` tinyint(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`chain_id`,`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
