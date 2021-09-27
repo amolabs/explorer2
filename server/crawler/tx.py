@@ -577,6 +577,9 @@ def tx_did_claim(tx, cursor):
     did.document = payload['document']
     did.save(cursor)
 
+    rel = models.RelDIDTx(tx.chain_id, did.id, tx.height, tx.index)
+    rel.save(cursor)
+
 
 def tx_did_dismiss(tx, cursor):
     payload = json.loads(tx.payload)
@@ -584,6 +587,9 @@ def tx_did_dismiss(tx, cursor):
     did = models.DID(tx.chain_id, payload['target'], None, cursor)
     did.active = False
     did.save(cursor)
+
+    rel = models.RelDIDTx(tx.chain_id, did.id, tx.height, tx.index)
+    rel.save(cursor)
 
 
 def tx_did_issue(tx, cursor):
@@ -594,6 +600,9 @@ def tx_did_issue(tx, cursor):
     vc.credential = payload['credential']
     vc.save(cursor)
 
+    rel = models.RelVCTx(tx.chain_id, vc.id, tx.height, tx.index)
+    rel.save(cursor)
+
 
 def tx_did_revoke(tx, cursor):
     payload = json.loads(tx.payload)
@@ -601,6 +610,9 @@ def tx_did_revoke(tx, cursor):
     vc = models.VC(tx.chain_id, payload['target'], None, cursor)
     vc.active = False
     vc.save(cursor)
+
+    rel = models.RelVCTx(tx.chain_id, vc.id, tx.height, tx.index)
+    rel.save(cursor)
 
 
 yappers = []

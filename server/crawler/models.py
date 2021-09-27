@@ -707,3 +707,37 @@ class RelParcelTx:
                 `chain_id`, `parcel_id`, `height`, `index`)
             VALUES (%(chain_id)s, %(parcel_id)s, %(height)s, %(index)s)
             """, values)
+
+
+class RelDIDTx:
+    def __init__(self, chain_id, did, height, index):
+        self.chain_id = chain_id
+        self.id = did
+        self.height = height
+        self.index = index
+
+    def save(self, cursor):
+        values = vars(self).copy()
+        cursor.execute(
+            """
+            INSERT INTO `r_did_tx` (
+                `chain_id`, `id`, `height`, `index`)
+            VALUES (%(chain_id)s, %(id)s, %(height)s, %(index)s)
+            """, values)
+
+
+class RelVCTx:
+    def __init__(self, chain_id, vcid, height, index):
+        self.chain_id = chain_id
+        self.id = vcid
+        self.height = height
+        self.index = index
+
+    def save(self, cursor):
+        values = vars(self).copy()
+        cursor.execute(
+            """
+            INSERT INTO `r_vc_tx` (
+                `chain_id`, `id`, `height`, `index`)
+            VALUES (%(chain_id)s, %(id)s, %(height)s, %(index)s)
+            """, values)
