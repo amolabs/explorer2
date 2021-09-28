@@ -1,3 +1,12 @@
+-- explorer.play_stat definition
+
+CREATE TABLE `play_stat` (
+  `chain_id` char(32) NOT NULL,
+  `height` int(11) NOT NULL,
+  PRIMARY KEY (`chain_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 -- explorer.asset_stat definition
 
 CREATE TABLE `asset_stat` (
@@ -6,16 +15,6 @@ CREATE TABLE `asset_stat` (
   `stakes` char(40) NOT NULL DEFAULT '0',
   `delegates` char(40) NOT NULL DEFAULT '0',
   PRIMARY KEY (`chain_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-
--- explorer.s_protocol definition
-
-CREATE TABLE `s_protocol` (
-  `chain_id` char(32) NOT NULL,
-  `height` int(11) NOT NULL,
-  `version` int(11) NOT NULL,
-  PRIMARY KEY (`chain_id`,`height`,`version`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -47,72 +46,6 @@ CREATE TABLE `c_genesis` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
--- explorer.play_stat definition
-
-CREATE TABLE `play_stat` (
-  `chain_id` char(32) NOT NULL,
-  `height` int(11) NOT NULL,
-  PRIMARY KEY (`chain_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-
--- explorer.s_accounts definition
-
-CREATE TABLE `s_accounts` (
-  `chain_id` char(32) NOT NULL,
-  `address` char(40) NOT NULL,
-  `balance` char(40) NOT NULL DEFAULT '0',
-  `stake` char(40) NOT NULL DEFAULT '0',
-  `stake_locked` char(40) NOT NULL DEFAULT '0',
-  `val_addr` char(40) DEFAULT NULL,
-  `delegate` char(40) NOT NULL DEFAULT '0',
-  `del_addr` char(40) DEFAULT NULL,
-  `val_pubkey` char(64) DEFAULT NULL,
-  `val_power` char(40) NOT NULL DEFAULT '0',
-  `eff_stake` char(40) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`chain_id`,`address`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-
--- explorer.s_udcs definition
-
-CREATE TABLE `s_udcs` (
-  `chain_id` char(32) NOT NULL,
-  `udc_id` int(11) NOT NULL,
-  `owner` char(40) NOT NULL DEFAULT '',
-  `desc` varchar(100) NOT NULL DEFAULT '',
-  `operators` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '[]' CHECK (json_valid(`operators`)),
-  `total` char(40) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`chain_id`,`udc_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-
--- explorer.s_incentives definition
-
-CREATE TABLE `s_incentives` (
-  `chain_id` char(32) NOT NULL,
-  `height` int(11) NOT NULL,
-  `address` char(40) NOT NULL,
-  `amount` char(40) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`chain_id`,`height`,`address`),
-  CONSTRAINT `inc_block_FK` FOREIGN KEY (`chain_id`, `height`) REFERENCES `c_blocks` (`chain_id`, `height`),
-  CONSTRAINT `inc_account_FK` FOREIGN KEY (`chain_id`, `address`) REFERENCES `s_accounts` (`chain_id`, `address`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-
--- explorer.s_penalties definition
-
-CREATE TABLE `s_penalties` (
-  `chain_id` char(32) NOT NULL,
-  `height` int(11) NOT NULL,
-  `address` char(40) NOT NULL,
-  `amount` char(40) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`chain_id`,`height`,`address`),
-  CONSTRAINT `pen_block_FK` FOREIGN KEY (`chain_id`, `height`) REFERENCES `c_blocks` (`chain_id`, `height`),
-  CONSTRAINT `pen_account_FK` FOREIGN KEY (`chain_id`, `address`) REFERENCES `s_accounts` (`chain_id`, `address`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-
 -- explorer.c_txs definition
 
 CREATE TABLE `c_txs` (
@@ -136,37 +69,71 @@ CREATE TABLE `c_txs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
--- explorer.r_account_block definition
+-- explorer.s_accounts definition
 
-CREATE TABLE `r_account_block` (
-  `seq` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `s_accounts` (
   `chain_id` char(32) NOT NULL,
   `address` char(40) NOT NULL,
-  `height` int(11) NOT NULL,
-  `amount` char(40) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`seq`),
-  KEY `r_account_block_FK` (`chain_id`,`address`),
-  KEY `r_account_block_FK_1` (`chain_id`,`height`),
-  CONSTRAINT `r_account_block_FK` FOREIGN KEY (`chain_id`, `address`) REFERENCES `s_accounts` (`chain_id`, `address`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `r_account_block_FK_1` FOREIGN KEY (`chain_id`, `height`) REFERENCES `c_blocks` (`chain_id`, `height`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1109313 DEFAULT CHARSET=utf8mb4;
+  `balance` char(40) NOT NULL DEFAULT '0',
+  `stake` char(40) NOT NULL DEFAULT '0',
+  `stake_locked` char(40) NOT NULL DEFAULT '0',
+  `val_addr` char(40) DEFAULT NULL,
+  `delegate` char(40) NOT NULL DEFAULT '0',
+  `del_addr` char(40) DEFAULT NULL,
+  `val_pubkey` char(64) DEFAULT NULL,
+  `val_power` char(40) NOT NULL DEFAULT '0',
+  `eff_stake` char(40) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`chain_id`,`address`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
--- explorer.r_account_tx definition
+-- explorer.s_protocol definition
 
-CREATE TABLE `r_account_tx` (
-  `seq` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `s_protocol` (
   `chain_id` char(32) NOT NULL,
-  `address` char(40) NOT NULL,
   `height` int(11) NOT NULL,
-  `index` int(11) NOT NULL,
-  `amount` char(40) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`seq`),
-  KEY `r_account_tx_FK` (`chain_id`,`address`),
-  KEY `r_account_tx_FK_1` (`chain_id`,`height`,`index`),
-  CONSTRAINT `r_account_tx_FK` FOREIGN KEY (`chain_id`, `address`) REFERENCES `s_accounts` (`chain_id`, `address`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `r_account_tx_FK_1` FOREIGN KEY (`chain_id`, `height`, `index`) REFERENCES `c_txs` (`chain_id`, `height`, `index`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6453 DEFAULT CHARSET=utf8mb4;
+  `version` int(11) NOT NULL,
+  PRIMARY KEY (`chain_id`,`height`,`version`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- explorer.s_udcs definition
+
+CREATE TABLE `s_udcs` (
+  `chain_id` char(32) NOT NULL,
+  `udc_id` int(11) NOT NULL,
+  `owner` char(40) NOT NULL DEFAULT '',
+  `desc` varchar(100) NOT NULL DEFAULT '',
+  `operators` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '[]' CHECK (json_valid(`operators`)),
+  `total` char(40) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`chain_id`,`udc_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- explorer.s_dids definition
+
+CREATE TABLE `s_dids` (
+  `chain_id` char(32) NOT NULL,
+  `id` char(48) NOT NULL,
+  `owner` char(40) NOT NULL,
+  `document` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`document`)),
+  `active` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`chain_id`,`id`),
+  KEY `did_owner_FK` (`chain_id`,`owner`),
+  CONSTRAINT `did_owner_FK` FOREIGN KEY (`chain_id`, `owner`) REFERENCES `s_accounts` (`chain_id`, `address`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- explorer.s_vcs definition
+
+CREATE TABLE `s_vcs` (
+  `chain_id` char(32) NOT NULL,
+  `id` char(48) NOT NULL,
+  `issuer` char(40) NOT NULL,
+  `cred` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`cred`)),
+  `active` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`chain_id`,`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 -- explorer.s_drafts definition
@@ -190,6 +157,34 @@ CREATE TABLE `s_drafts` (
   PRIMARY KEY (`chain_id`,`draft_id`),
   KEY `s_storages_FK` (`chain_id`,`proposer`) USING BTREE,
   CONSTRAINT `s_storages_FK_copy` FOREIGN KEY (`chain_id`, `proposer`) REFERENCES `s_accounts` (`chain_id`, `address`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- explorer.s_incentives definition
+
+CREATE TABLE `s_incentives` (
+  `chain_id` char(32) NOT NULL,
+  `height` int(11) NOT NULL,
+  `address` char(40) NOT NULL,
+  `amount` char(40) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`chain_id`,`height`,`address`),
+  KEY `inc_account_FK` (`chain_id`,`address`),
+  CONSTRAINT `inc_account_FK` FOREIGN KEY (`chain_id`, `address`) REFERENCES `s_accounts` (`chain_id`, `address`),
+  CONSTRAINT `inc_block_FK` FOREIGN KEY (`chain_id`, `height`) REFERENCES `c_blocks` (`chain_id`, `height`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- explorer.s_penalties definition
+
+CREATE TABLE `s_penalties` (
+  `chain_id` char(32) NOT NULL,
+  `height` int(11) NOT NULL,
+  `address` char(40) NOT NULL,
+  `amount` char(40) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`chain_id`,`height`,`address`),
+  KEY `pen_account_FK` (`chain_id`,`address`),
+  CONSTRAINT `pen_account_FK` FOREIGN KEY (`chain_id`, `address`) REFERENCES `s_accounts` (`chain_id`, `address`),
+  CONSTRAINT `pen_block_FK` FOREIGN KEY (`chain_id`, `height`) REFERENCES `c_blocks` (`chain_id`, `height`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -287,48 +282,37 @@ CREATE TABLE `s_usages` (
   CONSTRAINT `s_requests_FK_copy` FOREIGN KEY (`chain_id`, `parcel_id`) REFERENCES `s_parcels` (`chain_id`, `parcel_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- explorer.nodes definition (insert, update)
 
-CREATE TABLE `nodes` (
-  `chain_id` char(32) NOT NULL,
-  `node_id` char(40) NOT NULL,
-  `timestamp` datetime(6) NOT NULL DEFAULT current_timestamp(6),
-  `moniker` varchar(40) NOT NULL,
-  `ip_addr` int(11) unsigned NOT NULL default 0,
-  PRIMARY KEY (`chain_id`, `node_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- explorer.r_account_block definition
 
--- explorer.node_history definition (insert)
-
-CREATE TABLE `node_history` (
-  `chain_id` char(32) NOT NULL,
-  `node_id` char(40) NOT NULL,
-  `timestamp` datetime(6) NOT NULL DEFAULT current_timestamp(6),
-  `n_peers` int(11) NOT NULL default 0,
-  `val_addr` char(40) NOT NULL,
-  `latest_block_time` datetime(6) NOT NULL DEFAULT current_timestamp(6),
-  `latest_block_height` int(11) NOT NULL,
-  `catching_up` boolean NOT NULL default false,
-  `elapsed` float(8,6) NOT NULL default 0,
-  `online` boolean NOT NULL default false,
-  PRIMARY KEY (`chain_id`, `node_id`, `timestamp`),
-  CONSTRAINT `nodes_FK` FOREIGN KEY (`chain_id`, `node_id`) REFERENCES `nodes` (`chain_id`, `node_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-
--- explorer.r_parcel_tx definition
-
-CREATE TABLE `r_parcel_tx` (
+CREATE TABLE `r_account_block` (
   `seq` int(11) NOT NULL AUTO_INCREMENT,
   `chain_id` char(32) NOT NULL,
-  `parcel_id` char(72) NOT NULL,
+  `address` char(40) NOT NULL,
+  `height` int(11) NOT NULL,
+  `amount` char(40) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`seq`),
+  KEY `r_account_block_FK` (`chain_id`,`address`),
+  KEY `r_account_block_FK_1` (`chain_id`,`height`),
+  CONSTRAINT `r_account_block_FK` FOREIGN KEY (`chain_id`, `address`) REFERENCES `s_accounts` (`chain_id`, `address`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `r_account_block_FK_1` FOREIGN KEY (`chain_id`, `height`) REFERENCES `c_blocks` (`chain_id`, `height`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- explorer.r_account_tx definition
+
+CREATE TABLE `r_account_tx` (
+  `seq` int(11) NOT NULL AUTO_INCREMENT,
+  `chain_id` char(32) NOT NULL,
+  `address` char(40) NOT NULL,
   `height` int(11) NOT NULL,
   `index` int(11) NOT NULL,
+  `amount` char(40) NOT NULL DEFAULT '0',
   PRIMARY KEY (`seq`),
-  KEY `r_parcel_tx_FK` (`chain_id`,`parcel_id`),
-  KEY `r_parcel_tx_FK_1` (`chain_id`,`height`,`index`),
-  CONSTRAINT `r_parcel_tx_FK` FOREIGN KEY (`chain_id`, `parcel_id`) REFERENCES `s_parcels` (`chain_id`, `parcel_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `r_parcel_tx_FK_1` FOREIGN KEY (`chain_id`, `height`, `index`) REFERENCES `c_txs` (`chain_id`, `height`, `index`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `r_account_tx_FK` (`chain_id`,`address`),
+  KEY `r_account_tx_FK_1` (`chain_id`,`height`,`index`),
+  CONSTRAINT `r_account_tx_FK` FOREIGN KEY (`chain_id`, `address`) REFERENCES `s_accounts` (`chain_id`, `address`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `r_account_tx_FK_1` FOREIGN KEY (`chain_id`, `height`, `index`) REFERENCES `c_txs` (`chain_id`, `height`, `index`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -349,4 +333,82 @@ CREATE TABLE `r_balance_tx` (
   CONSTRAINT `account_FK` FOREIGN KEY (`chain_id`, `address`) REFERENCES `s_accounts` (`chain_id`, `address`),
   CONSTRAINT `tx_FK` FOREIGN KEY (`chain_id`, `height`, `index`) REFERENCES `c_txs` (`chain_id`, `height`, `index`),
   CONSTRAINT `udc_balance_FK` FOREIGN KEY (`chain_id`, `udc_id`, `address`) REFERENCES `s_udc_balances` (`chain_id`, `udc_id`, `address`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- explorer.r_parcel_tx definition
+
+CREATE TABLE `r_parcel_tx` (
+  `seq` int(11) NOT NULL AUTO_INCREMENT,
+  `chain_id` char(32) NOT NULL,
+  `parcel_id` char(72) NOT NULL,
+  `height` int(11) NOT NULL,
+  `index` int(11) NOT NULL,
+  PRIMARY KEY (`seq`),
+  KEY `r_parcel_tx_FK` (`chain_id`,`parcel_id`),
+  KEY `r_parcel_tx_FK_1` (`chain_id`,`height`,`index`),
+  CONSTRAINT `r_parcel_tx_FK` FOREIGN KEY (`chain_id`, `parcel_id`) REFERENCES `s_parcels` (`chain_id`, `parcel_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `r_parcel_tx_FK_1` FOREIGN KEY (`chain_id`, `height`, `index`) REFERENCES `c_txs` (`chain_id`, `height`, `index`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- explorer.r_did_tx definition
+
+CREATE TABLE `r_did_tx` (
+  `seq` int(11) NOT NULL AUTO_INCREMENT,
+  `chain_id` char(32) NOT NULL,
+  `id` char(48) NOT NULL,
+  `height` int(11) NOT NULL,
+  `index` int(11) NOT NULL,
+  PRIMARY KEY (`seq`),
+  KEY `r_did_tx_FK` (`chain_id`,`id`),
+  KEY `r_did_tx_FK_1` (`chain_id`,`height`,`index`),
+  CONSTRAINT `r_did_tx_FK` FOREIGN KEY (`chain_id`, `id`) REFERENCES `s_dids` (`chain_id`, `id`),
+  CONSTRAINT `r_did_tx_FK_1` FOREIGN KEY (`chain_id`, `height`, `index`) REFERENCES `c_txs` (`chain_id`, `height`, `index`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- explorer.r_vc_tx definition
+
+CREATE TABLE `r_vc_tx` (
+  `seq` int(11) NOT NULL AUTO_INCREMENT,
+  `chain_id` char(32) NOT NULL,
+  `id` char(48) NOT NULL,
+  `height` int(11) NOT NULL,
+  `index` int(11) NOT NULL,
+  PRIMARY KEY (`seq`),
+  KEY `r_vc_tx_FK` (`chain_id`,`id`),
+  KEY `r_vc_tx_FK_1` (`chain_id`,`height`,`index`),
+  CONSTRAINT `r_vc_tx_FK` FOREIGN KEY (`chain_id`, `id`) REFERENCES `s_vcs` (`chain_id`, `id`),
+  CONSTRAINT `r_vc_tx_FK_1` FOREIGN KEY (`chain_id`, `height`, `index`) REFERENCES `c_txs` (`chain_id`, `height`, `index`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- explorer.nodes definition
+
+CREATE TABLE `nodes` (
+  `chain_id` char(32) NOT NULL,
+  `node_id` char(40) NOT NULL,
+  `timestamp` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `moniker` varchar(40) NOT NULL,
+  `ip_addr` int(11) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`chain_id`,`node_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- explorer.node_history definition
+
+CREATE TABLE `node_history` (
+  `chain_id` char(32) NOT NULL,
+  `node_id` char(40) NOT NULL,
+  `timestamp` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `n_peers` int(11) NOT NULL DEFAULT 0,
+  `val_addr` char(40) NOT NULL,
+  `latest_block_time` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `latest_block_height` int(11) NOT NULL,
+  `catching_up` tinyint(1) NOT NULL DEFAULT 0,
+  `elapsed` float(8,6) NOT NULL DEFAULT 0.000000,
+  `online` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`chain_id`,`node_id`,`timestamp`),
+  CONSTRAINT `nodes_FK` FOREIGN KEY (`chain_id`, `node_id`) REFERENCES `nodes` (`chain_id`, `node_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

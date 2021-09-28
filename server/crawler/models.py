@@ -466,6 +466,98 @@ class UDCBalance:
             """, values)
 
 
+class DID:
+    def __init__(self, chain_id, did, owner, cursor):
+        self.chain_id = chain_id
+        self.id = did
+        self.owner = owner
+        self.document = "{}"
+        self.active = True
+        cursor.execute(
+            """
+            SELECT * FROM `s_dids`
+            WHERE (`chain_id` = %(chain_id)s AND `id` = %(id)s)
+            """, vars(self))
+        row = cursor.fetchone()
+        if row:
+            d = dict(zip(cursor.column_names, row))
+            self.owner = d['owner']
+            self.document = d['document']
+            self.active = d['active']
+        else:
+            cursor.execute(
+                """
+                INSERT INTO `s_dids`
+                    (`chain_id`, `id`, `owner`, `document`, `active`)
+                VALUES (%(chain_id)s, %(id)s, %(owner)s, %(document)s,
+                    %(active)s)
+                """, vars(self))
+
+    def save(self, cursor):
+        values = vars(self).copy()
+        cursor.execute(
+            """
+            UPDATE `s_dids`
+            SET
+                `document` = %(document)s,
+                `active` = %(active)s
+            WHERE (`chain_id` = %(chain_id)s AND `id` = %(id)s)
+            """, values)
+
+    def delete(self, cursor):
+        cursor.execute(
+            """
+            DELETE FROM `s_dids`
+            WHERE (`chain_id` = %(chain_id)s AND `id` = %(id)s
+            """, vars(self))
+
+
+class VC:
+    def __init__(self, chain_id, vcid, issuer, cursor):
+        self.chain_id = chain_id
+        self.id = vcid
+        self.issuer = issuer
+        self.credential = "{}"
+        self.active = True
+        cursor.execute(
+            """
+            SELECT * FROM `s_vcs`
+            WHERE (`chain_id` = %(chain_id)s AND `id` = %(id)s)
+            """, vars(self))
+        row = cursor.fetchone()
+        if row:
+            d = dict(zip(cursor.column_names, row))
+            self.issuer = d['issuer']
+            self.credential = d['credential']
+            self.active = d['active']
+        else:
+            cursor.execute(
+                """
+                INSERT INTO `s_vcs`
+                    (`chain_id`, `id`, `issuer`, `credential`, `active`)
+                VALUES (%(chain_id)s, %(id)s, %(issuer)s, %(credential)s,
+                    %(active)s)
+                """, vars(self))
+
+    def save(self, cursor):
+        values = vars(self).copy()
+        cursor.execute(
+            """
+            UPDATE `s_vcs`
+            SET
+                `credential` = %(credential)s,
+                `active` = %(active)s
+            WHERE (`chain_id` = %(chain_id)s AND `id` = %(id)s)
+            """, values)
+
+    def delete(self, cursor):
+        cursor.execute(
+            """
+            DELETE FROM `s_vcs`
+            WHERE (`chain_id` = %(chain_id)s AND `id` = %(id)s
+            """, vars(self))
+
+
 class RelAccountBlock:
     def __init__(self, chain_id, address, height, cursor):
         self.chain_id = chain_id
@@ -614,4 +706,38 @@ class RelParcelTx:
             INSERT INTO `r_parcel_tx` (
                 `chain_id`, `parcel_id`, `height`, `index`)
             VALUES (%(chain_id)s, %(parcel_id)s, %(height)s, %(index)s)
+            """, values)
+
+
+class RelDIDTx:
+    def __init__(self, chain_id, did, height, index):
+        self.chain_id = chain_id
+        self.id = did
+        self.height = height
+        self.index = index
+
+    def save(self, cursor):
+        values = vars(self).copy()
+        cursor.execute(
+            """
+            INSERT INTO `r_did_tx` (
+                `chain_id`, `id`, `height`, `index`)
+            VALUES (%(chain_id)s, %(id)s, %(height)s, %(index)s)
+            """, values)
+
+
+class RelVCTx:
+    def __init__(self, chain_id, vcid, height, index):
+        self.chain_id = chain_id
+        self.id = vcid
+        self.height = height
+        self.index = index
+
+    def save(self, cursor):
+        values = vars(self).copy()
+        cursor.execute(
+            """
+            INSERT INTO `r_vc_tx` (
+                `chain_id`, `id`, `height`, `index`)
+            VALUES (%(chain_id)s, %(id)s, %(height)s, %(index)s)
             """, values)
