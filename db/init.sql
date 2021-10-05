@@ -128,9 +128,9 @@ CREATE TABLE `s_dids` (
 
 CREATE TABLE `s_vcs` (
   `chain_id` char(32) NOT NULL,
-  `id` char(48) NOT NULL,
+  `id` char(74) NOT NULL,
   `issuer` char(40) NOT NULL,
-  `cred` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`cred`)),
+  `credential` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`credential`)),
   `active` tinyint(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`chain_id`,`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -373,7 +373,7 @@ CREATE TABLE `r_did_tx` (
 CREATE TABLE `r_vc_tx` (
   `seq` int(11) NOT NULL AUTO_INCREMENT,
   `chain_id` char(32) NOT NULL,
-  `id` char(48) NOT NULL,
+  `id` char(74) NOT NULL,
   `height` int(11) NOT NULL,
   `index` int(11) NOT NULL,
   PRIMARY KEY (`seq`),
