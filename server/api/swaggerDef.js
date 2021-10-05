@@ -46,6 +46,10 @@ module.exports = {
       name: 'data trade',
     },
     {
+      name: 'dids',
+      description: 'Ditributed ID and Verifiable Credential'
+    },
+    {
       name: 'nodes',
       description: 'blockchain nodes',
     },

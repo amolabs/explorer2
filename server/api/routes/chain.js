@@ -13,6 +13,7 @@ var nodes = require('./nodes');
 var drafts = require('./drafts');
 var parcels = require('./parcels');
 var storages = require('./storages');
+var dids = require('./dids');
 var incentives = require('./incentives');
 var penalties = require('./penalties');
 
@@ -26,6 +27,7 @@ router.use('/drafts', drafts);
 router.use('/config', appConfig);
 router.use('/parcels', parcels);
 router.use('/storages', storages);
+router.use('/dids', dids);
 router.use('/incentives', incentives);
 router.use('/penalties', penalties);
 

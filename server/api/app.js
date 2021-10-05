@@ -23,6 +23,7 @@ const swaggerOptions = {
     'routes/penalties.js',
     'routes/storages.js',
     'routes/parcels.js',
+    'routes/dids.js',
     'routes/nodes.js',
   ]
 }
