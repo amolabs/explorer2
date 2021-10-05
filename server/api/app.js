@@ -24,6 +24,7 @@ const swaggerOptions = {
     'routes/storages.js',
     'routes/parcels.js',
     'routes/dids.js',
+    'routes/vcs.js',
     'routes/nodes.js',
   ]
 }

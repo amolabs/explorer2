@@ -1,39 +1,39 @@
 /* vim: set sw=2 ts=2 expandtab : */
 var express = require('express');
 var router = express.Router();
-const did = require('../models/did');
+const vc = require('../models/vc');
 
 /**
  * @swagger
  * definitions:
- *   DID:
- *     name: did
+ *   VCID:
+ *     name: vcid
  *     in: path
- *     description: "DID to inspect."
+ *     description: "Verifiable Credential ID to inspect."
  *     required: true
  *     schema:
  *       type: string
  *     style: simple
- *   DIDInfo:
+ *   VCInfo:
  *     type: object
  *     properties:
  *       chain_id:
  *         type: string
  *       id:
  *         type: string
- *       owner:
+ *       issuer:
  *         type: string
  *         description: hexadecimal string
- *       document:
+ *       credential:
  *         type: object
- *         description: DID Document associated with the DID
+ *         description: Verifiable Credential associated with the DID
  *       active:
  *         type: boolean
  */
 
 /**
  * @swagger
- * /chain/{chain_id}/dids:
+ * /chain/{chain_id}/vcs:
  *   parameters:
  *     - $ref: '#/definitions/ChainId'
  *     - name: from
@@ -51,22 +51,22 @@ const did = require('../models/did');
  *   get:
  *     tags:
  *       - dids
- *     description: Get DID list (not sorted)
+ *     description: Get VC list (not sorted)
  *     produces:
  *       - application/json
  *     responses:
  *       200:
- *         description: DID list
+ *         description: VC list
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/definitions/DIDInfo'
+ *                 $ref: '#/definitions/VCInfo'
  */
 router.get('/', function(req, res) {
   const chain_id = res.locals.chain_id;
-  did.getList(chain_id)
+  vc.getList(chain_id)
     .then((rows) => {
       res.status(200);
       res.send(rows);
@@ -79,29 +79,29 @@ router.get('/', function(req, res) {
 
 /**
  * @swagger
- * /chain/{chain_id}/dids/{did}:
+ * /chain/{chain_id}/vcs/{vcid}:
  *   parameters:
  *     - $ref: '#/definitions/ChainId'
- *     - $ref: '#/definitions/DID'
+ *     - $ref: '#/definitions/VCID'
  *   get:
  *     tags:
  *       - dids
- *     description: Get DID document info by DID
+ *     description: Get verifiable credential info by VCID
  *     produces:
  *       - application/json
  *     responses:
  *       200:
- *         description: DID document info
+ *         description: Verifiable credential info
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/definitions/DIDInfo'
+ *               $ref: '#/definitions/VCInfo'
  *       404:
  *         description: DID not found
  */
-router.get('/:did([a-z]+:[a-z]+:[A-F0-9]+)', function(req, res) {
+router.get('/:vcid([a-z]+:[a-z]+:[A-F0-9]+)', function(req, res) {
   const chain_id = res.locals.chain_id;
-  did.getOne(chain_id, req.params.did)
+  vc.getOne(chain_id, req.params.vcid)
     .then((rows) => {
       if (rows.length > 0) {
         res.status(200);
