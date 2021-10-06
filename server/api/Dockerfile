@@ -14,10 +14,10 @@ COPY routes/ /app/routes/
 COPY app.js config.js package.json package-lock.json swaggerDef.js /app/
 
 # install package.json
-RUN npm install
+RUN yarn install
 
 # volume
 VOLUME /db/config.json
 
 # run app
-CMD ["npm", "run", "start"]
+CMD ["yarn", "run", "start"]
