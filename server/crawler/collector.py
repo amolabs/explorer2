@@ -8,12 +8,10 @@ block collector
 # standard imports
 import argparse
 import json
-import base64
 import asyncio
 import signal  # for main
 import traceback  # for main
 import sys  # for main
-import time
 
 # third-party imports
 import websockets
@@ -25,6 +23,7 @@ from filelock import FileLock, Timeout
 import dbproxy
 import block
 import tx
+from version import version
 
 
 class Collector:
@@ -311,7 +310,17 @@ if __name__ == '__main__':
                    default=False,
                    dest='verbose',
                    action='store_true')
+    p.add_argument("-V",
+                   "--version",
+                   help="print version",
+                   default=False,
+                   dest='print_version',
+                   action='store_true')
     args = p.parse_args()
+
+    if args.print_version:
+        print("AMO blockchain explorer (collector) version", version)
+        sys.exit(0)
 
     try:
         collector = Collector(node=args.node)

@@ -22,6 +22,7 @@ import block
 import tx
 import stats
 import models
+from version import version
 
 # for typing
 from mysql.connector import MySQLConnection, CMySQLConnection
@@ -259,7 +260,17 @@ if __name__ == "__main__":
                    default=False,
                    dest='verbose',
                    action='store_true')
+    p.add_argument("-V",
+                   "--version",
+                   help="print version",
+                   default=False,
+                   dest='print_version',
+                   action='store_true')
     args = p.parse_args()
+
+    if args.print_version:
+        print("AMO blockchain explorer (builder) version", version)
+        sys.exit(0)
 
     try:
         builder = Builder(args.chain)
