@@ -575,6 +575,7 @@ def tx_did_claim(tx, cursor):
     owner = models.Account(tx.chain_id, tx.sender, cursor)
     did = models.DID(tx.chain_id, payload['target'], owner.address, cursor)
     did.document = json.dumps(payload['document'])
+    did.active = True
     did.save(cursor)
 
     rel = models.RelDIDTx(tx.chain_id, did.id, tx.height, tx.index)
@@ -598,6 +599,7 @@ def tx_did_issue(tx, cursor):
     issuer = models.Account(tx.chain_id, tx.sender, cursor)
     vc = models.VC(tx.chain_id, payload['target'], issuer.address, cursor)
     vc.credential = json.dumps(payload['credential'])
+    vc.active = True
     vc.save(cursor)
 
     rel = models.RelVCTx(tx.chain_id, vc.id, tx.height, tx.index)
