@@ -14,8 +14,8 @@ from typing import Union
 c_tables = ['c_genesis', 'c_txs', 'c_blocks']
 s_tables = ['s_requests', 's_usages', 's_parcels', 's_storages',
             's_votes', 's_drafts', 's_incentives', 's_penalties',
-            's_udc_balances', 's_udcs', 's_accounts', 's_protocol',
             's_dids', 's_vcs',
+            's_udc_balances', 's_udcs', 's_accounts', 's_protocol',
             'asset_stat']
 r_tables = ['r_account_block', 'r_account_tx', 'r_parcel_tx', 'r_balance_tx',
             'r_did_tx', 'r_vc_tx']
