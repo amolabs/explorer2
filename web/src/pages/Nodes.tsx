@@ -9,6 +9,10 @@ import {Link} from "react-router-dom"
 
 const columns = [
   {
+    key: 'moniker',
+    header: 'Name(moniker)',
+  },
+  {
     key: 'node_id',
     header: 'Node ID',
     format: (node_id: string, chainId: string) => {
@@ -18,10 +22,6 @@ const columns = [
         </Link>
       )
     }
-  },
-  {
-    key: 'moniker',
-    header: 'Name(moniker)',
   },
   {
     key: 'val_addr',

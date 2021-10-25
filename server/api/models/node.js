@@ -56,7 +56,7 @@ async function getList(chain_id, from, to) {
       ON n.`chain_id` = h.`chain_id` AND n.`node_id` = h.`node_id` \
         AND n.`timestamp` = h.`timestamp` \
       WHERE n.`chain_id` = ? \
-      ORDER BY n.`node_id`";
+      ORDER BY n.`moniker`";
     var query_var = [chain_id, from, to];
     db.query(query_str, query_var, function(err, rows, fields) {
       if (err) {
