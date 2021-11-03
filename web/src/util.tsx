@@ -47,3 +47,13 @@ export function displayMono(text: string) {
     <code>{text}</code>
   )
 }
+
+export function displayObject(obj: object) {
+  if (obj) {
+    return (
+      <code>{JSON.stringify(obj)}</code>
+    )
+  } else {
+    return (<i>none</i>)
+  }
+}

@@ -10,6 +10,7 @@ import {
   displayAMOLong,
   displayResult,
   displayMono,
+  displayObject,
 } from "../../util"
 import {Grid, Link as UrlLink} from "@material-ui/core"
 import {useDispatch} from "react-redux"
@@ -38,6 +39,11 @@ const payloadColumns: StringMap = {
       key: 'custody',
       header: 'Owner Key Custody',
       format: displayMono,
+    },
+    {
+      key: 'extra',
+      header: 'Extra Info',
+      format: displayObject,
     }
   ],
   stake: [
