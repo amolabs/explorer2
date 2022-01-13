@@ -25,7 +25,7 @@ async function getAccountHistory(chain_id, address, anchor, from, num,
           WHERE rat.chain_id = ? \
             AND rat.`address` = ? "
             + (anchor > 0 ? "AND rat.height <= ? " : "")
-      + " ORDER BY rat.`height` DESC LIMIT ? \
+      + " ORDER BY rat.`seq` DESC LIMIT ? \
         ) \
       ";
       if (anchor > 0) {
@@ -51,7 +51,7 @@ async function getAccountHistory(chain_id, address, anchor, from, num,
           WHERE  rab.chain_id = ? \
             AND rab.`address` = ? "
             + (anchor > 0 ? "AND rab.height <= ? " : "")
-      + " ORDER BY rab.`height` DESC LIMIT ? \
+      + " ORDER BY rab.`seq` DESC LIMIT ? \
         ) \
       ";
       if (anchor > 0) {
