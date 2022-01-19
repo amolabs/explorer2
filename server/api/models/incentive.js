@@ -31,7 +31,7 @@ async function getListByAddress(chain_id, address, anchor, from, num) {
     if (anchor == 0) {
       query_str = "SELECT \
           `height`, `amount` \
-        FROM `s_incentives` \
+        FROM `s_incentives` USE INDEX (inc_account_FK) \
         WHERE `chain_id` = ? AND `address` = ? \
         ORDER BY `height` DESC \
         LIMIT ?, ?";
@@ -39,7 +39,7 @@ async function getListByAddress(chain_id, address, anchor, from, num) {
     } else {
       query_str = "SELECT \
           `height`, `amount` \
-        FROM `s_incentives` \
+        FROM `s_incentives` USE INDEX (inc_account_FK) \
         WHERE `chain_id` = ? AND `address` = ? AND `height` <= ? \
         ORDER BY `height` DESC \
         LIMIT ?, ?";
